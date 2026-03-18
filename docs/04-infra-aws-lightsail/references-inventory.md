@@ -59,15 +59,32 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
 - a Auth API canônica no Lightsail
 - o hostname público canônico `auth-api.haxixesmokeclub.com`
 - o reverse proxy Nginx no próprio host Lightsail
-- o upstream local da aplicação em `127.0.0.1:3000`
-- a presença do vhost reconciliado em `/etc/nginx/sites-available/hsc-auth-api`
+- o upstream local do Nginx em `127.0.0.1:3000`
+- a unit canônica da aplicação:
+  - `hsc-auth-api.service`
+- o arquivo real da unit:
+  - `/etc/systemd/system/hsc-auth-api.service`
+- o usuário real de execução:
+  - `hscadmin`
+- o working directory real:
+  - `/opt/hsc/hsc-auth-api`
+- o `ExecStart` real:
+  - `/usr/bin/node index.js`
+- a política de restart:
+  - `Restart=always`
+- o ambiente explicitamente reconciliado:
+  - `NODE_ENV=production`
+- o binding observado da aplicação:
+  - `0.0.0.0:3000`
+- a presença do vhost reconciliado em:
+  - `/etc/nginx/sites-available/hsc-auth-api`
 - a resposta pública bem-sucedida de `/health`
 
 Ainda restam pendências menores, principalmente ligadas a:
 
 - diretório final dos dumps de backup
 - detalhes finos do restore validado em host
-- eventual reconciliação final de units e nomes exatos de serviços da aplicação
+- eventual confirmação de outras variáveis de ambiente fora da unit
 - cleanup do drift residual da borda antiga ainda presente na Hostinger
 
 ---
@@ -110,6 +127,9 @@ Usado para:
 - validar hostname canônico
 - validar reverse proxy real
 - validar upstream local da aplicação
+- validar unit `systemd` real
+- validar usuário, working directory e `ExecStart`
+- validar processo Node e porta local
 - validar arquivos de Nginx no host
 - validar o endpoint `/health`
 - confirmar o estado real do runtime da Auth API
@@ -188,9 +208,13 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - `auth-api.haxixesmokeclub.com`
 
-### Upstream local da aplicação
+### Upstream do Nginx
 
 - `http://127.0.0.1:3000`
+
+### Binding observado da aplicação
+
+- `0.0.0.0:3000`
 
 ### Vhost reconciliado da API
 
@@ -200,10 +224,27 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - `/etc/nginx/sites-available/default`
 
+### Unit canônica da aplicação
+
+- `hsc-auth-api.service`
+
+### Arquivo real da unit
+
+- `/etc/systemd/system/hsc-auth-api.service`
+
 ### Processo da aplicação
 
 - serviço Node.js via systemd
-- aplicação escutando localmente na porta `3000`
+- aplicação executada com:
+  - `/usr/bin/node index.js`
+
+### Working directory real
+
+- `/opt/hsc/hsc-auth-api`
+
+### Usuário real da unit
+
+- `hscadmin`
 
 ### Persistência local
 
@@ -229,7 +270,14 @@ Papel:
 - terminação TLS
 - reverse proxy para o runtime local
 
-### serviço Node.js da Auth API
+### `hsc-auth-api.service`
+
+Papel:
+- unit canônica da aplicação
+- sustentação do runtime Node.js da Auth API
+- integração da app ao boot e à operação normal do host
+
+### processo Node.js da Auth API
 
 Papel:
 - aplicação dinâmica do ecossistema
@@ -267,13 +315,25 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/etc/nginx/`
 
-### Upstream local da aplicação
+### Unit canônica da aplicação
+
+- `/etc/systemd/system/hsc-auth-api.service`
+
+### Working directory real da app
+
+- `/opt/hsc/hsc-auth-api`
+
+### Upstream do Nginx
 
 - `127.0.0.1:3000`
 
+### Binding observado da app
+
+- `0.0.0.0:3000`
+
 Regra prática:
 
-- qualquer mudança nesses paths ou nessa relação entre hostname, proxy e upstream deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
+- qualquer mudança nesses paths ou nessa relação entre hostname, proxy, unit e runtime Node deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
 
@@ -297,13 +357,29 @@ Borda pública da API.
 
 - `auth-api.haxixesmokeclub.com`
 
-### Upstream local
+### Unit canônica da aplicação
+
+- `hsc-auth-api.service`
+
+### Working directory real
+
+- `/opt/hsc/hsc-auth-api`
+
+### Execução real da aplicação
+
+- `/usr/bin/node index.js`
+
+### Usuário real
+
+- `hscadmin`
+
+### Upstream do Nginx
 
 - `127.0.0.1:3000`
 
-### Node.js via systemd
+### Binding observado da aplicação
 
-Runtime local da aplicação.
+- `0.0.0.0:3000`
 
 ### MariaDB local
 
@@ -327,9 +403,33 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - Nginx no próprio Lightsail
 
-### Upstream local da aplicação
+### Upstream do Nginx
 
 - `http://127.0.0.1:3000`
+
+### Unit canônica da app
+
+- `hsc-auth-api.service`
+
+### Arquivo real da unit
+
+- `/etc/systemd/system/hsc-auth-api.service`
+
+### Working directory real
+
+- `/opt/hsc/hsc-auth-api`
+
+### Usuário real
+
+- `hscadmin`
+
+### ExecStart real
+
+- `/usr/bin/node index.js`
+
+### Binding observado da app
+
+- `0.0.0.0:3000`
 
 ### Vhost reconciliado
 
@@ -356,10 +456,12 @@ A Auth API depende de:
 - TLS saudável
 - proxy coerente com o upstream real
 
-### Dependência da aplicação local
+### Dependência da unit e da aplicação local
 
 A borda depende de:
 
+- `hsc-auth-api.service` íntegra
+- working directory correto
 - processo Node funcional
 - porta `3000` respondendo localmente
 - serviço local estável via systemd
@@ -385,6 +487,32 @@ A leitura correta do ecossistema depende de:
 ## Comandos de validação
 
 Os comandos abaixo formam um kit mínimo de validação da camada Lightsail.
+
+### Validar unit files relevantes
+
+```bash
+systemctl list-unit-files --type=service --no-pager | grep -Ei 'hsc|auth|api|node'
+systemctl list-units --type=service --all --no-pager | grep -Ei 'hsc|auth|api|node'
+```
+
+### Validar localização dos unit files
+
+```bash
+find /etc/systemd /lib/systemd/system -maxdepth 2 -type f | grep -Ei 'hsc|auth|api|node' | sort
+```
+
+### Validar campos principais das units
+
+```bash
+grep -RInE 'Description=|ExecStart=|WorkingDirectory=|User=|Group=|Environment=|EnvironmentFile=|Restart=|WantedBy=' /etc/systemd /lib/systemd/system 2>/dev/null | grep -Ei 'hsc|auth|api|node'
+```
+
+### Validar status e conteúdo da unit canônica
+
+```bash
+systemctl status hsc-auth-api.service --no-pager
+systemctl cat hsc-auth-api.service
+```
 
 ### Validar sintaxe do Nginx
 
@@ -417,23 +545,35 @@ curl -I https://auth-api.haxixesmokeclub.com/health
 curl -sS https://auth-api.haxixesmokeclub.com/health
 ```
 
-### Validar upstream local da aplicação
+### Validar processo real
+
+```bash
+ps -ef | grep -Ei 'node|hsc-auth-api|index.js' | grep -v grep
+```
+
+### Validar porta local
+
+```bash
+ss -ltnp | grep ':3000'
+```
+
+### Validar working directory real
+
+```bash
+ls -lah /opt/hsc/hsc-auth-api
+```
+
+### Validar health local da aplicação
 
 ```bash
 curl -I http://127.0.0.1:3000/health
 curl -sS http://127.0.0.1:3000/health
 ```
 
-### Validar hostname local do host
-
-```bash
-hostname -f
-```
-
 Regra prática:
 
-- se o upstream local responde, mas o hostname público não, o problema tende a estar na borda
-- se nem o upstream local responde, o problema tende a estar na app ou no systemd
+- se o processo existe e a porta responde, mas o hostname público não, o problema tende a estar na borda
+- se nem a unit, nem a porta respondem, o problema tende a estar no runtime da app ou no `systemd`
 
 ---
 
@@ -450,9 +590,9 @@ Ainda falta fixar sem ambiguidade o diretório final dos arquivos de dump.
 
 A camada de backup já está posicionada corretamente, mas ainda pode ser refinada com validação prática do restore no host atual.
 
-### 3. Nome exato da unit systemd da aplicação
+### 3. Eventuais outras variáveis de ambiente fora da unit
 
-A arquitetura Node.js via systemd já está reconciliada, mas o nome final da unit ainda deve ser congelado diretamente no host para fortalecer `node-systemd.md` e `observability-troubleshooting.md`.
+A unit já explicita `NODE_ENV=production`, mas ainda pode haver variáveis relevantes fora dela que mereçam ser formalizadas em momento próprio.
 
 ### 4. Eventuais arquivos auxiliares de deploy
 
@@ -500,7 +640,10 @@ Os limites documentais deste contexto são:
 Este documento deve ser atualizado quando houver:
 
 - mudança de hostname público da API
-- mudança de upstream local da aplicação
+- mudança da unit canônica da aplicação
+- mudança do usuário ou working directory reais
+- mudança do `ExecStart`
+- mudança do binding observado da app
 - mudança relevante no vhost do Nginx
 - mudança de path estrutural da operação da Auth API
 - confirmação ou resolução de item pendente listado aqui
@@ -515,8 +658,8 @@ Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no d
 Este documento pode ser considerado maduro quando:
 
 - os artefatos reais do host estiverem confirmados sem ambiguidade
-- o hostname canônico, o reverse proxy e o upstream local estiverem claramente reconciliados
-- o path do vhost da API estiver fixado
+- hostname canônico, reverse proxy, unit `systemd` e runtime Node estiverem claramente reconciliados
+- o path do vhost da API e o path real do runtime estiverem fixados
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
 - ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 
