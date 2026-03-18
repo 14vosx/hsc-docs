@@ -85,13 +85,20 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
   - `/opt/hsc/backups/mariadb/`
 - o log real da camada de backup:
   - `/opt/hsc/backups/mariadb/backup.log`
+- o mecanismo exato de agendamento do backup:
+  - crontab do root
+- a linha exata de agendamento:
+  - `15 3 * * * /opt/hsc/backup-mariadb.sh`
+- o timezone real do host:
+  - `Etc/UTC`
+- a retenção exata configurada no script:
+  - `14 dias`
 
 Ainda restam pendências menores, principalmente ligadas a:
 
-- mecanismo exato de agendamento do backup
-- política exata de retenção dos dumps
 - procedimento de restore validado de ponta a ponta
 - eventual confirmação de outras variáveis de ambiente fora da unit
+- eventual estratégia externa/off-host de retenção ou cópia
 - cleanup do drift residual da borda antiga ainda presente na Hostinger
 
 ---
@@ -140,6 +147,8 @@ Usado para:
 - validar arquivos de Nginx no host
 - validar o endpoint `/health`
 - validar script, diretório e log reais de backup
+- validar o conteúdo do script de backup
+- validar o crontab real do root
 - confirmar o estado real do runtime da Auth API
 
 Regra principal:
@@ -206,6 +215,8 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - instância AWS Lightsail
 - Ubuntu 22.04 LTS
+- timezone:
+  - `Etc/UTC`
 
 ### Borda pública
 
@@ -274,6 +285,14 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - `hsc_auth_*.sql.gz`
 
+### Mecanismo real de agendamento
+
+- crontab do root
+
+### Linha exata do cron
+
+- `15 3 * * * /opt/hsc/backup-mariadb.sh`
+
 Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
 
 ---
@@ -314,6 +333,11 @@ Papel:
 Papel:
 - sustentação do serviço da aplicação
 - apoio operacional para start, stop, restart e observabilidade
+
+### cron do root
+
+Papel:
+- mecanismo real de agendamento da rotina de backup do banco
 
 ### script `backup-mariadb.sh`
 
@@ -369,6 +393,10 @@ Os paths críticos conhecidos deste contexto incluem:
 ### Log real da camada de backup
 
 - `/opt/hsc/backups/mariadb/backup.log`
+
+### Crontab real observado
+
+- `/var/spool/cron/crontabs/root`
 
 Regra prática:
 
@@ -429,6 +457,11 @@ Persistência principal do backend dinâmico.
 - `/opt/hsc/backup-mariadb.sh`
 - `/opt/hsc/backups/mariadb/`
 - `/opt/hsc/backups/mariadb/backup.log`
+
+### Agendamento real do backup
+
+- root cron
+- `15 3 * * * /opt/hsc/backup-mariadb.sh`
 
 ### Endpoint `/health`
 
@@ -492,6 +525,18 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - `/opt/hsc/backups/mariadb/backup.log`
 
+### Mecanismo real de agendamento
+
+- root cron
+
+### Linha exata do cron
+
+- `15 3 * * * /opt/hsc/backup-mariadb.sh`
+
+### Retenção exata do script
+
+- `14 dias`
+
 ### Endpoint público validado
 
 - `https://auth-api.haxixesmokeclub.com/health`
@@ -536,6 +581,7 @@ A aplicação depende de:
 A resiliência do contexto depende de:
 
 - existência do script real de backup
+- existência da entrada correta no crontab do root
 - escrita contínua no diretório `/opt/hsc/backups/mariadb/`
 - presença de dumps recentes
 - integridade do `backup.log`
@@ -661,10 +707,25 @@ find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | so
 tail -n 50 /opt/hsc/backups/mariadb/backup.log
 ```
 
+### Validar cron real do backup
+
+```bash
+sudo crontab -l
+sudo sed -n '1,220p' /var/spool/cron/crontabs/root
+```
+
 ### Validar MariaDB
 
 ```bash
 systemctl status mariadb --no-pager
+```
+
+### Validar timezone do host
+
+```bash
+date -u
+date
+timedatectl
 ```
 
 Regra prática:
@@ -679,29 +740,24 @@ Regra prática:
 
 Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Mecanismo exato de agendamento do backup
-
-O diretório real e o script real já estão reconciliados.  
-Ainda falta congelar com total precisão como o backup é disparado no runtime atual.
-
-### 2. Política exata de retenção dos dumps
-
-Já há evidência prática de rotação/retensão.  
-Ainda falta extrair a regra exata do script ou do mecanismo real de agendamento.
-
-### 3. Procedimento de restore validado de ponta a ponta
+### 1. Procedimento de restore validado de ponta a ponta
 
 A camada de backup já está corretamente posicionada, mas ainda pode ser refinada com validação prática do restore no host atual.
 
-### 4. Eventuais outras variáveis de ambiente fora da unit
+### 2. Eventuais outras variáveis de ambiente fora da unit
 
 A unit já explicita `NODE_ENV=production`, mas ainda pode haver variáveis relevantes fora dela que mereçam ser formalizadas em momento próprio.
 
-### 5. Eventuais arquivos auxiliares de deploy
+### 3. Eventual estratégia externa/off-host de retenção ou cópia
+
+O backup local está reconciliado.  
+Ainda não foi confirmada nesta rodada a existência de cópia externa ou retenção fora do host.
+
+### 4. Eventuais arquivos auxiliares de deploy
 
 É útil confirmar se existem paths adicionais estáveis de release/deploy que mereçam ser citados formalmente neste contexto.
 
-### 6. Cleanup do drift residual da Hostinger
+### 5. Cleanup do drift residual da Hostinger
 
 A presença de configuração residual antiga da Auth API na Hostinger já foi identificada, mas o cleanup ainda pertence a uma etapa posterior.
 
@@ -751,6 +807,8 @@ Este documento deve ser atualizado quando houver:
 - mudança de path estrutural da operação da Auth API
 - mudança do script real de backup
 - mudança do diretório real dos dumps
+- mudança da linha real do cron de backup
+- mudança da retenção configurada
 - confirmação ou resolução de item pendente listado aqui
 - mudança relevante na estratégia de backup ou runtime
 
@@ -765,6 +823,7 @@ Este documento pode ser considerado maduro quando:
 - os artefatos reais do host estiverem confirmados sem ambiguidade
 - hostname canônico, reverse proxy, unit `systemd`, runtime Node e camada de backup estiverem claramente reconciliados
 - o path do vhost da API, o path real do runtime e o diretório real dos dumps estiverem fixados
+- a linha real de agendamento do backup estiver explícita
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
 - ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 

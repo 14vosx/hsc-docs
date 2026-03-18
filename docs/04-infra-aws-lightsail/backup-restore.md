@@ -2,13 +2,15 @@
 
 ## Objetivo
 
-Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o diretório reconciliado dos dumps, o script real observado no host, o formato dos artefatos de backup, o estado atual da evidência de retenção e o procedimento seguro de restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação prática.
+Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o script real observado no host, o diretório reconciliado dos dumps, o mecanismo exato de agendamento, o formato dos artefatos de backup, a política real de retenção e o procedimento seguro de restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação prática.
 
 Este documento existe para registrar, de forma estável e auditável:
 
 - onde os dumps reais do banco estão sendo gravados
 - qual script real de backup existe no host
+- qual é o mecanismo exato que dispara o backup
 - qual é o padrão de naming dos dumps observados
+- qual é a política real de retenção já confirmada no script
 - qual log de backup já foi reconciliado
 - como validar a existência e a saúde básica da camada de backup
 - como executar um restore de forma controlada
@@ -22,10 +24,12 @@ Este documento cobre:
 
 - diretório real de dumps do MariaDB no Lightsail
 - script real de backup observado no host
+- mecanismo exato de agendamento do backup
 - arquivos de dump já encontrados
 - log real da camada de backup
 - estado observado do serviço MariaDB
 - convenções reconciliadas de naming dos dumps
+- política real de retenção observada no script
 - validações operacionais mínimas da camada
 - procedimento seguro de restore em nível operacional
 - limitações e pendências ainda abertas dessa camada
@@ -36,8 +40,8 @@ Este documento não cobre em profundidade:
 - deploy/release da aplicação Node
 - configuração completa do Nginx
 - tuning avançado do MariaDB
-- política final de retenção, porque ainda não foi congelada a partir do script
-- restore end-to-end já executado e certificado no host atual
+- restore end-to-end já executado e certificado formalmente no host atual
+- estratégia de snapshot do host além dos dumps SQL
 
 Esses tópicos vivem em documentos próprios do contexto `04-infra-aws-lightsail` ou exigem nova reconciliação prática.
 
@@ -58,6 +62,8 @@ O estado operacional conhecido e reconciliado da camada de backup do Lightsail �
   - `.sql.gz`
 - o prefixo observado dos arquivos é:
   - `hsc_auth_`
+- o banco alvo definido no script é:
+  - `hsc_auth`
 - o MariaDB local está ativo no host
 - o serviço reconciliado do banco é:
   - `mariadb.service`
@@ -66,16 +72,28 @@ O estado operacional conhecido e reconciliado da camada de backup do Lightsail �
 
 Também ficou reconciliado no host que:
 
-- o diretório `/var/backups` não é o diretório real dos dumps da Auth API
+- o mecanismo exato de agendamento do backup é o **crontab do root**
+- a linha exata do crontab é:
+  - `15 3 * * * /opt/hsc/backup-mariadb.sh`
+- o host está em timezone:
+  - `Etc/UTC`
+- portanto o backup está programado para rodar:
+  - **todos os dias às 03:15 UTC**
+- a política exata de retenção configurada no script é:
+  - `RETENTION_DAYS=14`
+- o script usa `mysqldump "$DB_NAME" | gzip -c > "$OUT_FILE"`
+- o script aplica:
+  - `chown root:adm`
+  - `chmod 640`
+- `/var/backups` não é o diretório real dos dumps da Auth API
 - `/var/backups` contém backups de sistema/pacote, não os dumps principais do banco da Auth API
-- a automação exata que dispara o script de backup ainda não foi completamente reconciliada por `systemd` ou `cron`
-- a evidência atual sugere execução recorrente diária por volta de `03:15Z`, mas essa cadência ainda deve ser tratada como observação empírica, não como contrato formal congelado
 
 Leitura canônica:
 
 - o diretório real dos dumps já está fechado sem ambiguidade
-- o fluxo de backup existe de forma material no host
-- o ponto ainda não totalmente fechado é o mecanismo exato de agendamento e a política final de retenção extraída do script
+- o mecanismo exato de agendamento já está fechado sem ambiguidade
+- a retenção exata dos dumps também já está fechada no nível do script
+- o ponto que ainda permanece em aberto é a validação prática completa do restore ponta a ponta
 
 ---
 
@@ -91,10 +109,15 @@ As principais evidências deste documento, nesta fase de reconciliação, são:
   - `/opt/hsc/backups/mariadb/backup.log`
 - presença dos dumps reais:
   - `hsc_auth_*.sql.gz`
+- conteúdo reconciliado do script real
+- presença da entrada exata no crontab do root
+- ausência de crontab relevante do `hscadmin`
+- ausência de timer `systemd --user` relevante para backup
 - saída real de `systemctl status mariadb`
 - presença do socket local:
   - `/run/mysqld/mysqld.sock`
-- inventário real do filesystem no host
+- timezone reconciliado do host:
+  - `Etc/UTC`
 
 Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
@@ -141,12 +164,142 @@ O script real reconciliado no host é:
 /opt/hsc/backup-mariadb.sh
 ```
 
+Permissões observadas:
+
+- owner: `root`
+- group: `root`
+- mode: `0755`
+
 Leitura canônica:
 
 - este script existe materialmente no host
-- ele deve ser tratado como entrypoint real da rotina de backup do MariaDB
-- a lógica completa de retenção e disparo ainda precisa de leitura direta do script para congelamento absoluto
-- mesmo sem essa leitura linha a linha, já existe evidência suficiente para fechar o diretório real de destino e o naming dos dumps
+- ele é o entrypoint real da rotina de backup do MariaDB
+- ele não delega o backup a outro wrapper reconciliado nesta rodada
+- o script já permite fechar com precisão:
+  - nome da base
+  - diretório de saída
+  - retenção
+  - naming dos dumps
+  - forma de compressão
+  - permissões finais do artefato
+
+---
+
+## Conteúdo operacional reconciliado do script
+
+Os parâmetros reais reconciliados do script são:
+
+### Base-alvo
+
+```text
+DB_NAME="hsc_auth"
+```
+
+### Diretório de saída
+
+```text
+BACKUP_DIR="/opt/hsc/backups/mariadb"
+```
+
+### Retenção
+
+```text
+RETENTION_DAYS=14
+```
+
+### Naming do arquivo
+
+O script monta:
+
+```text
+${BACKUP_DIR}/${DB_NAME}_${TS}.sql.gz
+```
+
+onde:
+
+```text
+TS="$(date -u +%Y-%m-%dT%H%M%SZ)"
+```
+
+### Log
+
+```text
+LOG_FILE="${BACKUP_DIR}/backup.log"
+```
+
+### Comando principal de dump
+
+```text
+mysqldump "$DB_NAME" | gzip -c > "$OUT_FILE"
+```
+
+### Permissões do dump final
+
+```text
+chown root:adm "$OUT_FILE"
+chmod 640 "$OUT_FILE"
+```
+
+### Política de limpeza
+
+```text
+find "$BACKUP_DIR" -type f -name "${DB_NAME}_*.sql.gz" -mtime +"$RETENTION_DAYS" -print -delete
+```
+
+Leitura canônica:
+
+- a retenção exata já está fechada em 14 dias
+- a base-alvo já está fechada como `hsc_auth`
+- a compressão é gzip no próprio pipeline do dump
+- o cleanup remove arquivos mais antigos que a janela configurada
+
+---
+
+## Mecanismo exato de agendamento
+
+O mecanismo exato reconciliado do backup é:
+
+- **cron**
+- **crontab do root**
+
+A linha exata observada é:
+
+```text
+15 3 * * * /opt/hsc/backup-mariadb.sh
+```
+
+Leitura canônica:
+
+- o backup **não** está sendo disparado por timer `systemd` reconciliado
+- o backup **não** está sendo disparado por `crontab` do `hscadmin`
+- o backup **não** está sendo disparado por user timer reconciliado
+- o invocador exato atual é o `root` cron
+
+---
+
+## Timezone do agendamento
+
+O host está em:
+
+```text
+Etc/UTC
+```
+
+Com isso, a entrada:
+
+```text
+15 3 * * * /opt/hsc/backup-mariadb.sh
+```
+
+deve ser lida como:
+
+- execução diária
+- às **03:15 UTC**
+
+Leitura canônica:
+
+- o horário operacional do backup já está fechado
+- qualquer leitura desse horário em outro fuso deve ser tratada como conversão derivada, não como configuração do host
 
 ---
 
@@ -165,11 +318,13 @@ Leitura canônica:
 - ele já mostrou evidência de sucesso recorrente
 - ele também já mostrou ao menos um episódio histórico de falha de conexão do `mysqldump`
 
-Trecho operacional relevante já observado no host:
+Trechos operacionais relevantes já observados no host:
 
 - o log contém linhas `Out: /opt/hsc/backups/mariadb/...`
-- o log também registrou erro de conexão ao socket local em um momento anterior
-- isso confirma que o log deve ser tratado como artefato importante de troubleshooting da camada
+- o log registrou erro histórico de conexão ao socket local
+- o log mostra também arquivos sendo impressos/removidos pela etapa de retenção
+
+Isso confirma que o log deve ser tratado como artefato importante de troubleshooting da camada.
 
 ---
 
@@ -197,7 +352,7 @@ Leitura canônica:
 
 - existe materialidade histórica suficiente para afirmar que a rotina de dump está funcionando de forma recorrente
 - o formato comprimido `.sql.gz` já está reconciliado
-- o prefixo `hsc_auth_` sugere fortemente associação com a base da Auth API
+- o prefixo `hsc_auth_` está alinhado com o nome da base do script
 - a convenção temporal está em UTC com marca no nome do arquivo
 
 ---
@@ -225,6 +380,30 @@ Leitura canônica:
   - ordenação cronológica
   - retenção por script
   - restore direcionado por data
+
+---
+
+## Retenção real reconciliada
+
+A retenção exata configurada no script é:
+
+```text
+RETENTION_DAYS=14
+```
+
+A remoção é feita por:
+
+```text
+find "$BACKUP_DIR" -type f -name "${DB_NAME}_*.sql.gz" -mtime +"$RETENTION_DAYS" -print -delete
+```
+
+Leitura canônica:
+
+- a política de retenção já não é mais inferência
+- ela está confirmada diretamente no script
+- a limpeza atua sobre dumps do padrão:
+  - `hsc_auth_*.sql.gz`
+- arquivos mais antigos que a janela configurada podem ser impressos e removidos durante a execução
 
 ---
 
@@ -266,51 +445,21 @@ Leitura canônica:
 
 ---
 
-## Cadência observada dos backups
-
-Com base nos dumps observados e no log reconciliado, existe evidência empírica de uma cadência recorrente próxima de:
-
-- um dump por dia
-- aproximadamente às `03:15Z`
-
-Leitura de precisão:
-
-- esta cadência ainda deve ser tratada como observação reconciliada
-- ela ainda não deve ser tratada como contrato formal definitivo até leitura completa do mecanismo de agendamento
-- o host não mostrou, nesta rodada, unit `systemd` ou entrada `cron` explicitamente nomeada para este backup
-- isso significa que o mecanismo de disparo ainda precisa de reconciliação adicional
-
----
-
-## Retenção observada
-
-O conjunto de arquivos observados mostra uma sequência contínua recente de dumps diários.
-
-Também há indícios no `backup.log` de que arquivos mais antigos já foram manipulados ou removidos em algum momento.
-
-Leitura honesta:
-
-- existe evidência de retenção/rotação em prática
-- a política exata de retenção ainda não foi congelada com base no conteúdo do script
-- este documento não deve afirmar um número fechado de dias sem inspeção direta do `backup-mariadb.sh`
-
-Regra canônica:
-
-- política exata de retenção = ainda pendente de confirmação fina
-- diretório real e naming dos dumps = já reconciliados
-
----
-
 ## O que já está confirmado
 
 Os pontos abaixo já podem ser tratados como fechados:
 
 - existe script real de backup
 - o script real está em `/opt/hsc/backup-mariadb.sh`
+- a base-alvo do script é `hsc_auth`
 - os dumps reais vivem em `/opt/hsc/backups/mariadb/`
 - o log real vive em `/opt/hsc/backups/mariadb/backup.log`
 - os dumps usam `.sql.gz`
 - o prefixo observado é `hsc_auth_`
+- a retenção exata no script é 14 dias
+- o mecanismo exato de agendamento é o crontab do root
+- a linha exata de cron é `15 3 * * * /opt/hsc/backup-mariadb.sh`
+- o host usa timezone `Etc/UTC`
 - o MariaDB local está ativo no host
 - existe histórico recente suficiente de dumps para considerar a camada real, não hipotética
 
@@ -320,15 +469,14 @@ Os pontos abaixo já podem ser tratados como fechados:
 
 Os pontos abaixo ainda precisam de validação adicional para congelamento absoluto:
 
-- mecanismo exato de agendamento do backup
-- política exata de retenção
-- comando exato usado no script
-- base exata restaurada pelo dump, embora o naming aponte fortemente para `hsc_auth`
 - restore end-to-end já executado com validação prática no host atual
+- validação formal do restore sobre base temporária específica neste host
+- eventual endurecimento adicional do backup, como checksum ou cópia externa/off-host
+- política operacional de retenção fora do host, se existir
 
 Regra importante:
 
-- este documento deve distinguir claramente evidência observada de inferência operacional
+- este documento deve distinguir claramente evidência observada de validação prática ainda não executada
 - a confiabilidade aumenta muito quando essa distinção é preservada
 
 ---
@@ -351,6 +499,13 @@ Confirmar rapidamente se a camada de backup do banco parece saudável.
 
 ```bash
 ls -lah /opt/hsc/backup-mariadb.sh
+```
+
+### Validar cron do root
+
+```bash
+sudo crontab -l
+sudo sed -n '1,220p' /var/spool/cron/crontabs/root
 ```
 
 ### Validar diretório de dumps
@@ -382,6 +537,7 @@ systemctl status mariadb --no-pager
 A camada é considerada minimamente saudável quando:
 
 - o script existe
+- a entrada do cron do root existe
 - o diretório de dumps existe
 - há dumps recentes no diretório
 - o log não indica falha persistente recente
@@ -486,12 +642,12 @@ Restore produtivo só deve acontecer depois de:
 Exemplo genérico, apenas quando o alvo estiver 100% confirmado:
 
 ```bash
-gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | mysql -u root -p NOME_REAL_DA_BASE
+gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | mysql -u root -p hsc_auth
 ```
 
 Observação importante:
-- o naming observado sugere fortemente que a base real seja `hsc_auth`
-- ainda assim, o nome da base produtiva deve ser confirmado antes de restore destrutivo
+- o nome da base produtiva está agora alinhado com o script como `hsc_auth`
+- ainda assim, restore destrutivo continua exigindo validação operacional cuidadosa
 
 ---
 
@@ -531,11 +687,10 @@ curl -I https://auth-api.haxixesmokeclub.com/health
 
 Causas comuns:
 
-- backup não executou
+- cron do root removido ou alterado
 - script falhou
 - problema de permissões
 - problema no MariaDB
-- agendamento real ainda desconhecido e interrompido
 
 Impacto:
 - falsa sensação de segurança
@@ -616,17 +771,20 @@ Regra canônica:
 Os invariantes conhecidos desta camada incluem:
 
 - o script real de backup vive em `/opt/hsc/backup-mariadb.sh`
+- a base-alvo do script é `hsc_auth`
 - o diretório real dos dumps vive em `/opt/hsc/backups/mariadb/`
 - o log real da camada vive em `/opt/hsc/backups/mariadb/backup.log`
 - o naming observado dos dumps usa prefixo `hsc_auth_`
 - a extensão observada é `.sql.gz`
+- a retenção configurada no script é 14 dias
+- o mecanismo exato de agendamento é o crontab do root
+- a linha exata do cron é `15 3 * * * /opt/hsc/backup-mariadb.sh`
+- o host está em timezone `Etc/UTC`
 - o MariaDB local está ativo via `mariadb.service`
 - o socket local observado é `/run/mysqld/mysqld.sock`
 - `/var/backups` não é o diretório principal da camada de backup da Auth API
-- a política exata de retenção ainda não está congelada sem leitura do script
-- o mecanismo exato de agendamento ainda não está 100% reconciliado
 
-Esses invariantes ajudam a preservar a leitura correta da camada de backup atual sem inventar certezas que ainda não foram confirmadas.
+Esses invariantes ajudam a preservar a leitura correta da camada de backup atual.
 
 ---
 
@@ -634,12 +792,12 @@ Esses invariantes ajudam a preservar a leitura correta da camada de backup atual
 
 Este documento não detalha:
 
-- conteúdo completo linha a linha do `backup-mariadb.sh`
 - credenciais reais de acesso ao banco
 - restore end-to-end já executado com certificação formal
-- política exata de retenção
-- política exata de agendamento
-- estratégia de snapshot do host além dos dumps SQL
+- cópia externa/off-host dos dumps, se existir
+- integração futura com snapshot de volume
+- verificação criptográfica dos dumps
+- política futura de retenção externa
 
 Esses tópicos pertencem a futuras reconciliações finas.
 
@@ -651,10 +809,11 @@ Este documento pode ser considerado maduro quando:
 
 - o diretório real dos dumps estiver explícito sem ambiguidade
 - o script real de backup estiver corretamente posicionado
+- o mecanismo exato de agendamento estiver formalizado
+- a retenção real do script estiver explícita
 - o log da camada estiver formalizado
 - o runbook de validação estiver claro
 - o restore seguro estiver descrito com cautela adequada
-- a distinção entre fatos confirmados e pontos ainda pendentes estiver preservada
 - ele puder ser usado como referência confiável de backup/restore da Auth API sem depender do master legado
 
 ---
