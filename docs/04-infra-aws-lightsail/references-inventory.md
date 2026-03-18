@@ -11,7 +11,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - quais serviços, paths e componentes são críticos para a Auth API
 - quais comandos ajudam a validar rapidamente a infraestrutura do Lightsail
 - quais pontos ainda dependem de confirmação direta no ambiente real
-- quais são os limites documentais deste contexto
+- quais são os limites documentais do contexto
 
 ---
 
@@ -93,10 +93,13 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
   - `Etc/UTC`
 - a retenção exata configurada no script:
   - `14 dias`
+- o restore prático já validado no host:
+  - restore com sucesso em base temporária `hsc_auth_restore_test`
+  - comparação estrutural coerente com a produção
+  - base temporária removida após o teste
 
 Ainda restam pendências menores, principalmente ligadas a:
 
-- procedimento de restore validado de ponta a ponta
 - eventual confirmação de outras variáveis de ambiente fora da unit
 - eventual estratégia externa/off-host de retenção ou cópia
 - cleanup do drift residual da borda antiga ainda presente na Hostinger
@@ -149,6 +152,7 @@ Usado para:
 - validar script, diretório e log reais de backup
 - validar o conteúdo do script de backup
 - validar o crontab real do root
+- validar o restore em base temporária
 - confirmar o estado real do runtime da Auth API
 
 Regra principal:
@@ -292,6 +296,10 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 ### Linha exata do cron
 
 - `15 3 * * * /opt/hsc/backup-mariadb.sh`
+
+### Restore validado em base temporária
+
+- `hsc_auth_restore_test`
 
 Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
 
@@ -463,6 +471,12 @@ Persistência principal do backend dinâmico.
 - root cron
 - `15 3 * * * /opt/hsc/backup-mariadb.sh`
 
+### Restore prático validado
+
+- dump restaurado com sucesso em `hsc_auth_restore_test`
+- inventário estrutural coerente com a produção
+- base temporária removida ao final
+
 ### Endpoint `/health`
 
 Ponto mínimo de validação pública e operacional da borda e da app.
@@ -537,6 +551,12 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - `14 dias`
 
+### Restore prático validado
+
+- restore bem-sucedido em base temporária
+- estrutura e volume básico coerentes com a produção
+- base temporária descartada após o teste
+
 ### Endpoint público validado
 
 - `https://auth-api.haxixesmokeclub.com/health`
@@ -586,6 +606,7 @@ A resiliência do contexto depende de:
 - presença de dumps recentes
 - integridade do `backup.log`
 - disponibilidade do MariaDB local para permitir o dump
+- capacidade comprovada de restaurar o dump em base temporária
 
 ### Dependência de separação arquitetural
 
@@ -714,6 +735,18 @@ sudo crontab -l
 sudo sed -n '1,220p' /var/spool/cron/crontabs/root
 ```
 
+### Validar restore em base temporária
+
+```bash
+LATEST_DUMP="$(find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | sort | tail -n 1)"
+TEST_DB="hsc_auth_restore_test"
+sudo mysql -e "DROP DATABASE IF EXISTS \`$TEST_DB\`;"
+sudo mysql -e "CREATE DATABASE \`$TEST_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+gunzip -c "$LATEST_DUMP" | sudo mysql "$TEST_DB"
+sudo mysql -e "SHOW TABLES FROM \`$TEST_DB\`;"
+sudo mysql -e "DROP DATABASE IF EXISTS \`$TEST_DB\`;"
+```
+
 ### Validar MariaDB
 
 ```bash
@@ -738,26 +771,22 @@ Regra prática:
 
 ## Itens pendentes de confirmação
 
-Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
+Os itens abaixo ainda podem ser confirmados diretamente no ambiente real para elevar ainda mais o grau de confiança do contexto, mas já não bloqueiam o checkpoint.
 
-### 1. Procedimento de restore validado de ponta a ponta
-
-A camada de backup já está corretamente posicionada, mas ainda pode ser refinada com validação prática do restore no host atual.
-
-### 2. Eventuais outras variáveis de ambiente fora da unit
+### 1. Eventuais outras variáveis de ambiente fora da unit
 
 A unit já explicita `NODE_ENV=production`, mas ainda pode haver variáveis relevantes fora dela que mereçam ser formalizadas em momento próprio.
 
-### 3. Eventual estratégia externa/off-host de retenção ou cópia
+### 2. Eventual estratégia externa/off-host de retenção ou cópia
 
 O backup local está reconciliado.  
 Ainda não foi confirmada nesta rodada a existência de cópia externa ou retenção fora do host.
 
-### 4. Eventuais arquivos auxiliares de deploy
+### 3. Eventuais arquivos auxiliares de deploy
 
 É útil confirmar se existem paths adicionais estáveis de release/deploy que mereçam ser citados formalmente neste contexto.
 
-### 5. Cleanup do drift residual da Hostinger
+### 4. Cleanup do drift residual da Hostinger
 
 A presença de configuração residual antiga da Auth API na Hostinger já foi identificada, mas o cleanup ainda pertence a uma etapa posterior.
 
@@ -809,6 +838,7 @@ Este documento deve ser atualizado quando houver:
 - mudança do diretório real dos dumps
 - mudança da linha real do cron de backup
 - mudança da retenção configurada
+- mudança relevante no procedimento validado de restore
 - confirmação ou resolução de item pendente listado aqui
 - mudança relevante na estratégia de backup ou runtime
 
@@ -824,6 +854,7 @@ Este documento pode ser considerado maduro quando:
 - hostname canônico, reverse proxy, unit `systemd`, runtime Node e camada de backup estiverem claramente reconciliados
 - o path do vhost da API, o path real do runtime e o diretório real dos dumps estiverem fixados
 - a linha real de agendamento do backup estiver explícita
+- o restore prático em base temporária estiver explícito
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
 - ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 

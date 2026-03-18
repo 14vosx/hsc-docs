@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o script real observado no host, o diretório reconciliado dos dumps, o mecanismo exato de agendamento, o formato dos artefatos de backup, a política real de retenção e o procedimento seguro de restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação prática.
+Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o script real observado no host, o diretório reconciliado dos dumps, o mecanismo exato de agendamento, o formato dos artefatos de backup, a política real de retenção e a validação prática do restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação adicional.
 
 Este documento existe para registrar, de forma estável e auditável:
 
@@ -14,7 +14,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - qual log de backup já foi reconciliado
 - como validar a existência e a saúde básica da camada de backup
 - como executar um restore de forma controlada
-- quais partes do fluxo já estão confirmadas e quais ainda precisam de validação prática
+- como o restore já foi validado na prática no host atual
 
 ---
 
@@ -32,7 +32,7 @@ Este documento cobre:
 - política real de retenção observada no script
 - validações operacionais mínimas da camada
 - procedimento seguro de restore em nível operacional
-- limitações e pendências ainda abertas dessa camada
+- validação prática do restore em base temporária
 
 Este documento não cobre em profundidade:
 
@@ -40,8 +40,8 @@ Este documento não cobre em profundidade:
 - deploy/release da aplicação Node
 - configuração completa do Nginx
 - tuning avançado do MariaDB
-- restore end-to-end já executado e certificado formalmente no host atual
 - estratégia de snapshot do host além dos dumps SQL
+- eventual retenção ou cópia off-host, ainda não reconciliada
 
 Esses tópicos vivem em documentos próprios do contexto `04-infra-aws-lightsail` ou exigem nova reconciliação prática.
 
@@ -87,13 +87,14 @@ Também ficou reconciliado no host que:
   - `chmod 640`
 - `/var/backups` não é o diretório real dos dumps da Auth API
 - `/var/backups` contém backups de sistema/pacote, não os dumps principais do banco da Auth API
+- o restore já foi **validado na prática** no host atual, em base temporária, sem tocar a produção
 
 Leitura canônica:
 
-- o diretório real dos dumps já está fechado sem ambiguidade
-- o mecanismo exato de agendamento já está fechado sem ambiguidade
-- a retenção exata dos dumps também já está fechada no nível do script
-- o ponto que ainda permanece em aberto é a validação prática completa do restore ponta a ponta
+- o diretório real dos dumps está fechado sem ambiguidade
+- o mecanismo exato de agendamento está fechado sem ambiguidade
+- a retenção exata dos dumps também está fechada no nível do script
+- o restore já não é mais hipótese documental; ele foi testado com sucesso em base temporária no host real
 
 ---
 
@@ -118,6 +119,9 @@ As principais evidências deste documento, nesta fase de reconciliação, são:
   - `/run/mysqld/mysqld.sock`
 - timezone reconciliado do host:
   - `Etc/UTC`
+- restore prático realizado em base temporária:
+  - `hsc_auth_restore_test`
+- inventário restaurado de tabelas e comparação com a produção
 
 Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
@@ -248,8 +252,8 @@ find "$BACKUP_DIR" -type f -name "${DB_NAME}_*.sql.gz" -mtime +"$RETENTION_DAYS"
 
 Leitura canônica:
 
-- a retenção exata já está fechada em 14 dias
-- a base-alvo já está fechada como `hsc_auth`
+- a retenção exata está fechada em 14 dias
+- a base-alvo está fechada como `hsc_auth`
 - a compressão é gzip no próprio pipeline do dump
 - o cleanup remove arquivos mais antigos que a janela configurada
 
@@ -298,7 +302,7 @@ deve ser lida como:
 
 Leitura canônica:
 
-- o horário operacional do backup já está fechado
+- o horário operacional do backup está fechado
 - qualquer leitura desse horário em outro fuso deve ser tratada como conversão derivada, não como configuração do host
 
 ---
@@ -351,7 +355,7 @@ Os dumps reais observados no host incluem, entre outros:
 Leitura canônica:
 
 - existe materialidade histórica suficiente para afirmar que a rotina de dump está funcionando de forma recorrente
-- o formato comprimido `.sql.gz` já está reconciliado
+- o formato comprimido `.sql.gz` está reconciliado
 - o prefixo `hsc_auth_` está alinhado com o nome da base do script
 - a convenção temporal está em UTC com marca no nome do arquivo
 
@@ -445,6 +449,74 @@ Leitura canônica:
 
 ---
 
+## Restore validado na prática
+
+O restore foi validado no host real em **2026-03-18**, sem tocar a base produtiva.
+
+### Dump usado no teste
+
+```text
+/opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz
+```
+
+### Estratégia usada
+
+- inspeção prévia do dump com `gunzip -c`
+- criação da base temporária:
+  - `hsc_auth_restore_test`
+- restore do dump nesta base temporária
+- comparação de estrutura e volume básico com a base produtiva `hsc_auth`
+- remoção da base temporária ao final do teste
+
+### Resultado do restore
+
+O restore concluiu sem erro.
+
+### Estrutura restaurada
+
+A base temporária restaurada apresentou **8 tabelas**:
+
+- `admin_audit_log`
+- `magic_links`
+- `news`
+- `profiles`
+- `schema_meta`
+- `seasons`
+- `sessions`
+- `users`
+
+### Comparação com a produção
+
+A estrutura da base temporária coincidiu com a produção.
+
+A comparação básica de volume observada foi:
+
+- `admin_audit_log` → `0`
+- `magic_links` → `0`
+- `news` → `0`
+- `profiles` → `0`
+- `schema_meta` → `0`
+- `seasons` → `2`
+- `sessions` → `0`
+- `users` → `0`
+
+Leitura canônica:
+
+- o dump não apenas existe; ele restaura corretamente
+- a cadeia `dump -> gunzip -> mysql` foi validada com sucesso no host real
+- a pendência de “restore testado na prática” pode ser tratada como **fechada**
+- o que continua não executado, por escolha correta de segurança, é apenas um restore destrutivo sobre a base produtiva
+
+### Limpeza pós-teste
+
+Após a validação, a base temporária foi removida:
+
+- `DROP DATABASE IF EXISTS hsc_auth_restore_test`
+
+Isso confirma que o teste foi concluído sem deixar artefato operacional residual.
+
+---
+
 ## O que já está confirmado
 
 Os pontos abaixo já podem ser tratados como fechados:
@@ -461,23 +533,23 @@ Os pontos abaixo já podem ser tratados como fechados:
 - a linha exata de cron é `15 3 * * * /opt/hsc/backup-mariadb.sh`
 - o host usa timezone `Etc/UTC`
 - o MariaDB local está ativo no host
-- existe histórico recente suficiente de dumps para considerar a camada real, não hipotética
+- o restore foi validado com sucesso em base temporária no host atual
+- a base temporária de teste foi removida após a validação
 
 ---
 
 ## O que ainda não está 100% fechado
 
-Os pontos abaixo ainda precisam de validação adicional para congelamento absoluto:
+Os pontos abaixo ainda podem ser refinados futuramente, mas já não bloqueiam o checkpoint:
 
-- restore end-to-end já executado com validação prática no host atual
-- validação formal do restore sobre base temporária específica neste host
-- eventual endurecimento adicional do backup, como checksum ou cópia externa/off-host
+- eventual endurecimento adicional do backup, como checksum
+- eventual cópia externa/off-host dos dumps
 - política operacional de retenção fora do host, se existir
 
 Regra importante:
 
-- este documento deve distinguir claramente evidência observada de validação prática ainda não executada
-- a confiabilidade aumenta muito quando essa distinção é preservada
+- este documento distingue o que foi comprovado do que ainda seria apenas evolução futura
+- o restore local em base temporária já foi fechado com evidência prática suficiente
 
 ---
 
@@ -629,6 +701,12 @@ Valide volume básico:
 mysql -u root -p -e "SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema = 'hsc_auth_restore_test';"
 ```
 
+Quando o teste terminar, remova a base temporária:
+
+```bash
+mysql -u root -p -e "DROP DATABASE IF EXISTS hsc_auth_restore_test;"
+```
+
 ### Restore produtivo
 
 Restore produtivo só deve acontecer depois de:
@@ -646,7 +724,7 @@ gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | mysql -u
 ```
 
 Observação importante:
-- o nome da base produtiva está agora alinhado com o script como `hsc_auth`
+- o nome da base produtiva está alinhado com o script como `hsc_auth`
 - ainda assim, restore destrutivo continua exigindo validação operacional cuidadosa
 
 ---
@@ -782,6 +860,7 @@ Os invariantes conhecidos desta camada incluem:
 - o host está em timezone `Etc/UTC`
 - o MariaDB local está ativo via `mariadb.service`
 - o socket local observado é `/run/mysqld/mysqld.sock`
+- o restore em base temporária foi validado com sucesso no host atual
 - `/var/backups` não é o diretório principal da camada de backup da Auth API
 
 Esses invariantes ajudam a preservar a leitura correta da camada de backup atual.
@@ -793,7 +872,6 @@ Esses invariantes ajudam a preservar a leitura correta da camada de backup atual
 Este documento não detalha:
 
 - credenciais reais de acesso ao banco
-- restore end-to-end já executado com certificação formal
 - cópia externa/off-host dos dumps, se existir
 - integração futura com snapshot de volume
 - verificação criptográfica dos dumps
@@ -812,6 +890,7 @@ Este documento pode ser considerado maduro quando:
 - o mecanismo exato de agendamento estiver formalizado
 - a retenção real do script estiver explícita
 - o log da camada estiver formalizado
+- o restore em base temporária estiver validado na prática
 - o runbook de validação estiver claro
 - o restore seguro estiver descrito com cautela adequada
 - ele puder ser usado como referência confiável de backup/restore da Auth API sem depender do master legado
