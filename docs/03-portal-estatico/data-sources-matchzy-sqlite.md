@@ -2,16 +2,16 @@
 
 ## Objetivo
 
-Documentar a fonte primária de dados do contexto Portal Estático, baseada no banco SQLite gerado pelo MatchZy, registrando seu papel arquitetural, seus paths críticos, suas tabelas relevantes e os limites estruturais que impactam a Static API v2.
+Documentar a fonte de dados primária do contexto Portal Estático do ecossistema HSC, registrando o papel do banco SQLite do MatchZy, seu path canônico no runtime real e sua relação estrutural com a Static API v2.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- qual é a fonte de verdade de stats do portal
-- onde o `matchzy.db` se posiciona na arquitetura
-- quais tabelas principais sustentam a v2
-- quais dependências ocultas existem no path e na estrutura da instância
-- quais limitações do banco impactam os artefatos públicos
-- quais riscos de drift de schema precisam ser observados
+- qual é a fonte de dados primária da camada pública de stats
+- onde vive o `matchzy.db` no ambiente real
+- quais tabelas principais sustentam ranking, matches, maps e players
+- por que essa fonte pertence ao lado jogo, mas impacta diretamente o portal
+- quais riscos existem quando path, schema ou instância divergem do esperado
+- como validar rapidamente se a fonte continua íntegra
 
 ---
 
@@ -19,56 +19,61 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- a fonte de verdade do lado estatístico para o portal
-- o papel do `matchzy.db`
-- o path operacional conhecido do banco
+- a fonte de dados principal da Static API v2
+- o papel do SQLite do MatchZy
+- o path canônico do `matchzy.db`
+- o path de backup identificado no ambiente
 - as tabelas principais consumidas pelo ETL
-- a dependência de SQLite com suporte a JSON1
-- a dependência estrutural da instância AMP / Game Panel
-- limitações estruturais dos dados disponíveis
-- riscos de drift de schema
+- a relação entre Game Panel e Portal Estático
+- validações mínimas da fonte de dados
+- riscos e problemas comuns ligados a essa camada
 
 Este documento não cobre em profundidade:
 
-- o funcionamento do MatchZy como ferramenta operacional de jogo
-- as queries SQL detalhadas do ETL
-- o pipeline completo script por script
-- os contratos JSON finais da v2
-- troubleshooting aprofundado do portal
-- Auth API e seus bancos
+- queries SQL linha a linha
+- implementação completa do ETL Bash
+- contratos JSON campo a campo
+- operação detalhada do AMP
+- troubleshooting detalhado do servidor CS2
+- MariaDB da Auth API no Lightsail
 
-Esses tópicos vivem em documentos próprios deste contexto ou em outros contextos canônicos.
+Esses tópicos vivem em documentos próprios dos contextos `02-game-panel`, `03-portal-estatico` e `04-infra-aws-lightsail`.
 
 ---
 
 ## Estado atual
 
-A fonte primária conhecida de dados estatísticos do Portal Estático é o banco SQLite do MatchZy.
+O estado operacional conhecido e reconciliado desta camada é:
 
-O estado operacional conhecido dessa camada é:
+- a fonte de dados primária da Static API v2 é o banco SQLite do MatchZy
+- o banco ativo e canônico é o `matchzy.db`
+- esse banco vive sob a árvore da instância oficial `MixHAXIXE01`
+- o ETL do portal depende diretamente desse arquivo
+- as tabelas estruturais principais já reconciliadas são:
+  - `matchzy_stats_matches`
+  - `matchzy_stats_maps`
+  - `matchzy_stats_players`
 
-- a origem de dados públicos da Static API v2 vem do `matchzy.db`
-- esse banco é produzido no contexto operacional do servidor CS2
-- o ETL Bash lê diretamente esse SQLite
-- as tabelas principais já reconciliadas sustentam ranking, matches, maps e players
-- a arquitetura atual depende da estabilidade do path da instância e da compatibilidade do schema do banco
-- o portal não consulta o banco diretamente; ele consome apenas os JSONs gerados a partir dele
+Também ficou reconciliado que:
 
-Esse desenho torna o `matchzy.db` a principal fonte estatística do lado público do HSC.
+- existe um arquivo de backup histórico do `matchzy.db`
+- esse backup não deve ser tratado como fonte ativa
+- a leitura canônica do portal deve apontar para o banco vivo do runtime, e não para cópias de backup
 
 ---
 
 ## Source of truth / evidências
 
-As principais evidências deste documento, nesta fase de migração documental, são:
+As principais evidências deste documento, nesta fase de reconciliação, são:
 
 - documentação consolidada atual do ecossistema HSC
 - blueprint técnico consolidado do HSC
-- documentação reconciliada do MatchZy e da Static API v2
-- reconciliação dos paths do `matchzy.db` dentro da instância AMP
-- reconciliação das tabelas principais consumidas pelo ETL
+- documentação reconciliada do Game Panel e do Portal Estático
+- runtime real da Hostinger
+- validação direta do path do `matchzy.db` no host
+- validação direta das tabelas principais do banco no ambiente real
 
-Enquanto a migração canônica do contexto não estiver concluída, essas fontes seguem sendo usadas como base de reconciliação do estado real.
+Enquanto novas mudanças não ocorrerem no runtime, o path validado diretamente no host prevalece como source of truth operacional.
 
 ---
 
@@ -81,118 +86,123 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
-- `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/references-inventory.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/matchzy.md`
+- `docs/02-game-panel/references-inventory.md`
 
-Este documento descreve a fonte de dados estatística usada pelo portal.  
-Ele não substitui os documentos de pipeline, queries, contratos ou operação do jogo.
+Este documento descreve a fonte SQLite do portal.  
+Ele não substitui os documentos de ETL, SQL, MatchZy ou inventário da instância.
 
 ---
 
-## Fonte de verdade de stats
+## Papel do `matchzy.db` no ecossistema
 
-A fonte de verdade estatística do Portal Estático, no desenho atual do ecossistema, é o SQLite produzido pelo MatchZy.
+No HSC, o `matchzy.db` é a ponte entre:
 
-Isso significa:
+- a operação real do servidor CS2
+- a persistência estatística do MatchZy
+- a geração pública da Static API v2
 
-- ranking público deriva do banco SQLite
-- listas e detalhes de matches derivam do banco SQLite
-- páginas de player derivam do banco SQLite
-- agregados por mapa derivam do banco SQLite
-- a v2 só é tão boa quanto a integridade e a compatibilidade do banco de origem
+Em termos práticos:
+
+- o Game Panel produz a fonte
+- o Portal Estático consome essa fonte
+- o browser nunca consome o banco diretamente
+- o público consome apenas os JSONs derivados da v2
 
 Regra canônica:
 
-- para a camada pública de stats, o `matchzy.db` é a origem primária
-- o portal não deve inventar ou inferir dados fora do que foi produzido e transformado a partir dessa fonte
+**o `matchzy.db` é a fonte estrutural da camada pública de stats, mas não é artefato público**
 
 ---
 
-## Papel do `matchzy.db` na arquitetura
+## Path canônico do banco ativo
 
-O `matchzy.db` ocupa o papel de base operacional intermediária entre:
+O path canônico ativo do `matchzy.db`, validado no runtime real, é:
 
-- runtime do jogo
-- pipeline ETL
-- publicação pública da Static API v2
+```bash
+/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
+```
 
-Fluxo resumido:
+Leitura canônica:
 
-1. o runtime do servidor CS2 produz estatísticas
-2. o MatchZy persiste essas estatísticas em SQLite
-3. o ETL lê esse banco
-4. o ETL gera JSONs estáticos
-5. o portal consome esses JSONs
-
-Implicações:
-
-- se o banco não atualizar, a v2 fica stale
-- se o schema do banco mudar, o ETL pode quebrar
-- se o path do banco mudar, o pipeline deixa de funcionar
-- se os dados no banco estiverem inconsistentes, isso pode se propagar para o público
+- este é o banco vivo do runtime
+- este é o path que deve ser tratado como fonte principal da v2
+- qualquer referência documental diferente precisa ser tratada como stale até validação contrária no ambiente real
 
 ---
 
-## Path oficial do `matchzy.db`
+## Path de backup identificado
 
-O path reconciliado historicamente para o banco depende da estrutura da instância AMP e do runtime do servidor CS2.
+Também foi identificado no ambiente um arquivo de backup do banco:
 
-A referência estrutural conhecida inclui a instância oficial:
+```bash
+/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db
+```
 
-- `MixHAXIXE01`
+Leitura correta desse path:
 
-E a base de paths observada no ecossistema segue a árvore ligada ao AMP, dentro de algo como:
-
-- `/home/amp/.ampdata/instances/MixHAXIXE01/...`
+- é backup histórico
+- não é o banco vivo do runtime
+- não deve ser tratado como source of truth ativo do portal
+- só deve ser usado para investigação histórica, contingência ou comparação
 
 Regra importante:
 
-- o nome da instância é parte da dependência estrutural do path
-- qualquer renomeação da instância ou mudança de árvore no runtime do jogo pode quebrar a localização do banco
-- o path exato do `matchzy.db` deve ser mantido reconciliado com o ambiente real
-
-Enquanto este contexto não receber a validação final do host em sua nova documentação, o canônico deve assumir:
-
-- o `matchzy.db` vive sob a árvore operacional da instância `MixHAXIXE01`
-- a dependência do nome da instância é real e deve ser explicitada
+- o ETL canônico deve mirar o path ativo
+- backup não deve entrar na documentação como fonte principal
 
 ---
 
-## Dependência da instância AMP
+## Relação com a instância `MixHAXIXE01`
 
-O banco de dados não vive em abstração.
+O `matchzy.db` vive sob a árvore da instância oficial:
 
-Ele depende diretamente da estrutura operacional da instância gerida pelo AMP / Game Panel.
+- `MixHAXIXE01`
 
-Isso implica:
+Isso é estrutural porque:
 
-- o portal depende indiretamente do Game Panel para localizar sua fonte de dados
-- o ETL depende de um path que nasce fora do contexto do portal
-- o nome da instância e a árvore de diretórios não são detalhes cosméticos; são parte da topologia
+- o path do banco depende do nome e da árvore da instância
+- renomeação ou migração dessa instância pode quebrar o ETL
+- a camada pública do portal depende indiretamente da estabilidade dessa identidade operacional
 
-Regra arquitetural importante:
+Regra canônica:
 
-- o contexto `03-portal-estatico` consome o banco
-- mas a origem do banco nasce no contexto `02-game-panel`
-
-Por isso, qualquer alteração de instância, path ou layout precisa ser tratada de forma coordenada entre os dois contextos.
+- mudança de path do banco ou da instância é mudança estrutural real
+- não é detalhe cosmético de organização interna
 
 ---
 
-## Tabelas principais
+## Relação com MatchZy
 
-As tabelas principais já reconciliadas como base da Static API v2 são:
+O `matchzy.db` é produzido pelo MatchZy como persistência estatística do lado jogo.
+
+Isso significa que:
+
+- o banco não é “do portal”
+- o banco nasce do runtime do servidor
+- o portal apenas o consome por ETL
+- se o MatchZy falhar em persistir, a v2 fica stale depois
+
+Regra importante:
+
+- problema na v2 pode nascer no lado game
+- troubleshooting do portal precisa considerar essa dependência
+
+---
+
+## Tabelas principais já reconciliadas
+
+As tabelas principais já reconciliadas como estruturais para a camada pública são:
 
 ### `matchzy_stats_matches`
 
 Papel:
-- sustentar listagem de partidas
-- sustentar metadados principais de matches
-- alimentar detalhe incremental por match
+- base da coleção pública de partidas
+- base de detalhe por match
 
-Uso típico na cadeia pública:
+Impacto na v2:
 - `matches.json`
 - `match/{id}.json`
 
@@ -201,11 +211,10 @@ Uso típico na cadeia pública:
 ### `matchzy_stats_maps`
 
 Papel:
-- sustentar agregados por mapa
-- sustentar visão pública de performance e volume por mapa
-- alimentar listas e detalhes ligados a mapas
+- base dos agregados por mapa
+- base de detalhe por mapa
 
-Uso típico na cadeia pública:
+Impacto na v2:
 - `maps.json`
 - `map/{map}.json`
 
@@ -214,246 +223,206 @@ Uso típico na cadeia pública:
 ### `matchzy_stats_players`
 
 Papel:
-- sustentar ranking e dossiê público de jogador
-- alimentar páginas de player
-- sustentar agregações de performance individual
+- base do ranking público
+- base do dossiê público de jogador
 
-Uso típico na cadeia pública:
+Impacto na v2:
 - `ranking.json`
 - `player/{steamid64}.json`
 
 ---
 
-## Papel das tabelas na v2
+## O que a v2 herda dessa fonte
 
-As tabelas não são publicadas diretamente; elas são transformadas pelo ETL.
+A Static API v2 herda do `matchzy.db`:
 
-A relação conceitual é:
+- universo de partidas
+- universo de jogadores
+- universo de mapas
+- contagens e agregados centrais
+- identificadores estruturais como:
+  - id de match
+  - `steamid64`
+  - nome/identidade de mapa
 
-- `matchzy_stats_matches` → coleções e detalhes de partidas
-- `matchzy_stats_maps` → coleções e detalhes por mapa
-- `matchzy_stats_players` → ranking e dossiês públicos de jogador
+Isso significa que:
 
-Essa separação é importante porque:
-
-- ajuda a entender de onde cada recurso público deriva
-- facilita troubleshooting quando um recurso específico quebra
-- ajuda a localizar drift de schema ou erro em query
-
----
-
-## Dependência de SQLite JSON1
-
-A cadeia atual possui dependência conhecida de SQLite com suporte a JSON1 para parte das consultas e transformações usadas na geração da v2.
-
-Isso implica:
-
-- o ambiente que executa as queries precisa ser compatível com esse recurso
-- parte da lógica do ETL pressupõe essa capacidade
-- quebra ou incompatibilidade de suporte pode afetar geração de artefatos públicos
-
-Regra operacional:
-
-- compatibilidade do SQLite com JSON1 é parte do funcionamento do ETL
-- não deve ser tratada como detalhe incidental
+- drift de schema impacta a v2
+- ausência de novas gravações impacta a v2
+- mudança de path impacta a v2
+- dano ou corrupção do banco impacta a v2
 
 ---
 
-## Dependência de schema
+## O que o portal não deve fazer
 
-O ETL depende de schema compatível com as queries versionadas.
+O contexto do Portal Estático não deve:
 
-Isso significa:
+- servir o `matchzy.db` publicamente
+- tratar o banco como artefato da borda
+- ler backup como se fosse banco vivo
+- documentar MariaDB do lado game como fonte principal da v2
+- assumir que a fonte é estável sem validar path e schema
 
-- nomes de tabelas precisam permanecer coerentes
-- colunas esperadas pelas queries precisam existir
-- mudanças no MatchZy ou no banco precisam ser reconciliadas antes de tratar a v2 como saudável
-- snapshots ou auditorias de schema podem ser necessários em marcos importantes
+Regra canônica:
 
-O portal não falha “por causa do frontend” quando a quebra está na base estrutural do banco.  
-Muitas falhas públicas têm origem no schema ou na compatibilidade do banco de origem.
-
----
-
-## Limitações estruturais dos dados
-
-A camada pública está limitada ao que o `matchzy.db` efetivamente oferece.
-
-Isso implica limites como:
-
-- ausência de backend analítico dinâmico para compor dados além do que foi persistido
-- dependência das entidades e agregações expostas pelo MatchZy
-- eventuais ausências de granularidade mais profunda em determinados eventos de jogo
-- dependência da forma como o plugin escreve estatísticas
-- limitação do que pode ser reconstruído apenas a partir das tabelas existentes
-
-Regra editorial:
-
-- o portal deve assumir o banco como fonte real, não como fonte idealizada
-- qualquer lacuna estrutural do banco deve ser reconhecida como limite da camada pública
+**a fonte principal do portal é SQLite do MatchZy, não MariaDB e não backup manual**
 
 ---
 
-## Limitações específicas que podem impactar a v2
+## Dependências operacionais da fonte
 
-Sem congelar detalhes não validados além do necessário, os limites típicos desta fonte incluem:
+Esta camada depende, no mínimo, de:
 
-- granularidade analítica menor do que uma plataforma dedicada de telemetria
-- dependência de agregados já produzidos ou facilmente extraíveis
-- dificuldade de reconstruir certos contextos se o dado não foi persistido pelo MatchZy
-- dependência alta da integridade do `steamid64` e de joins lógicos sobre player
-- possíveis lacunas em eventos muito específicos não registrados no banco
+- Infra Hostinger saudável
+- árvore `amp` íntegra
+- instância `MixHAXIXE01` íntegra
+- runtime do servidor CS2 saudável
+- MatchZy funcional
+- permissões corretas de leitura do ETL
+- ausência de drift de path
+- ausência de drift de schema destrutivo
 
-Esses limites não inviabilizam a v2, mas definem seu teto atual.
+Dependências cruzadas importantes:
 
----
-
-## Riscos de drift de schema
-
-Os principais riscos de drift nesta camada incluem:
-
-- tabela renomeada ou alterada sem ajuste do ETL
-- coluna esperada pela query deixando de existir
-- alteração de shape do dado sem atualização documental
-- mudança de versão do MatchZy com impacto estrutural não documentado
-- path do banco mudando silenciosamente junto com a instância
-
-Sintomas típicos de drift:
-
-- ETL falha
-- JSON deixa de ser gerado
-- JSON é gerado com lacunas
-- recursos específicos do portal quebram
-- health do pipeline acusa inconsistência
-
-Mitigações recomendadas:
-
-- versionar queries
-- manter snapshots e auditorias estruturais quando necessário
-- registrar mudança relevante em impl-log
-- reconciliar docs do portal e do Game Panel quando a origem mudar
-
----
-
-## Sinais de saúde da fonte de dados
-
-Os sinais de saúde esperados desta camada incluem:
-
-- `matchzy.db` presente no path esperado
-- SQLite legível pelo ETL
-- tabelas principais existentes
-- schema compatível com as queries versionadas
-- ETL conseguindo gerar artefatos públicos
-- ausência de erro estrutural recorrente nas execuções da pipeline
-
-A saúde da fonte de dados deve ser inferida pela combinação entre:
-
-- presença do banco
-- compatibilidade do schema
-- sucesso do pipeline
-- coerência do output público
+- o Portal Estático depende desta fonte
+- a saúde pública do portal não pode ser avaliada ignorando o lado jogo
+- o path canônico do banco é dependência estrutural do ETL
 
 ---
 
 ## Comandos de validação
 
-Os comandos abaixo representam verificações típicas da fonte de dados.
+Os comandos abaixo representam a validação mínima desta fonte de dados.
 
-### Verificar existência do banco
-
-Substitua pelo path real validado no ambiente.
+### Validar presença do banco ativo
 
 ```bash
-ls -l /CAMINHO/DO/matchzy.db
+ls -l /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
 ```
 
-### Inspecionar tabelas do banco
-
-Substitua pelo path real validado no ambiente.
+### Validar path absoluto resolvido
 
 ```bash
-sqlite3 /CAMINHO/DO/matchzy.db ".tables"
+realpath /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
 ```
 
-### Inspecionar schema de tabela principal
-
-Exemplo representativo:
+### Validar tabelas principais
 
 ```bash
-sqlite3 /CAMINHO/DO/matchzy.db ".schema matchzy_stats_players"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db ".tables"
 ```
 
-### Testar leitura simples
-
-Exemplo representativo:
+### Validar volume básico da fonte
 
 ```bash
-sqlite3 /CAMINHO/DO/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_matches;"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_matches;"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_players;"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_maps;"
 ```
 
-Regra importante:
-- não transformar este documento em dump de schema completo
-- usar validação pontual para confirmar integridade e compatibilidade
+### Validar presença do backup identificado
+
+```bash
+ls -l /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db
+```
+
+Regra prática:
+
+- a validação operacional principal deve sempre começar pelo banco ativo
+- o backup só entra na conversa quando o assunto for contingência ou comparação
 
 ---
 
 ## Problemas comuns
 
-### 1. `matchzy.db` não encontrado
+### 1. ETL aponta para path errado
 
 Causas comuns:
 
-- path mudou
-- instância foi renomeada
-- árvore operacional do AMP mudou
-- permissão impede acesso
+- path antigo preservado em script
+- renomeação ou reorganização da árvore da instância
+- documentação stale
 
 Impacto:
-- ETL não roda
-- a v2 não atualiza
+- a v2 deixa de atualizar
+- troubleshooting pode culpar ETL quando a raiz é path
 
 ---
 
-### 2. Banco existe, mas schema divergiu
+### 2. ETL lê backup em vez do banco ativo
 
 Causas comuns:
 
-- atualização do MatchZy
-- alteração estrutural não documentada
-- query versionada desatualizada
+- script ou operador usando path incorreto
+- troubleshooting feito sobre arquivo errado
+- confusão entre fonte viva e cópia histórica
 
 Impacto:
-- falha de geração
-- recursos específicos da v2 quebram
-- troubleshooting pode parecer “erro do portal”, mas a raiz está no banco
+- geração de dados stale
+- falsa percepção de saúde da cadeia pública
 
 ---
 
-### 3. Banco está íntegro, mas dados estão stale
+### 3. Banco existe, mas tabelas não batem com o esperado
 
 Causas comuns:
 
-- runtime do jogo não está atualizando stats
-- ETL não está consumindo o banco novo
-- statefiles ou incremental ficaram incoerentes
+- drift de schema
+- update do MatchZy
+- leitura do banco errado
+- banco parcialmente corrompido ou divergente
 
 Impacto:
-- portal continua de pé, mas com dados antigos
+- SQLs quebram
+- ETL quebra
+- recursos específicos da v2 deixam de ser gerados
 
 ---
 
-### 4. Uma tabela principal funciona, outra não
+### 4. Partidas acontecem, mas a fonte não evolui
 
 Causas comuns:
 
-- drift parcial de schema
-- query específica quebrada
-- corrupção localizada
-- inconsistência do pipeline incremental
+- MatchZy não está persistindo
+- problema de escrita no runtime do jogo
+- plugin carregado, mas funcionalmente degradado
+- problema de permissões ou contexto da instância
 
 Impacto:
-- parte da v2 funciona
-- parte da v2 quebra ou degrada
+- portal fica stale depois
+- problema parece “do portal”, mas nasce no lado game
+
+---
+
+### 5. Banco ativo muda de lugar sem atualização documental
+
+Causas comuns:
+
+- migração manual
+- rebuild da instância
+- reorganização de árvore
+- mudança operacional não registrada
+
+Impacto:
+- quebra indireta da cadeia pública
+- drift entre docs, ETL e runtime
+
+---
+
+## Invariantes operacionais
+
+Os invariantes conhecidos desta camada incluem:
+
+- a fonte principal da v2 é SQLite
+- o banco principal é o `matchzy.db`
+- o banco ativo vive sob a árvore da instância `MixHAXIXE01`
+- o path ativo reconciliado é o path em `addons/counterstrikesharp/plugins/MatchZy/`
+- backup não é fonte ativa
+- as tabelas principais consumidas pela v2 são `matches`, `maps` e `players`
+- a v2 depende do estado real do lado jogo para continuar atualizando
+
+Esses invariantes ajudam a preservar a leitura correta da cadeia de dados do portal.
 
 ---
 
@@ -461,14 +430,14 @@ Impacto:
 
 Este documento não detalha:
 
-- queries SQL completas
-- mapeamento campo a campo de cada tabela
-- pipeline completo de geração
-- troubleshooting do Game Panel
-- troubleshooting aprofundado do ETL
-- shape completo dos JSONs publicados
+- todas as queries SQL usadas pelo ETL
+- schema linha a linha de cada tabela
+- comportamento interno do MatchZy
+- troubleshooting aprofundado do runtime do CS2
+- recuperação de corrupção de banco
+- restore operacional a partir do backup identificado
 
-Esses tópicos pertencem a documentos específicos.
+Esses tópicos pertencem a documentos específicos ou exigem runbooks adicionais.
 
 ---
 
@@ -476,12 +445,11 @@ Esses tópicos pertencem a documentos específicos.
 
 Este documento pode ser considerado maduro quando:
 
-- o path real do `matchzy.db` estiver validado sem ambiguidade
-- a dependência da instância `MixHAXIXE01` estiver formalizada e reconciliada
-- as tabelas principais estiverem confirmadas contra o ambiente real
-- os limites estruturais da fonte estiverem claros
-- os riscos de drift de schema estiverem representados de forma útil
-- ele puder ser lido como referência da fonte de dados do portal sem depender do master legado
+- o path canônico do banco ativo estiver explícito sem ambiguidade
+- o path de backup estiver corretamente separado do path vivo
+- a relação entre `matchzy.db`, MatchZy e v2 estiver clara
+- as tabelas principais estiverem formalizadas
+- ele puder ser usado como referência confiável da fonte SQLite do portal sem depender do master legado
 
 ---
 
@@ -489,5 +457,5 @@ Este documento pode ser considerado maduro quando:
 
 - Status: ativo
 - Classificação: canônico
-- Contexto: portal estático / fonte de dados MatchZy SQLite
+- Contexto: portal estático / data sources — MatchZy SQLite
 - Última revisão: 2026-03-18

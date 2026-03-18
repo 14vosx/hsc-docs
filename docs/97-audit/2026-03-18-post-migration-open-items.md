@@ -37,71 +37,122 @@ Os 4 contextos canônicos iniciais já estão criados e navegáveis:
 3. Portal Estático
 4. Infra AWS Lightsail
 
-O estado atual, porém, ainda inclui pendências de reconciliação fina com o ambiente real.
-
-Leitura correta do momento atual:
+O estado atual é:
 
 - **estrutura canônica = pronta**
-- **reconciliação fina com runtime = ainda em andamento**
+- **reconciliação fina de runtime = parcialmente concluída**
+- **restam alguns itens de cleanup e ajuste documental pontual**
 
 ---
 
-## Pendências reais abertas
+## Itens já resolvidos
 
-## 1. Hostnames públicos finais ainda precisam de fixação explícita
+## 1. Hostname público final do portal no lado Hostinger
 
-### Contextos afetados
+### Status
+- Resolvido
 
-- `01-infra-hostinger`
-- `03-portal-estatico`
-- `04-infra-aws-lightsail`
+### Estado consolidado
+Os hostnames públicos canônicos do lado portal são:
 
-### Situação
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
 
-A topologia geral está correta, mas ainda faltam confirmações explícitas no ambiente real para congelar sem ambiguidade:
+Os seguintes hostnames não devem ser tratados como ativos no estado atual:
 
-- hostname público oficial do lado Hostinger
-- path HTTP público final da Static API v2
-- hostname público final da Auth API no Lightsail
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
 
-### Ação recomendada
+### Impacto documental
+Este ponto já pode ser refletido em:
 
-Validar no ambiente real e atualizar:
-
-- `network-dns-tls.md`
-- `references-inventory.md`
+- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/03-portal-estatico/nginx-publishing-cache.md`
 
 ---
 
-## 2. Path final completo do `matchzy.db` ainda precisa ser fixado
+## 2. Path HTTP público final da Static API v2
 
-### Contextos afetados
+### Status
+- Resolvido
 
-- `02-game-panel`
-- `03-portal-estatico`
+### Estado consolidado
+A Static API v2 é servida publicamente em:
 
-### Situação
+- `/api/cs2/v2/`
 
-Já está reconciliado que:
+Também ficou reconciliado que:
 
-- o banco estrutural principal é o `matchzy.db`
-- ele vive sob a árvore da instância `MixHAXIXE01`
+- `/api/cs2/v1/` retorna `404`
+- existem redirects de compat para endpoints antigos:
+  - `/api/ranking.json`
+  - `/api/matches.json`
+  - `/api/health.json`
 
-O que ainda falta congelar com precisão canônica é:
+### Impacto documental
+Este ponto já pode ser refletido em:
 
-- o path completo final do arquivo no ambiente real
+- `docs/03-portal-estatico/static-api-v2.md`
+- `docs/03-portal-estatico/nginx-publishing-cache.md`
+- `docs/03-portal-estatico/references-inventory.md`
+- `docs/01-infra-hostinger/nginx-static-serving.md`
 
-### Ação recomendada
+---
 
-Validar no host e atualizar:
+## 3. Hostname final da Auth API
 
+### Status
+- Resolvido
+
+### Estado consolidado
+A Auth API está canonicamente no Lightsail com:
+
+- hostname: `auth-api.haxixesmokeclub.com`
+- Nginx reverse proxy no próprio Lightsail
+- `proxy_pass http://127.0.0.1:3000`
+
+### Impacto documental
+Este ponto já pode ser refletido em:
+
+- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
+- `docs/04-infra-aws-lightsail/references-inventory.md`
+
+---
+
+## 4. Path final completo do `matchzy.db`
+
+### Status
+- Resolvido
+
+### Estado consolidado
+O path canônico vivo do banco é:
+
+```bash
+/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
+```
+
+Também foi encontrado um path de backup, que não deve ser tratado como fonte ativa:
+
+```bash
+/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db
+```
+
+### Impacto documental
+Este ponto já pode ser refletido em:
+
+- `docs/02-game-panel/instance-mixhaxixe01.md`
+- `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/references-inventory.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/references-inventory.md`
 
 ---
 
-## 3. Inventário completo de plugins em produção ainda não foi consolidado
+## Pendências reais ainda abertas
+
+## 1. Inventário completo de plugins em produção ainda não foi consolidado
 
 ### Contexto afetado
 
@@ -134,7 +185,7 @@ Capturar `css_plugins list` no runtime atual e revisar:
 
 ---
 
-## 4. Inventário real de presets e aliases do lado jogo ainda está incompleto
+## 2. Inventário real de presets e aliases do lado jogo ainda está incompleto
 
 ### Contexto afetado
 
@@ -163,7 +214,7 @@ Revisar ambiente real e atualizar:
 
 ---
 
-## 5. Nomes exatos de services/timers ainda precisam de validação direta em host
+## 3. Nomes exatos de services/timers ainda precisam de validação direta em host
 
 ### Contextos afetados
 
@@ -194,7 +245,7 @@ Validar com `systemctl list-timers --all` e revisar:
 
 ---
 
-## 6. Comando agregador real de regeneração da v2 ainda não foi congelado
+## 4. Comando agregador real de regeneração da v2 ainda não foi congelado
 
 ### Contexto afetado
 
@@ -217,7 +268,7 @@ Validar no host e revisar:
 
 ---
 
-## 7. Root/alias final dos vhosts públicos ainda precisa de confirmação fina
+## 5. Root/alias final dos vhosts públicos ainda precisa de confirmação fina
 
 ### Contextos afetados
 
@@ -226,11 +277,11 @@ Validar no host e revisar:
 
 ### Situação
 
-Os paths de filesystem já estão reconciliados.  
+Os paths de filesystem e os principais endpoints já estão reconciliados.  
 O que ainda falta confirmar sem ambiguidade é:
 
-- como o Nginx aponta exatamente para esses paths no runtime real
-- se o path público final da v2 está coerente com essa configuração
+- a forma final completa dos blocos de vhost relevantes no runtime real
+- se existe algum detalhe residual de root/alias além do já validado
 
 ### Ação recomendada
 
@@ -242,7 +293,7 @@ Validar o host e revisar:
 
 ---
 
-## 8. Diretório final dos dumps do backup da Auth API ainda não está fixado
+## 6. Diretório final dos dumps do backup da Auth API ainda não está fixado
 
 ### Contexto afetado
 
@@ -270,7 +321,37 @@ Validar no host e revisar:
 
 ---
 
-## 9. Material legado ainda não foi formalmente reorganizado em `98-legacy/`
+## 7. Vhost legado da Auth API ainda existe na Hostinger
+
+### Contexto afetado
+
+- `01-infra-hostinger`
+
+### Situação
+
+O runtime atual confirmou que a Auth API canônica está no Lightsail.
+
+Mesmo assim, ainda existe configuração Nginx na Hostinger contendo:
+
+- `server_name auth-api.haxixesmokeclub.com`
+
+Isso deve ser tratado como:
+
+- configuração legada / stale
+- item de cleanup técnico
+- não como prova de que a Auth API ainda roda canonicamente na Hostinger
+
+### Ação recomendada
+
+Registrar esse drift em:
+
+- `docs/01-infra-hostinger/references-inventory.md`
+
+E tratar o cleanup técnico em momento próprio do host.
+
+---
+
+## 8. Material legado ainda não foi formalmente reorganizado além do núcleo inicial
 
 ### Contexto afetado
 
@@ -278,23 +359,20 @@ Validar no host e revisar:
 
 ### Situação
 
-A nova base canônica já existe, mas os antigos masters e documentos históricos ainda não passaram por uma etapa formal de:
+A nova base canônica já existe e os dois masters históricos principais já foram preservados em `98-legacy/`.
 
-- seleção
-- classificação
-- realocação para `98-legacy/`
+O que ainda pode evoluir:
+
+- classificar outros documentos históricos relevantes
+- expandir o uso disciplinado de `98-legacy/`
 
 ### Ação recomendada
 
-Executar uma fase própria de legado para:
-
-- preservar histórico útil
-- reduzir ambiguidade de navegação
-- evitar que arquivos antigos continuem sendo tratados como canônico vivo
+Executar nova onda controlada de legado apenas quando necessário.
 
 ---
 
-## 10. Diretórios `95-impl-log/` e `97-audit/` acabaram de ser inaugurados e ainda precisam virar rotina
+## 9. Diretórios `95-impl-log/` e `97-audit/` ainda precisam virar rotina viva
 
 ### Contexto afetado
 
@@ -327,22 +405,21 @@ Adotar como rotina:
 
 ### Prioridade alta
 
-1. hostnames públicos finais
-2. path final do `matchzy.db`
-3. inventário atual de plugins
-4. units/timers reais do host
-5. comando agregador real da v2
+1. inventário atual de plugins
+2. units/timers reais do host
+3. comando agregador real da v2
 
 ### Prioridade média
 
-6. inventário de presets e aliases
-7. root/alias final dos vhosts
-8. diretório final dos dumps do backup
+4. inventário de presets e aliases
+5. root/alias final dos vhosts
+6. diretório final dos dumps do backup
 
 ### Prioridade estrutural contínua
 
-9. reorganização do legado
-10. institucionalização de impl-log + audit como rotina
+7. cleanup do vhost legado da Auth API na Hostinger
+8. institucionalização de impl-log + audit como rotina
+9. expansão controlada de `98-legacy/`
 
 ---
 
@@ -351,9 +428,9 @@ Adotar como rotina:
 A leitura correta deste documento é:
 
 - a migração inicial foi bem-sucedida
-- as pendências agora estão visíveis
-- nenhuma dessas pendências invalida a nova base canônica
-- a próxima fase é reconciliação fina, não recomeço estrutural
+- os itens mais críticos de hostname e path principal já foram reconciliados
+- o backlog restante agora está menor, mais técnico e mais localizado
+- a próxima fase é manutenção disciplinada, não reconstrução estrutural
 
 ---
 

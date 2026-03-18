@@ -2,15 +2,15 @@
 
 ## Objetivo
 
-Consolidar o inventário de referências, evidências, artefatos operacionais e itens pendentes de validação do contexto AWS Lightsail da Auth API.
+Consolidar o inventário de referências, evidências, artefatos operacionais, paths críticos e itens pendentes de validação do contexto Infra AWS Lightsail do ecossistema HSC.
 
 Este documento existe para registrar, de forma estável e auditável:
 
 - quais documentos alimentam este contexto
 - quais artefatos reais do host são source of truth operacional
-- quais paths e serviços são críticos para o runtime
-- quais comandos ajudam a validar a camada
-- quais pontos ainda dependem de confirmação no ambiente real
+- quais serviços, paths e componentes são críticos para a Auth API
+- quais comandos ajudam a validar rapidamente a infraestrutura do Lightsail
+- quais pontos ainda dependem de confirmação direta no ambiente real
 - quais são os limites documentais deste contexto
 
 ---
@@ -21,22 +21,23 @@ Este documento cobre:
 
 - documentos de origem do contexto
 - artefatos reais do host Lightsail
-- serviços principais do runtime
+- serviços principais da camada
 - paths críticos conhecidos
+- componentes estruturais relevantes
 - comandos de validação
 - itens pendentes de confirmação
-- limites do contexto documental
+- limites documentais do contexto
 
 Este documento não cobre em profundidade:
 
-- explicação detalhada de cada serviço
-- configuração linha a linha de Nginx
-- unit file completo do systemd
-- schema completo do banco
-- troubleshooting detalhado
+- infraestrutura base da Hostinger
+- pipeline ETL detalhado da Static API v2
+- contratos JSON do portal
+- operação do servidor CS2
+- credenciais e arquivos sensíveis
 - histórico completo de mudanças
 
-Esses assuntos vivem nos documentos especializados do contexto e nos impl-logs correspondentes.
+Esses assuntos vivem nos documentos especializados dos outros contextos, bem como em impl-logs e material legado.
 
 ---
 
@@ -44,56 +45,78 @@ Esses assuntos vivem nos documentos especializados do contexto e nos impl-logs c
 
 O contexto `04-infra-aws-lightsail` já possui estrutura canônica definida para documentar:
 
-- runtime do host
-- edge público
-- aplicação Node.js via systemd
+- arquitetura de runtime da instância Lightsail
+- borda pública da Auth API via Nginx reverse proxy
+- DNS, TLS e hostname canônico da Auth API
+- Node.js via systemd
 - MariaDB local
-- deploy/release/rollback
-- operação funcional da Auth API
-- observabilidade e troubleshooting
+- deploy, release e rollback
 - backup e restore
+- observabilidade e troubleshooting da camada dinâmica
 
-Neste estágio da migração, o contexto já foi estruturado documentalmente, mas ainda depende de reconciliação progressiva com o ambiente real para elevar a confiança de alguns itens operacionais específicos.
+Neste estágio da reconciliação, o contexto já possui confirmação operacional suficiente para fixar sem ambiguidade:
+
+- a Auth API canônica no Lightsail
+- o hostname público canônico `auth-api.haxixesmokeclub.com`
+- o reverse proxy Nginx no próprio host Lightsail
+- o upstream local da aplicação em `127.0.0.1:3000`
+- a presença do vhost reconciliado em `/etc/nginx/sites-available/hsc-auth-api`
+- a resposta pública bem-sucedida de `/health`
+
+Ainda restam pendências menores, principalmente ligadas a:
+
+- diretório final dos dumps de backup
+- detalhes finos do restore validado em host
+- eventual reconciliação final de units e nomes exatos de serviços da aplicação
+- cleanup do drift residual da borda antiga ainda presente na Hostinger
 
 ---
 
 ## Source of truth / evidências
 
-As evidências que sustentam este contexto se dividem em quatro grupos:
+As evidências que sustentam este contexto se dividem em quatro grupos principais.
 
 ### 1. Documentação consolidada do ecossistema
 
 Usada para:
-- visão macro do papel da Auth API
-- relação entre Lightsail e os demais contextos do HSC
-- reconciliação de topologia e superfícies operacionais
 
-### 2. Documentação específica da Auth API em Lightsail
+- visão macro do papel do Lightsail no HSC
+- separação entre Hostinger, Game Panel, Portal Estático e Auth API
+- topologia geral da camada dinâmica
+
+### 2. Documentação específica da Auth API
 
 Usada para:
-- runtime real
-- paths operacionais
-- service unit
-- modelo de deploy
-- rotina de backup
-- comandos de operação
 
-### 3. Impl-logs técnicos
+- runtime da aplicação
+- Nginx reverse proxy
+- MariaDB local
+- deploy/release/rollback
+- backup e restore
+- observabilidade da camada dinâmica
+
+### 3. Impl-logs e registros incrementais
 
 Usados para:
-- mudanças incrementais
-- rastreabilidade de evolução
-- snapshots técnicos
-- endurecimento de segurança e fluxo administrativo
 
-### 4. Ambiente real do host
+- rastrear mudanças em deploy, borda, backup e operação da Auth API
+- registrar ajustes relevantes de infraestrutura e aplicação
+- preservar rastreabilidade da evolução da camada dinâmica
+
+### 4. Ambiente real do Lightsail
 
 Usado para:
-- validação final de serviço, path, DNS, edge e banco
-- confirmação de que o canônico reflete a produção real
+
+- validar hostname canônico
+- validar reverse proxy real
+- validar upstream local da aplicação
+- validar arquivos de Nginx no host
+- validar o endpoint `/health`
+- confirmar o estado real do runtime da Auth API
 
 Regra principal:
-- quando houver conflito entre documento antigo e ambiente real, prevalece o ambiente real validado
+
+- quando houver conflito entre documento histórico e ambiente real validado, prevalece o ambiente real validado
 
 ---
 
@@ -103,14 +126,14 @@ Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
 - `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/node-systemd.md`
+- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
+- `docs/04-infra-aws-lightsail/mariadb-local.md`
+- `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
-- `docs/04-infra-aws-lightsail/node-systemd.md`
-- `docs/04-infra-aws-lightsail/mariadb-local.md`
-- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/backup-restore.md`
-- `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/backup-restore.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.
@@ -123,30 +146,27 @@ Os documentos abaixo são as principais fontes de extração e reconciliação d
 
 ### Fontes primárias
 
-- documentação específica da Auth API em AWS Lightsail
-- documentação de git flow, release por TAG e deploy da Auth API
-- documentação de fluxo manual de deploy da Auth API
+- documentação consolidada atual do ecossistema HSC
+- blueprint técnico consolidado do HSC
+- documentação específica da infraestrutura AWS Lightsail
+- documentação específica da Auth API
 
 ### Fontes secundárias
 
-- documentação consolidada geral do HSC
-- blueprint técnico consolidado do HSC
-- impl-logs ligados à Auth API, especialmente:
-  - CORS allowlist
-  - sessions e admin guard
-  - schema snapshot
-  - fail-closed
-  - git flow / release / deploy workflow
+- documentação reconciliada de borda, Node.js, MariaDB local e backup
+- impl-logs ligados a deploy, rollback, borda pública e ajustes operacionais da API
 
 ### Fontes de apoio histórico
 
-- manuais antigos
-- arquivos `_old`
-- versões históricas de documentação de deploy
+- master antigo
+- blueprint histórico
+- documentação legada da Auth API
+- materiais `_old` úteis para reconciliar hostnames, paths, rotinas de deploy e mudanças de runtime
 
 Regra documental:
+
 - fontes históricas ajudam a reconciliar
-- mas não devem governar o canônico sozinhas
+- mas não governam o canônico sozinhas
 
 ---
 
@@ -158,39 +178,41 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - instância AWS Lightsail
 - Ubuntu 22.04 LTS
-- usuário operacional `hscadmin`
 
-### Aplicação
-
-- diretório da aplicação: `/opt/hsc/hsc-auth-api`
-- arquivo de ambiente: `/opt/hsc/hsc-auth-api/.env`
-- entrypoint da aplicação: `index.js`
-
-### Serviço
-
-- unit file: `/etc/systemd/system/hsc-auth-api.service`
-- serviço systemd: `hsc-auth-api`
-
-### Banco
-
-- serviço MariaDB
-- database principal: `hsc_auth`
-- bind local via `127.0.0.1`
-
-### Edge
+### Borda pública
 
 - Nginx
-- hostname público da Auth API
-- TLS na borda pública
+- reverse proxy da Auth API
 
-### Deploy e operação
+### Hostname público canônico
 
-- state file de deploy: `/opt/hsc/.deploy-auth-last-tag`
-- log operacional de deploy: `/var/log/hsc/deploy-auth.log`
+- `auth-api.haxixesmokeclub.com`
 
-### Backup
+### Upstream local da aplicação
 
-- script de backup: `/opt/hsc/backup-mariadb.sh`
+- `http://127.0.0.1:3000`
+
+### Vhost reconciliado da API
+
+- `/etc/nginx/sites-available/hsc-auth-api`
+
+### Configuração default do host
+
+- `/etc/nginx/sites-available/default`
+
+### Processo da aplicação
+
+- serviço Node.js via systemd
+- aplicação escutando localmente na porta `3000`
+
+### Persistência local
+
+- MariaDB local do contexto da Auth API
+
+### Camada de backup
+
+- script e rotina de dump local
+- retenção operacional já reconciliada em alto nível
 
 Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
 
@@ -198,29 +220,34 @@ Esses artefatos devem ser tratados como inventário-base do contexto até revis�
 
 ## Serviços principais do contexto
 
-Os serviços principais conhecidos deste contexto são:
+Os serviços principais conhecidos desta camada são:
 
 ### `nginx`
 
 Papel:
-- borda pública
-- TLS termination
-- reverse proxy da Auth API
+- borda pública da Auth API
+- terminação TLS
+- reverse proxy para o runtime local
 
-### `hsc-auth-api`
-
-Papel:
-- serviço principal da aplicação
-- runtime Node.js da Auth API
-- exposição das superfícies públicas e administrativas do backend
-
-### `mariadb`
+### serviço Node.js da Auth API
 
 Papel:
-- persistência local da Auth API
-- suporte a autenticação, sessões, auditoria e conteúdo
+- aplicação dinâmica do ecossistema
+- runtime local atrás do reverse proxy
 
-Esses três serviços formam o núcleo mínimo do runtime operacional do contexto.
+### MariaDB local
+
+Papel:
+- persistência relacional da Auth API
+- storage principal da camada dinâmica
+
+### systemd
+
+Papel:
+- sustentação do serviço da aplicação
+- apoio operacional para start, stop, restart e observabilidade
+
+Esses componentes formam o núcleo mínimo da infraestrutura dinâmica do Lightsail.
 
 ---
 
@@ -228,85 +255,136 @@ Esses três serviços formam o núcleo mínimo do runtime operacional do context
 
 Os paths críticos conhecidos deste contexto incluem:
 
-### Aplicação
+### Vhost reconciliado da Auth API
 
-- `/opt/hsc/hsc-auth-api`
-- `/opt/hsc/hsc-auth-api/.env`
+- `/etc/nginx/sites-available/hsc-auth-api`
 
-### Serviço
+### Vhost default do host
 
-- `/etc/systemd/system/hsc-auth-api.service`
+- `/etc/nginx/sites-available/default`
 
-### Deploy
+### Árvore de configuração do Nginx
 
-- `/opt/hsc/.deploy-auth-last-tag`
-- `/var/log/hsc/deploy-auth.log`
+- `/etc/nginx/`
 
-### Backup
+### Upstream local da aplicação
 
-- `/opt/hsc/backup-mariadb.sh`
-
-### Health local
-
-- `http://127.0.0.1:3000/health`
+- `127.0.0.1:3000`
 
 Regra prática:
-- qualquer alteração nesses paths deve ser tratada como mudança relevante e refletida no canônico e, quando necessário, no impl-log
+
+- qualquer mudança nesses paths ou nessa relação entre hostname, proxy e upstream deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
 
-## Superfícies operacionais principais
+## Componentes estruturais relevantes
 
-As superfícies mais relevantes já reconciliadas neste contexto são:
+Os componentes estruturais mais importantes já reconciliados neste contexto são:
 
-### Saúde
+### AWS Lightsail
 
-- `/health`
+Base do host da camada dinâmica do ecossistema.
 
-### Conteúdo público
+### Ubuntu 22.04 LTS
 
-- `/content/news`
-- `/content/seasons`
-- `/content/seasons/active`
-- `/content/seasons/:slug`
+Sistema operacional do runtime atual da Auth API.
 
-### Camada administrativa
+### Nginx reverse proxy
 
-- superfícies administrativas protegidas da Auth API
-- fluxos session-first
-- caminho break-glass administrativo
-- mutações administrativas sujeitas a auditoria e política fail-closed
+Borda pública da API.
 
-Regra editorial:
-- este documento inventaria superfícies
-- a semântica operacional detalhada vive em `auth-api-operations.md`
+### Hostname canônico
+
+- `auth-api.haxixesmokeclub.com`
+
+### Upstream local
+
+- `127.0.0.1:3000`
+
+### Node.js via systemd
+
+Runtime local da aplicação.
+
+### MariaDB local
+
+Persistência principal do backend dinâmico.
+
+### Endpoint `/health`
+
+Ponto mínimo de validação pública e operacional da borda e da app.
 
 ---
 
-## Tabelas e entidades operacionais relevantes
+## Componentes já reconciliados
 
-As estruturas de persistência já reconciliadas como relevantes incluem:
+Os itens abaixo já possuem relevância reconciliada suficiente no contexto atual.
 
-- `users`
-- `magic_links`
-- `sessions`
-- `admin_audit_log`
+### Hostname canônico da API
 
-Também há evidência de estruturas ligadas a conteúdo e domínio, especialmente News e Seasons, mas o nível exato de detalhe dessas tabelas deve continuar sendo reconciliado a partir do schema real e de impl-logs estruturais.
+- `auth-api.haxixesmokeclub.com`
+
+### Reverse proxy local
+
+- Nginx no próprio Lightsail
+
+### Upstream local da aplicação
+
+- `http://127.0.0.1:3000`
+
+### Vhost reconciliado
+
+- `/etc/nginx/sites-available/hsc-auth-api`
+
+### Endpoint público validado
+
+- `https://auth-api.haxixesmokeclub.com/health`
+
+Esses itens já devem ser tratados como parte da verdade operacional do contexto.
+
+---
+
+## Dependências cruzadas
+
+Os principais workloads e dependências cruzadas deste contexto incluem:
+
+### Dependência do DNS e da borda
+
+A Auth API depende de:
+
+- resolução correta de `auth-api.haxixesmokeclub.com`
+- Nginx íntegro
+- TLS saudável
+- proxy coerente com o upstream real
+
+### Dependência da aplicação local
+
+A borda depende de:
+
+- processo Node funcional
+- porta `3000` respondendo localmente
+- serviço local estável via systemd
+
+### Dependência do banco local
+
+A aplicação depende de:
+
+- MariaDB local íntegro
+- credenciais e configuração operacional corretas
+- compatibilidade de schema com a versão atual da app
+
+### Dependência de separação arquitetural
+
+A leitura correta do ecossistema depende de:
+
+- Hostinger = jogo + portal
+- Lightsail = Auth API
+- documentação e operação respeitando essa fronteira
 
 ---
 
 ## Comandos de validação
 
-Os comandos abaixo formam um kit mínimo de validação do contexto.
-
-### Validar status dos serviços
-
-```bash
-sudo systemctl status nginx
-sudo systemctl status hsc-auth-api
-sudo systemctl status mariadb
-```
+Os comandos abaixo formam um kit mínimo de validação da camada Lightsail.
 
 ### Validar sintaxe do Nginx
 
@@ -314,123 +392,106 @@ sudo systemctl status mariadb
 sudo nginx -t
 ```
 
-### Ver logs da aplicação
+### Validar status do Nginx
 
 ```bash
-sudo journalctl -u hsc-auth-api -n 100 --no-pager
+sudo systemctl status nginx
 ```
 
-### Ver logs do Nginx
+### Validar configuração ativa relevante
 
 ```bash
-sudo journalctl -u nginx -n 100 --no-pager
+sudo nginx -T | grep -nE "server_name|proxy_pass|root |alias "
 ```
 
-### Validar health local
+### Validar inventário de arquivos do Nginx
 
 ```bash
+find /etc/nginx -maxdepth 3 -type f | sort
+```
+
+### Validar health público da API
+
+```bash
+curl -I https://auth-api.haxixesmokeclub.com/health
+curl -sS https://auth-api.haxixesmokeclub.com/health
+```
+
+### Validar upstream local da aplicação
+
+```bash
+curl -I http://127.0.0.1:3000/health
 curl -sS http://127.0.0.1:3000/health
 ```
 
-### Validar health público
-
-Substitua pelo hostname vigente do contexto.
+### Validar hostname local do host
 
 ```bash
-curl -sS https://SEU_DOMINIO/health
+hostname -f
 ```
 
-### Validar rotas públicas principais
+Regra prática:
 
-```bash
-curl -sS https://SEU_DOMINIO/content/news
-curl -sS https://SEU_DOMINIO/content/seasons
-curl -sS https://SEU_DOMINIO/content/seasons/active
-```
-
-### Validar resolução DNS
-
-```bash
-nslookup SEU_DOMINIO
-```
-
-### Verificar TAG ativa no diretório da aplicação
-
-```bash
-cd /opt/hsc/hsc-auth-api
-git describe --tags --exact-match 2>/dev/null || true
-```
-
-### Verificar state file da última TAG implantada
-
-```bash
-cat /opt/hsc/.deploy-auth-last-tag
-```
-
-### Verificar existência do script de backup
-
-```bash
-ls -l /opt/hsc/backup-mariadb.sh
-```
+- se o upstream local responde, mas o hostname público não, o problema tende a estar na borda
+- se nem o upstream local responde, o problema tende a estar na app ou no systemd
 
 ---
 
 ## Itens pendentes de confirmação
 
-Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto:
+Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Hostname público canônico final da Auth API
+### 1. Diretório final dos dumps do backup
 
-Há histórico documental de mais de um hostname relacionado.  
-É necessário fixar com confirmação operacional qual é o hostname produtivo oficial vigente.
+Já está reconciliado que existe rotina de backup.  
+Ainda falta fixar sem ambiguidade o diretório final dos arquivos de dump.
 
-### 2. Diretório final dos dumps de backup
+### 2. Procedimento de restore validado de ponta a ponta
 
-O script de backup está reconciliado, mas o diretório final dos artefatos ainda precisa ser formalizado no canônico com validação direta do host.
+A camada de backup já está posicionada corretamente, mas ainda pode ser refinada com validação prática do restore no host atual.
 
-### 3. Conteúdo efetivo do unit file
+### 3. Nome exato da unit systemd da aplicação
 
-Os pontos principais já estão reconciliados, mas a validação final do unit real continua desejável para fechar qualquer drift residual.
+A arquitetura Node.js via systemd já está reconciliada, mas o nome final da unit ainda deve ser congelado diretamente no host para fortalecer `node-systemd.md` e `observability-troubleshooting.md`.
 
-### 4. Lista completa de tabelas de conteúdo ativas
+### 4. Eventuais arquivos auxiliares de deploy
 
-As estruturas de autenticação, sessão e auditoria já estão bem representadas.  
-O detalhamento final das tabelas de conteúdo ainda deve ser reconciliado com snapshots e schema real.
+É útil confirmar se existem paths adicionais estáveis de release/deploy que mereçam ser citados formalmente neste contexto.
 
-### 5. Eventuais logs adicionais fora de `journalctl`
+### 5. Cleanup do drift residual da Hostinger
 
-É útil confirmar, no host real, se existem access/error logs específicos do Nginx ou outros artefatos operacionais relevantes que devam ser referenciados formalmente.
+A presença de configuração residual antiga da Auth API na Hostinger já foi identificada, mas o cleanup ainda pertence a uma etapa posterior.
 
 ---
 
 ## Itens fora do escopo deste contexto
 
-Os itens abaixo não pertencem ao inventário canônico do contexto Lightsail:
+Os itens abaixo não pertencem ao inventário canônico da Infra AWS Lightsail:
 
-- infraestrutura Hostinger
-- AMP / Game Panel
-- instância `MixHAXIXE01`
+- servidor CS2
+- AMP
 - MatchZy
-- pipeline ETL da Static API v2
-- frontend do portal estático
+- `matchzy.db`
+- ETL Bash da v2
+- publicação do portal
+- Nginx do lado Hostinger
 - credenciais reais
 - arquivos de acesso sensíveis
 - documentação histórica não reconciliada
 
-Esses itens pertencem a outros contextos ou devem permanecer fora do repositório documental normal.
+Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo normal do repositório documental.
 
 ---
 
-## Limites deste contexto
+## Limites documentais do contexto
 
 Os limites documentais deste contexto são:
 
-- ele documenta a camada dinâmica da Auth API em Lightsail
-- ele não documenta o ecossistema inteiro sozinho
+- ele documenta a camada dinâmica da Auth API
+- ele não documenta sozinho o ecossistema HSC inteiro
 - ele não substitui o índice mestre
 - ele não substitui impl-logs históricos
-- ele não deve absorver material sensível
-- ele depende de confirmação periódica contra o host real para permanecer confiável
+- ele depende de confirmação periódica contra o ambiente real para permanecer confiável
 
 ---
 
@@ -438,12 +499,12 @@ Os limites documentais deste contexto são:
 
 Este documento deve ser atualizado quando houver:
 
-- mudança de path crítico
-- mudança de hostname público oficial
-- mudança de nome de serviço
-- mudança de banco ou database principal
-- alteração relevante no inventário de artefatos operacionais
+- mudança de hostname público da API
+- mudança de upstream local da aplicação
+- mudança relevante no vhost do Nginx
+- mudança de path estrutural da operação da Auth API
 - confirmação ou resolução de item pendente listado aqui
+- mudança relevante na estratégia de backup ou runtime
 
 Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
 
@@ -454,10 +515,10 @@ Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no d
 Este documento pode ser considerado maduro quando:
 
 - os artefatos reais do host estiverem confirmados sem ambiguidade
-- os paths críticos estiverem validados no ambiente real
-- o hostname público oficial estiver fixado
+- o hostname canônico, o reverse proxy e o upstream local estiverem claramente reconciliados
+- o path do vhost da API estiver fixado
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
-- ele puder ser usado como inventário confiável do contexto sem depender do master legado
+- ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 
 ---
 

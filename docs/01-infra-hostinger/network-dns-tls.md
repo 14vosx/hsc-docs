@@ -7,6 +7,7 @@ Documentar a camada de entrada pública da Infra Hostinger do ecossistema HSC, r
 Este documento existe para registrar, de forma estável e auditável:
 
 - quais superfícies públicas pertencem ao lado Hostinger do HSC
+- quais hostnames públicos estão realmente ativos no runtime atual
 - como o DNS participa da exposição do portal e da Static API v2
 - como o TLS é terminado na borda do host
 - quais portas públicas são esperadas
@@ -30,7 +31,7 @@ Este documento cobre:
 
 Este documento não cobre em profundidade:
 
-- configuração textual do Nginx
+- configuração textual completa do Nginx
 - publishing detalhado do portal e da v2
 - operação do AMP e do servidor CS2
 - Auth API no AWS Lightsail
@@ -43,36 +44,51 @@ Esses tópicos vivem em documentos próprios deste contexto ou em outros context
 
 ## Estado atual
 
-O estado operacional conhecido da borda pública do contexto Hostinger é:
+O estado operacional conhecido e reconciliado da borda pública do contexto Hostinger é:
 
 - a camada Hostinger expõe superfícies públicas do portal e da Static API v2
-- existe domínio público do ecossistema apontando para o lado Hostinger
 - o Nginx é a borda pública dessa camada
 - o TLS é encerrado no host por meio da integração entre Nginx e Certbot
 - o tráfego externo esperado entra prioritariamente por HTTPS
 - os workloads publicados nesse lado não devem expor diretamente suas estruturas internas ao público
 - a integridade pública do portal depende da combinação entre DNS, TLS, Nginx, filesystem e publishing íntegros
 
-Esse desenho preserva a separação entre:
+Também ficou reconciliado no runtime real que os hostnames públicos canônicos ativos do lado Hostinger são:
 
-- borda pública do lado Hostinger
-- runtime interno do host
-- workloads publicados sobre ele
-- camada dinâmica separada no AWS Lightsail
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
+
+E que os hostnames abaixo **não** estão ativos como entrada pública canônica do portal no estado atual:
+
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
+
+Também existe hostname técnico do host:
+
+- `srv1353392.hstgr.cloud`
+
+Leitura correta:
+
+- `srv1353392.hstgr.cloud` é hostname técnico de infraestrutura
+- `haxixesmokeclub.com` e `www.haxixesmokeclub.com` são hostnames públicos canônicos do lado Hostinger
+- a Auth API canônica não pertence a esta borda, e sim ao Lightsail
 
 ---
 
 ## Source of truth / evidências
 
-As principais evidências deste documento, nesta fase de migração documental, são:
+As principais evidências deste documento, nesta fase de reconciliação, são:
 
 - documentação consolidada atual do ecossistema HSC
 - blueprint técnico consolidado do HSC
 - documentação reconciliada da Infra Hostinger
 - documentação reconciliada do Portal Estático e da Static API v2
-- reconciliação do uso de Nginx e Certbot como borda pública do lado Hostinger
+- runtime real da Hostinger
+- saída direta de `nginx -T`
+- validação pública via `curl -I` dos hostnames reconciliados
+- inventário real de arquivos em `/etc/nginx`
 
-Enquanto a migração canônica do contexto não estiver concluída, essas fontes seguem sendo usadas como base de reconciliação do estado real.
+Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
 ---
 
@@ -111,23 +127,36 @@ Regra canônica:
 
 ## DNS oficial
 
-O contexto Hostinger depende de resolução DNS correta para publicar o portal e a Static API v2.
+Os hostnames públicos canônicos reconciliados do lado Hostinger são:
 
-A modelagem documental atual reconhece que o domínio principal do ecossistema participa diretamente dessa camada pública do lado Hostinger.
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
 
-Em termos documentais, o lado Hostinger é a referência da camada pública para:
+Esses hostnames devem ser tratados como:
 
-- portal público do HSC
-- recursos estáticos
-- paths públicos associados ao portal e à v2
+- entrada pública oficial do portal
+- entrada pública oficial da Static API v2
+- referência canônica do lado game + portal do ecossistema
+
+Hostname técnico do host:
+
+- `srv1353392.hstgr.cloud`
+
+Esse hostname deve ser tratado como:
+
+- hostname técnico/de infraestrutura
+- útil para operação do host
+- não como hostname público canônico principal do ecossistema
+
+Hostnames não ativos para a borda pública do portal no estado atual:
+
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
 
 Regra importante:
 
-- este documento deve refletir o DNS efetivamente vigente no lado Hostinger
-- quando houver mais de um hostname histórico na documentação, o runtime atual validado deve prevalecer
-- mudança de hostname, alias ou subdomínio público do lado Hostinger deve ser tratada como alteração relevante de contexto
-
-Enquanto a reconciliação final não estiver concluída, o canônico deve evitar afirmar hostnames além dos já validados no ambiente real.
+- não documentar hostnames não resolvidos como se fossem ativos
+- quando houver drift entre documentação histórica e DNS real, prevalece o runtime validado
 
 ---
 
@@ -137,30 +166,38 @@ A camada de DNS do lado Hostinger deve distinguir, conceitualmente, entre:
 
 ### domínio principal do portal
 
-Usado para:
+Hostnames canônicos:
+
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
+
+Usados para:
 
 - acesso ao portal público
-- acesso a assets públicos
-- navegação pública principal
+- acesso aos assets públicos
+- acesso à Static API v2
+- acesso ao conteúdo same-origin quando aplicável
 
-### paths públicos da Static API v2
+### hostname técnico do host
 
-Usados para:
+Hostname:
 
-- acesso aos JSONs públicos da v2
-- consumo pelo frontend do portal
-- validação operacional dos artefatos publicados
+- `srv1353392.hstgr.cloud`
 
-### conteúdos auxiliares same-origin
+Usado para:
 
-Usados para:
+- identificação técnica da máquina
+- operação administrativa do host
 
-- conteúdo público complementar sob a mesma borda, quando esse fluxo estiver ativo
+### hostnames não ativos no estado atual
+
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
 
 Regra de separação:
 
-- um hostname ou alias só pertence ao contexto Hostinger quando resolve para a borda pública do host que serve o portal e a Static API v2
-- a borda da Auth API em Lightsail não deve ser confundida com a borda pública do lado Hostinger
+- só pertence ao contexto público ativo aquilo que resolve e responde como borda real
+- hostname técnico não substitui hostname público canônico
 
 ---
 
@@ -168,7 +205,7 @@ Regra de separação:
 
 O fluxo esperado da borda pública do lado Hostinger é:
 
-1. o cliente resolve o hostname público do portal
+1. o cliente resolve `haxixesmokeclub.com` ou `www.haxixesmokeclub.com`
 2. o cliente abre conexão HTTP ou, preferencialmente, HTTPS
 3. o tráfego chega ao host Hostinger
 4. o Nginx recebe a conexão
@@ -233,27 +270,6 @@ Regra canônica:
 
 ---
 
-## Firewall e borda
-
-O host Hostinger deve manter coerência entre:
-
-- DNS
-- IP público do host
-- portas liberadas
-- Nginx funcional
-- Certbot funcional
-- publishing público válido
-- proteção de arquivos internos
-
-Cuidados operacionais importantes:
-
-- `443/tcp` deve estar disponível para o edge público
-- `80/tcp` deve estar coerente com política de redirecionamento e renovação
-- a borda pública não deve expor `.db`, `.sqlite`, dotfiles ou paths operacionais
-- o lado público do host deve publicar apenas portal, v2 e conteúdo público explicitamente permitido
-
----
-
 ## Relação entre DNS, TLS e publishing
 
 No lado Hostinger, DNS e TLS não podem ser separados da publicação pública.
@@ -279,31 +295,18 @@ As validações mínimas da camada de entrada devem incluir:
 
 ### Resolução DNS
 
-Substitua pelo domínio vigente do portal.
+Substitua pelo hostname que deseja validar.
 
 ```bash
-nslookup SEU_DOMINIO
+nslookup haxixesmokeclub.com
+nslookup www.haxixesmokeclub.com
 ```
 
 ### Health público do portal
 
 ```bash
-curl -I https://SEU_DOMINIO/
-```
-
-### Verificação pública de artefato da v2
-
-Substitua pelo path público real da v2.
-
-```bash
-curl -I https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/health.json
-```
-
-### Verificação pública de conteúdo principal
-
-```bash
-curl -sS https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/health.json
-curl -sS https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/ranking.json
+curl -I https://haxixesmokeclub.com/
+curl -I https://www.haxixesmokeclub.com/
 ```
 
 ### Verificação local do Nginx
@@ -313,13 +316,22 @@ sudo nginx -t
 sudo systemctl status nginx
 ```
 
-A combinação entre DNS, acesso público e validação local do edge ajuda a separar falhas de:
+### Verificação de configuração relevante do Nginx
 
-- DNS
-- TLS
-- Nginx
-- publishing
-- ou filesystem/permissões
+```bash
+sudo nginx -T | grep -nE "server_name|root |alias "
+```
+
+### Inventário de arquivos do Nginx
+
+```bash
+find /etc/nginx -maxdepth 3 -type f | sort
+```
+
+Regra prática:
+
+- `portal.haxixesmokeclub.com` e `api.haxixesmokeclub.com` não devem ser usados como smoke test principal enquanto não forem hostnames ativos do runtime
+- a validação principal da borda deve mirar os hostnames canônicos reais
 
 ---
 
@@ -327,13 +339,14 @@ A combinação entre DNS, acesso público e validação local do edge ajuda a se
 
 Os sinais de saúde esperados desta camada incluem:
 
-- hostname público resolvendo corretamente
+- `haxixesmokeclub.com` resolvendo corretamente
+- `www.haxixesmokeclub.com` resolvendo corretamente
 - conexão HTTPS estabelecida sem erro de certificado
 - portal público respondendo
-- artefatos públicos da v2 respondendo
 - Nginx ativo e íntegro
+- coerência entre `server_name`, DNS e resposta pública real
 - ausência de exposição indevida de arquivos sensíveis
-- coerência entre domínio, TLS, edge e publishing público
+- distinção clara entre hostname técnico e hostname público
 
 Uma borda saudável depende tanto da camada de rede quanto da integridade do serving estático.
 
@@ -369,36 +382,26 @@ Impacto:
 
 ---
 
-### 3. Domínio principal responde, mas JSON da v2 falha
+### 3. Hostname histórico ainda circula, mas não resolve
 
 Causas comuns:
 
-- path público da v2 incorreto
-- problema de publishing
-- alias/root incorreto no Nginx
-- permissões de leitura incorretas
+- documentação antiga
+- memória operacional stale
+- referência a subdomínio que já não participa da borda
 
 Impacto:
-- frontend pode carregar
-- mas a camada de dados pública quebra
+- troubleshooting em hostname errado
+- falsas suspeitas de indisponibilidade
+
+Exemplos já reconciliados:
+
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
 
 ---
 
-### 4. Público responde, mas browser mostra dado stale
-
-Causas comuns:
-
-- cache do navegador
-- política de cache inadequada
-- troubleshooting baseado em um único cliente sem invalidação de estado
-
-Impacto:
-- o host parece não refletir atualização recente
-- o problema pode ser confundido com ETL ou publishing
-
----
-
-### 5. Arquivo sensível exposto na borda
+### 4. Arquivo sensível exposto na borda
 
 Causas comuns:
 
@@ -413,6 +416,26 @@ Impacto:
 
 ---
 
+### 5. Drift entre Hostinger e Lightsail
+
+Causas comuns:
+
+- configuração residual de hostname dinâmico no host errado
+- borda histórica não limpa
+- documentação antiga ainda influenciando leitura atual
+
+Impacto:
+- confusão sobre onde cada camada realmente roda
+- manutenção no host errado
+- troubleshooting mais lento
+
+Regra canônica:
+
+- a borda do portal pertence à Hostinger
+- a borda da Auth API pertence ao Lightsail
+
+---
+
 ## Riscos e cuidados
 
 Os principais riscos desta camada incluem:
@@ -420,7 +443,7 @@ Os principais riscos desta camada incluem:
 - drift entre DNS e host real
 - TLS aparentemente ativo, mas servindo borda errada
 - Nginx saudável sem publishing útil
-- path público mudando sem atualização documental
+- hostname não ativo continuar sendo citado como canônico
 - exposição indevida da árvore operacional do host
 - confusão entre problemas da borda Hostinger e da Auth API em Lightsail
 
@@ -430,7 +453,7 @@ Cuidados permanentes:
 - validar DNS e TLS após qualquer mudança relevante
 - manter a borda pública claramente separada da árvore operacional
 - revisar deny rules e exposição de paths
-- testar tanto o portal quanto a v2 após mudanças de borda
+- testar o portal com os hostnames realmente ativos do runtime
 
 ---
 
@@ -438,12 +461,12 @@ Cuidados permanentes:
 
 Este documento não detalha:
 
-- conteúdo do vhost Nginx
+- conteúdo completo do vhost Nginx
 - sintaxe completa de configuração TLS
 - política específica de cache por path
 - runbooks detalhados de Certbot
 - troubleshooting aprofundado do portal
-- detalhes de publishing da v2
+- detalhes finos do cleanup de configuração residual da Auth API na Hostinger
 
 Esses pontos devem ser tratados em documentos complementares.
 
@@ -453,7 +476,8 @@ Esses pontos devem ser tratados em documentos complementares.
 
 Este documento pode ser considerado maduro quando:
 
-- o domínio público vigente do lado Hostinger estiver validado sem ambiguidade
+- os hostnames públicos ativos do lado Hostinger estiverem validados sem ambiguidade
+- a distinção entre hostname técnico e hostname público estiver clara
 - a relação entre DNS, Nginx, Certbot e publishing estiver reconciliada com o host real
 - a política de portas públicas estiver confirmada
 - os riscos de borda e exposição indevida estiverem claros

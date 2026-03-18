@@ -2,15 +2,15 @@
 
 ## Objetivo
 
-Documentar a camada de entrada pública do contexto AWS Lightsail da Auth API, registrando a superfície de rede, o papel do DNS, a terminação TLS e os cuidados operacionais ligados à exposição externa do serviço.
+Documentar a camada de entrada pública do contexto Infra AWS Lightsail do ecossistema HSC, registrando a superfície de rede da Auth API, o hostname canônico, a borda TLS e os cuidados operacionais ligados à exposição externa dessa camada dinâmica.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- quais superfícies públicas pertencem a este contexto
-- como o DNS participa da exposição da Auth API
-- como o TLS é terminado
+- qual é a superfície pública canônica da Auth API
+- como o DNS participa da exposição da API no Lightsail
+- como o TLS é encerrado na borda dessa camada
 - quais portas públicas são esperadas
-- como validar a camada de entrada do contexto
+- como validar a camada pública da Auth API
 - quais riscos e cuidados operacionais existem nessa borda
 
 ---
@@ -19,60 +19,69 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- subdomínios e superfícies públicas do contexto
+- superfície pública da Auth API
+- DNS associado ao Lightsail
 - fluxo de entrada HTTP/HTTPS
-- DNS associado ao contexto Lightsail
-- terminação TLS
+- terminação TLS via Nginx
 - portas públicas esperadas
-- relação entre edge público e runtime interno da Auth API
-- validações operacionais da borda
-- riscos e cuidados dessa camada
+- relação entre borda pública e runtime local da aplicação
+- validações operacionais da camada de entrada
+- riscos e cuidados dessa borda
 
 Este documento não cobre em profundidade:
 
-- configuração textual do Nginx
-- unit file da aplicação
-- contratos HTTP completos da Auth API
-- fluxo detalhado de deploy e rollback
-- troubleshooting aprofundado do runtime
-- configuração completa de CORS da aplicação
+- configuração textual completa do vhost Nginx
+- deploy/release/rollback da aplicação
+- modelagem do MariaDB local
+- troubleshooting aprofundado da aplicação Node/Express
+- infraestrutura da Hostinger
+- publishing do Portal Estático
 
-Esses tópicos vivem em documentos próprios do contexto.
+Esses tópicos vivem em documentos próprios deste contexto ou em outros contextos canônicos.
 
 ---
 
 ## Estado atual
 
-O estado operacional conhecido da borda pública deste contexto é:
+O estado operacional conhecido e reconciliado da borda pública do contexto Lightsail é:
 
-- a Auth API está hospedada em AWS Lightsail
-- existe IP estático associado ao host
-- a exposição pública ocorre via Nginx
-- o tráfego externo esperado entra por HTTPS
-- o TLS é encerrado no edge do contexto
-- a aplicação Node.js roda atrás do Nginx
-- o banco MariaDB não faz parte da superfície pública
-- o consumo legítimo da Auth API depende de DNS, TLS e política de origem coerente com os domínios oficiais do ecossistema
+- a Auth API está canonicamente no AWS Lightsail
+- o hostname público canônico da Auth API é:
+  - `auth-api.haxixesmokeclub.com`
+- o Nginx no Lightsail é a borda pública dessa camada
+- o TLS é encerrado no próprio Lightsail, na borda Nginx da API
+- o tráfego público esperado entra prioritariamente por HTTPS
+- a aplicação Node.js não é a superfície pública canônica; ela responde localmente atrás do proxy reverso
+- o upstream local reconciliado da aplicação é:
+  - `http://127.0.0.1:3000`
 
-Este desenho preserva a separação entre:
+Também ficou evidenciado no runtime real que:
 
-- borda pública
-- runtime interno da aplicação
-- persistência local
+- o endpoint `https://auth-api.haxixesmokeclub.com/health` responde com `200 OK`
+- o host possui configuração específica da API em:
+  - `/etc/nginx/sites-available/hsc-auth-api`
+
+Leitura canônica:
+
+- a borda pública da Auth API pertence ao Lightsail
+- a Hostinger não é a camada canônica dessa borda, mesmo que exista configuração residual antiga fora do Lightsail
 
 ---
 
 ## Source of truth / evidências
 
-As principais evidências deste documento, nesta fase de migração documental, são:
+As principais evidências deste documento, nesta fase de reconciliação, são:
 
-- manual operacional da Auth API em AWS Lightsail
-- documentação consolidada do ecossistema HSC
-- blueprint técnico consolidado
-- impl-logs ligados a allowlist de CORS e operação da Auth API
-- reconciliação documental do papel atual da camada Lightsail dentro da arquitetura híbrida do HSC
+- documentação consolidada atual do ecossistema HSC
+- blueprint técnico consolidado do HSC
+- documentação reconciliada do contexto AWS Lightsail
+- runtime real do Lightsail
+- saída direta de `nginx -T`
+- resposta pública validada de:
+  - `https://auth-api.haxixesmokeclub.com/health`
+- inventário real de arquivos em `/etc/nginx`
 
-Enquanto a migração canônica do contexto não estiver concluída, essas fontes continuam servindo como base de reconciliação.
+Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
 ---
 
@@ -86,110 +95,88 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/01-infra-hostinger/network-dns-tls.md`
 
-Este documento descreve a borda de rede, DNS e TLS do contexto.  
-Ele não substitui os documentos de proxy, runtime da aplicação ou operação funcional.
+Este documento descreve a camada de rede, DNS e TLS da Auth API no Lightsail.  
+Ele não substitui os documentos de reverse proxy, runtime da aplicação, observabilidade ou inventário do contexto.
 
 ---
 
-## Superfícies públicas do contexto
+## Superfície pública do contexto
 
-A superfície pública deste contexto corresponde à entrada externa da Auth API.
+A superfície pública desta camada existe para expor:
 
-Essa superfície existe para expor:
-
-- health público do backend
-- rotas públicas de conteúdo dinâmico
-- superfícies administrativas protegidas que fazem parte do backend
-- resposta do edge público sobre o runtime interno da Auth API
+- Auth API do ecossistema HSC
+- endpoint de health
+- endpoints públicos/privados da aplicação sob o domínio oficial da API
+- borda dinâmica da metade backend do ecossistema
 
 Regra canônica:
-- a superfície pública pertence ao Nginx do contexto Lightsail
-- a aplicação Node.js não deve ser tratada como serviço público exposto diretamente à internet
+
+- a superfície pública da Auth API pertence ao Nginx do Lightsail
+- o processo Node.js em `127.0.0.1:3000` não deve ser tratado como borda pública
+- o runtime local da aplicação é interno ao host
 
 ---
 
 ## DNS oficial
 
-O contexto AWS Lightsail depende de resolução DNS correta para funcionar como backend público do ecossistema.
-
-A modelagem documental atual reconhece que a Auth API opera sob subdomínio(s) oficiais do HSC.
-
-Exemplos de nomes já observados historicamente na documentação do ecossistema incluem formas como:
+O hostname público canônico reconciliado desta camada é:
 
 - `auth-api.haxixesmokeclub.com`
-- ou superfícies correlatas do domínio oficial do HSC
+
+Esse hostname deve ser tratado como:
+
+- entrada pública oficial da Auth API
+- referência canônica da camada dinâmica do ecossistema
+- hostname prioritário em runbooks, troubleshooting e documentação
 
 Regra importante:
-- este documento deve refletir apenas o DNS que estiver efetivamente vigente
-- quando houver mais de um hostname histórico, o runtime atual validado deve prevalecer
-- mudanças de hostname devem ser tratadas como alteração relevante de contexto
 
-Enquanto a reconciliação final não estiver concluída, a documentação canônica deve evitar afirmar mais do que o estado realmente validado.
-
----
-
-## Subdomínios e papéis
-
-A camada de DNS deste contexto deve distinguir, conceitualmente, entre:
-
-### hostname público da Auth API
-
-Usado para:
-
-- health público
-- rotas públicas de conteúdo
-- rotas administrativas protegidas
-- integrações autorizadas
-
-### outros hostnames do ecossistema
-
-Hostnames como portal público, subdomínios estáticos ou superfícies futuras não pertencem automaticamente a este contexto, mesmo quando interagem com ele.
-
-Regra de separação:
-- um hostname só pertence ao contexto AWS Lightsail quando ele resolve para a borda pública da Auth API desse contexto
+- qualquer menção histórica à Auth API como superfície canônica da Hostinger deve ser tratada como estado antigo ou drift residual
+- a leitura correta atual é Lightsail-first para a Auth API
 
 ---
 
 ## Fluxo de entrada HTTP/HTTPS
 
-O fluxo esperado da borda pública é:
+O fluxo esperado da borda pública do Lightsail é:
 
-1. o cliente resolve o hostname público da Auth API via DNS
+1. o cliente resolve `auth-api.haxixesmokeclub.com`
 2. o cliente abre conexão HTTP ou, preferencialmente, HTTPS
-3. o tráfego chega ao IP público estático do host Lightsail
+3. o tráfego chega ao host Lightsail
 4. o Nginx recebe a conexão
 5. o Nginx encerra TLS
-6. o Nginx encaminha a requisição para o runtime interno da Auth API
-7. a aplicação responde
-8. a resposta retorna ao cliente pela mesma borda
+6. o Nginx resolve o vhost da Auth API
+7. o Nginx faz proxy para `http://127.0.0.1:3000`
+8. a aplicação Node responde
+9. o Nginx devolve a resposta ao cliente
 
 Esse desenho garante que:
 
-- o cliente não acessa diretamente a porta interna da aplicação
-- a segurança de transporte fica concentrada no edge
-- a superfície pública do contexto fica estável e previsível
+- a aplicação não fique exposta diretamente
+- a borda pública permaneça concentrada no Nginx
+- DNS, TLS, proxy e hostname canônico permaneçam alinhados
 
 ---
 
-## TLS / Let's Encrypt
+## TLS / HTTPS
 
-O estado conhecido do contexto pressupõe TLS ativo na borda pública do serviço.
+O estado reconciliado desta camada pressupõe HTTPS funcional na borda pública da Auth API.
 
 O papel do TLS neste contexto é:
 
-- proteger o tráfego entre cliente e edge
-- validar a identidade do hostname público
-- reduzir exposição de credenciais e payloads administrativos em trânsito
-- sustentar consumo confiável por frontends e integrações autorizadas
-
-A terminação TLS acontece no Nginx do contexto, e não no processo Node.js da aplicação.
+- proteger o tráfego entre cliente e API
+- validar a identidade pública de `auth-api.haxixesmokeclub.com`
+- permitir consumo confiável da camada dinâmica
+- manter a Auth API operacionalmente utilizável por browser, frontend e integrações
 
 Implicações operacionais:
 
-- a aplicação Node.js pode operar apenas na malha local interna
-- certificados e renovação afetam diretamente a disponibilidade pública e a confiança do cliente
-- falha de TLS pode tornar o serviço operacionalmente indisponível, mesmo com a aplicação viva localmente
+- falha de certificado ou borda segura afeta imediatamente a disponibilidade percebida da API
+- a aplicação pode continuar saudável localmente mesmo quando o acesso público em HTTPS estiver quebrado
+- TLS saudável é parte do runtime real da Auth API, não detalhe cosmético
 
 ---
 
@@ -206,60 +193,61 @@ Papel típico de cada porta:
 
 - suporte a HTTP
 - redirecionamento para HTTPS, quando aplicável
-- apoio operacional à validação/renovação de certificado, conforme a estratégia adotada
+- apoio operacional à emissão e renovação de certificados
 
 ### Porta 443
 
-- entrada HTTPS principal do contexto
-- tráfego produtivo esperado da Auth API
+- entrada HTTPS principal da Auth API
+- tráfego produtivo esperado da camada dinâmica
 
 Regra canônica:
-- a porta interna da aplicação não deve ser tratada como porta pública do contexto
 
-Se a aplicação usa porta interna local, ela deve permanecer atrás do Nginx.
-
----
-
-## Firewall e borda
-
-O host Lightsail deve manter coerência entre:
-
-- DNS
-- IP estático
-- portas liberadas
-- Nginx em funcionamento
-- aplicação escutando internamente
-- banco restrito ao loopback
-
-Cuidados operacionais importantes:
-
-- `443/tcp` deve estar disponível para o edge público
-- `80/tcp` deve estar coerente com a política de redirecionamento/renovação
-- portas internas da aplicação não devem ser expostas como superfície pública normal
-- MariaDB não deve ser promovido a serviço de rede pública do contexto
-
-A borda pública deve ser a mínima necessária para o funcionamento do backend.
+- a porta `3000` pertence ao runtime interno da aplicação
+- ela não deve ser tratada como interface pública canônica
 
 ---
 
-## Relação com CORS
+## Relação entre DNS, TLS e reverse proxy
 
-CORS não é sinônimo de DNS, mas esta camada interage com a política de origem.
+No Lightsail, DNS, TLS e reverse proxy precisam ser lidos como um conjunto.
 
-A distinção correta é:
+Isso acontece porque:
 
-- DNS define onde o serviço é encontrado
-- TLS valida a identidade da borda e protege o transporte
-- CORS controla quais origens de browser podem consumir a aplicação
-
-Por isso:
-
-- mudança de domínio ou subdomínio do ecossistema pode exigir atualização de CORS
-- um DNS correto não implica que o browser poderá consumir a API
-- um CORS correto não substitui TLS, DNS ou proxy adequados
+- o cliente consome o hostname público da API
+- o hostname precisa resolver corretamente para o Lightsail
+- o TLS precisa ser válido para esse hostname
+- o Nginx precisa resolver o vhost correto
+- o proxy precisa apontar para o upstream local correto
 
 Regra operacional:
-- mudanças em domínio e origem devem ser tratadas de forma coordenada entre borda e aplicação
+
+- DNS correto sem proxy correto não resolve a borda
+- proxy correto sem TLS funcional também não resolve a borda
+- a camada pública só está saudável quando hostname, TLS, Nginx e upstream local estão coerentes juntos
+
+---
+
+## Relação com a aplicação local
+
+A aplicação responde localmente em:
+
+```text
+http://127.0.0.1:3000
+```
+
+Isso significa que:
+
+- a aplicação é dependência estrutural da borda pública
+- ela não deve ser tratada como endpoint público direto
+- troubleshooting precisa sempre separar:
+  - borda pública
+  - upstream local
+  - runtime do serviço Node
+
+Regra importante:
+
+- `auth-api.haxixesmokeclub.com` é a borda pública
+- `127.0.0.1:3000` é o upstream interno
 
 ---
 
@@ -267,41 +255,49 @@ Regra operacional:
 
 As validações mínimas da camada de entrada devem incluir:
 
-### Resolução DNS
-
-Substitua pelo hostname vigente do contexto.
+### Validar health público da Auth API
 
 ```bash
-nslookup SEU_DOMINIO
+curl -I https://auth-api.haxixesmokeclub.com/health
+curl -sS https://auth-api.haxixesmokeclub.com/health
 ```
 
-### Health público
-
-Substitua pela URL pública vigente do contexto.
+### Validar sintaxe do Nginx
 
 ```bash
-curl -sS https://SEU_DOMINIO/health
+sudo nginx -t
 ```
 
-### Verificação manual de headers e resposta
+### Validar status do Nginx
 
 ```bash
-curl -I https://SEU_DOMINIO/health
+sudo systemctl status nginx
 ```
 
-### Teste local isolando edge e app
+### Validar configuração ativa relevante
 
 ```bash
+sudo nginx -T | grep -nE "server_name|proxy_pass|root |alias "
+```
+
+### Validar inventário de arquivos de Nginx
+
+```bash
+find /etc/nginx -maxdepth 3 -type f | sort
+```
+
+### Validar upstream local da aplicação
+
+```bash
+curl -I http://127.0.0.1:3000/health
 curl -sS http://127.0.0.1:3000/health
 ```
 
-A diferença entre os testes público e local ajuda a separar falhas de:
+Regra prática:
 
-- DNS
-- TLS
-- Nginx
-- aplicação
-- ou dependências internas
+- se o upstream local responde, mas o hostname público não, o problema tende a estar em DNS/TLS/Nginx
+- se o hostname público responde, mas o upstream local falha, o resultado público tende a degradar logo em seguida
+- a borda precisa sempre ser validada por ambos os lados
 
 ---
 
@@ -309,107 +305,109 @@ A diferença entre os testes público e local ajuda a separar falhas de:
 
 Os sinais de saúde esperados desta camada incluem:
 
-- hostname público resolvendo para o IP correto
+- `auth-api.haxixesmokeclub.com` resolvendo corretamente
 - conexão HTTPS estabelecida sem erro de certificado
-- resposta válida do health público
-- resposta válida do health local
-- diferença clara entre falha de borda e falha de aplicação quando houver incidente
-- ausência de exposição indevida de portas internas
+- endpoint `/health` respondendo publicamente
+- Nginx ativo e íntegro
+- `server_name auth-api.haxixesmokeclub.com` presente no runtime
+- proxy apontando para `127.0.0.1:3000`
+- ausência de exposição pública indevida do upstream interno
 
-Uma borda saudável depende tanto do caminho público quanto da coerência com o runtime interno.
+Uma borda saudável depende tanto da camada de rede quanto da integridade do reverse proxy e do serviço local.
 
 ---
 
 ## Problemas comuns
 
-### 1. DNS resolve para IP incorreto
+### 1. Hostname resolve, mas `/health` falha
 
 Causas comuns:
 
-- mudança de IP sem atualização de zona DNS
-- registro antigo ainda ativo
-- configuração incorreta do hostname
+- problema no Nginx
+- problema no upstream local
+- proxy apontando para porta errada
+- aplicação indisponível
 
 Impacto:
-- clientes chegam ao destino errado
-- API aparentemente “fora” mesmo com o host saudável
+- a borda existe, mas a API não responde corretamente
 
 ---
 
-### 2. TLS inválido ou expirado
+### 2. Upstream local responde, mas o hostname público falha
 
 Causas comuns:
 
-- renovação não executada corretamente
-- hostname não compatível com o certificado
-- edge servindo certificado errado
-
-Impacto:
-- falha de confiança no cliente
-- erros em browser e integrações
-- indisponibilidade operacional do backend para consumo legítimo
-
----
-
-### 3. `curl` local funciona, mas público falha
-
-Causas comuns:
-
-- Nginx parado ou mal configurado
+- problema de DNS
 - problema de TLS
-- firewall ou borda incorreta
-- DNS apontando errado
+- vhost incorreto
+- Nginx não carregou a configuração esperada
 
 Impacto:
-- a aplicação está viva, mas inacessível externamente
+- a aplicação continua viva localmente
+- a API fica indisponível ao público
 
 ---
 
-### 4. Público responde, mas browser bloqueia consumo
+### 3. `server_name` stale ou divergente
 
 Causas comuns:
 
-- problema de CORS
-- origem não autorizada
-- divergência entre domínio atual e allowlist da aplicação
+- drift de configuração
+- hostname antigo mantido em arquivo ativo
+- mudança de borda não reconciliada documentalmente
 
 Impacto:
-- backend funcional, mas integração em browser quebrada
+- tráfego pode ir para bloco incorreto
+- troubleshooting fica ambíguo
+- documentação perde aderência ao runtime
 
 ---
 
-### 5. Porta interna exposta indevidamente
+### 4. Proxy reverso correto, mas TLS inválido
 
 Causas comuns:
 
-- regra de firewall permissiva
-- configuração de aplicação ou host fora do desenho esperado
+- problema de certificado
+- mismatch de hostname
+- borda segura incompleta ou stale
 
 Impacto:
-- aumento da superfície de ataque
-- bypass do edge público
-- perda de previsibilidade operacional
+- a aplicação pode estar saudável
+- mas a experiência pública da API continua degradada
 
 ---
 
-## Riscos e cuidados
+### 5. Drift entre Hostinger e Lightsail
 
-Os principais riscos desta camada incluem:
+Causas comuns:
 
-- drift entre DNS e runtime real
-- TLS ativo, mas apontando para configuração errada
-- borda pública saudável com aplicação degradada internamente
-- mudança de domínio sem atualização coordenada de CORS
-- exposição indevida da porta interna da aplicação
-- abertura indevida do banco como serviço externo
+- configuração residual antiga em outro host
+- borda histórica não limpa
+- leitura documental antiga ainda circulando
 
-Cuidados permanentes:
+Impacto:
+- confusão sobre onde a Auth API realmente roda
+- troubleshooting mais lento
+- risco de manutenção no host errado
 
-- tratar hostname público como parte do contrato operacional
-- validar DNS e TLS após mudanças
-- manter edge e aplicação claramente separados
-- revisar allowlist de origem quando domínios oficiais mudarem
-- preservar a política de mínima exposição do contexto
+Regra canônica:
+
+- a presença de configuração residual em outro host não invalida a borda canônica reconciliada no Lightsail
+
+---
+
+## Invariantes operacionais
+
+Os invariantes conhecidos desta camada incluem:
+
+- a Auth API canônica está no Lightsail
+- o hostname canônico é `auth-api.haxixesmokeclub.com`
+- o Nginx do Lightsail é a borda pública dessa camada
+- o upstream local reconciliado é `127.0.0.1:3000`
+- o endpoint `/health` responde publicamente na borda reconciliada
+- DNS, TLS, Nginx e upstream devem ser tratados como conjunto operacional
+
+Esses invariantes ajudam a preservar a leitura correta da entrada pública da Auth API.
 
 ---
 
@@ -417,14 +415,14 @@ Cuidados permanentes:
 
 Este documento não detalha:
 
-- conteúdo do vhost Nginx
-- sintaxe de configuração TLS
-- política completa de CORS
-- detalhes de renovação de certificado
-- troubleshooting completo do edge
-- inventário detalhado de firewall do provedor
+- configuração completa do vhost Nginx
+- arquivo completo de certificado/TLS
+- políticas avançadas de headers de segurança
+- deploy e restart da aplicação
+- recovery completo após falha de borda
+- limpeza técnica do vhost residual da Hostinger
 
-Esses pontos devem ser tratados em documentos complementares quando necessário.
+Esses tópicos pertencem a documentos complementares ou a futuras reconciliações finas.
 
 ---
 
@@ -432,12 +430,11 @@ Esses pontos devem ser tratados em documentos complementares quando necessário.
 
 Este documento pode ser considerado maduro quando:
 
-- o hostname público vigente do contexto estiver validado sem ambiguidade
-- a relação entre DNS, IP estático, Nginx e aplicação estiver reconciliada com o runtime real
-- a política de portas públicas estiver confirmada
-- os testes de validação refletirem a prática operacional real
-- os riscos de borda e de coordenação com CORS estiverem claros
-- ele puder ser usado como referência da entrada pública do contexto sem depender do master legado
+- o hostname canônico da Auth API estiver explícito sem ambiguidade
+- a relação entre DNS, TLS e reverse proxy estiver clara
+- a distinção entre borda pública e upstream interno estiver formalizada
+- os comandos de validação refletirem o runtime real
+- ele puder ser usado como referência confiável da camada de rede e borda da Auth API sem depender do master legado
 
 ---
 
@@ -445,5 +442,5 @@ Este documento pode ser considerado maduro quando:
 
 - Status: ativo
 - Classificação: canônico
-- Contexto: infraestrutura AWS Lightsail / network, DNS e TLS
+- Contexto: infraestrutura AWS Lightsail / network, DNS and TLS
 - Última revisão: 2026-03-18

@@ -7,9 +7,9 @@ Consolidar o inventário de referências, evidências, artefatos operacionais, p
 Este documento existe para registrar, de forma estável e auditável:
 
 - quais documentos alimentam este contexto
-- quais artefatos reais do ambiente são source of truth operacional
-- quais paths e recursos públicos são críticos para a camada
-- quais comandos ajudam a validar o contexto
+- quais artefatos reais do host e da publicação pública são source of truth operacional
+- quais serviços, paths e componentes são críticos para o portal e para a Static API v2
+- quais comandos ajudam a validar rapidamente a camada pública
 - quais pontos ainda dependem de confirmação direta no ambiente real
 - quais são os limites documentais deste contexto
 
@@ -20,24 +20,23 @@ Este documento existe para registrar, de forma estável e auditável:
 Este documento cobre:
 
 - documentos de origem do contexto
-- artefatos reais do runtime do portal
-- paths críticos conhecidos
-- recursos públicos relevantes da v2
-- componentes operacionais centrais
+- artefatos reais da Static API v2 e do portal
+- serviços principais da camada pública
+- hostnames e paths públicos conhecidos
+- paths críticos no filesystem
 - comandos de validação
 - itens pendentes de confirmação
 - limites documentais do contexto
 
 Este documento não cobre em profundidade:
 
-- explicação detalhada de cada script do ETL
-- contratos JSON campo a campo
-- troubleshooting aprofundado
-- infraestrutura completa da VPS Hostinger
-- operação detalhada do Game Panel
+- infraestrutura base completa da Hostinger
+- operação detalhada do servidor CS2
 - Auth API no Lightsail
+- credenciais e arquivos sensíveis
+- histórico completo de mudanças
 
-Esses assuntos vivem nos documentos especializados do contexto ou em outros contextos canônicos.
+Esses assuntos vivem nos documentos especializados de outros contextos, bem como em impl-logs e material legado.
 
 ---
 
@@ -47,15 +46,39 @@ O contexto `03-portal-estatico` já possui estrutura canônica definida para doc
 
 - arquitetura de runtime do portal
 - Static API v2
-- fonte de dados baseada em MatchZy SQLite
+- fonte SQLite do MatchZy
 - pipeline ETL Bash
-- contratos JSON
-- estrutura do frontend
+- camada SQL versionada
+- contratos JSON públicos
+- estrutura do frontend estático
 - publishing e cache via Nginx
 - runbooks operacionais
-- observabilidade e troubleshooting
+- observabilidade e troubleshooting da camada pública
 
-Neste estágio da migração, o contexto já foi estruturado documentalmente, mas ainda depende de reconciliação progressiva com o ambiente real para fechar alguns pontos específicos de path, comandos operacionais agregadores e publishing público final.
+Neste estágio da reconciliação, o contexto já possui confirmação operacional suficiente para fixar sem ambiguidade:
+
+- os hostnames públicos canônicos:
+  - `haxixesmokeclub.com`
+  - `www.haxixesmokeclub.com`
+- o path público oficial do portal:
+  - `/portal/cs2/`
+- o path público oficial da Static API v2:
+  - `/api/cs2/v2/`
+- o path público same-origin do mirror de News:
+  - `/content/news/`
+- a árvore pública do portal:
+  - `/var/www/portal/cs2/`
+- a árvore pública da Static API v2:
+  - `/var/www/api/cs2/v2/`
+- o path canônico vivo do `matchzy.db`
+- a desativação explícita de `/api/cs2/v1/`
+
+Ainda restam pendências menores, principalmente ligadas a:
+
+- nomes exatos de units/timers da automação do host
+- comando agregador real de regeneração da v2
+- detalhes finais de root/alias em todos os blocos relevantes
+- inventário completo dos scripts e presets operacionais efetivamente em uso
 
 ---
 
@@ -67,39 +90,41 @@ As evidências que sustentam este contexto se dividem em quatro grupos principai
 
 Usada para:
 
-- visão macro do papel do Portal Estático
-- separação entre portal, Hostinger, Game Panel e Auth API
-- topologia geral da cadeia pública de dados
+- visão macro do papel do Portal Estático no HSC
+- separação entre Hostinger, Game Panel, Portal Estático e Lightsail
+- topologia geral da camada pública
 
-### 2. Documentação específica do portal e da v2
+### 2. Documentação específica do portal
 
 Usada para:
 
-- estrutura da Static API v2
-- pipeline ETL
-- paths públicos
-- regras de geração
-- relação entre portal e JSONs publicados
+- Static API v2
+- ETL Bash
+- frontend estático
+- Nginx publishing
+- mirror same-origin de conteúdo
+- runbooks da camada pública
 
 ### 3. Impl-logs e registros incrementais
 
 Usados para:
 
-- rastrear mudanças de publishing
-- rastrear integração de conteúdo same-origin
-- registrar alterações relevantes de ETL, contratos ou borda pública
+- rastrear mudanças em publishing, assets, paths, cache e mirror
+- registrar ajustes relevantes da camada pública
+- preservar rastreabilidade da evolução do portal
 
-### 4. Ambiente real do host
+### 4. Ambiente real da Hostinger
 
 Usado para:
 
-- validar paths efetivos
-- validar comandos reais de geração
-- confirmar estrutura de publicação
-- confirmar presença e integridade dos recursos públicos
-- confirmar dependências entre Nginx, ETL, SQLite e frontend
+- validar hostnames públicos canônicos
+- validar os paths HTTP públicos realmente ativos
+- validar os blocos `location`, `root` e `alias`
+- validar o path canônico do `matchzy.db`
+- validar a estrutura real publicada em `/var/www/portal/cs2/` e `/var/www/api/cs2/v2/`
 
 Regra principal:
+
 - quando houver conflito entre documento histórico e ambiente real validado, prevalece o ambiente real validado
 
 ---
@@ -119,6 +144,8 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
 - `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/nginx-static-serving.md`
+- `docs/01-infra-hostinger/network-dns-tls.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.
@@ -131,25 +158,26 @@ Os documentos abaixo são as principais fontes de extração e reconciliação d
 
 ### Fontes primárias
 
-- documentação específica do portal e da Static API v2
 - documentação consolidada atual do ecossistema HSC
 - blueprint técnico consolidado do HSC
+- documentação específica do Portal Estático
+- documentação específica da Static API v2
 
 ### Fontes secundárias
 
-- impl-logs ligados a mirror same-origin de conteúdo
-- impl-logs ligados a ETL e publishing
 - documentação reconciliada da Infra Hostinger
-- documentação reconciliada da camada Game Panel, especialmente no que toca à origem do `matchzy.db`
+- documentação reconciliada do Game Panel
+- impl-logs ligados a publishing, cache, assets, mirror de conteúdo e ETL
 
 ### Fontes de apoio histórico
 
-- documentos legados do portal
 - master antigo
 - blueprint histórico
-- materiais `_old` que ajudem a reconciliar paths, decisões e fluxos
+- documentação legada do portal
+- materiais `_old` úteis para reconciliar paths, convenções de API, publishing e evolução da v2
 
 Regra documental:
+
 - fontes históricas ajudam a reconciliar
 - mas não governam o canônico sozinhas
 
@@ -157,29 +185,188 @@ Regra documental:
 
 ## Artefatos reais do contexto
 
-Os artefatos reais conhecidos ou esperados do contexto Portal Estático incluem:
+Os artefatos reais conhecidos ou esperados deste contexto incluem:
 
-### Portal público
+### Hostnames públicos canônicos
 
-- árvore pública do portal em `/var/www/portal/cs2/`
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
 
-### Static API v2
+### Hostnames não ativos para esta borda no estado atual
 
-- árvore pública da v2 em `/var/www/api/cs2/v2/`
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
 
-### Base operacional do ETL
+### Publicação pública do portal
+
+- `/portal/cs2/`
+
+### Publicação pública dos assets do portal
+
+- `/portal/cs2/assets/`
+
+### Publicação pública da Static API v2
+
+- `/api/cs2/v2/`
+
+### Mirror same-origin de News
+
+- `/content/news/`
+
+### Árvore pública do portal
+
+- `/var/www/portal/cs2/`
+
+### Árvore pública da Static API v2
+
+- `/var/www/api/cs2/v2/`
+
+### Base operacional do portal / ETL
 
 - `/opt/cs2-portal/`
 
-### Diretório de locks
-
-- `/opt/cs2-portal/locks/`
-
-### Lock global principal
+### Lock global conhecido
 
 - `/opt/cs2-portal/locks/gen-all-v2.lock`
 
-### Diretório de statefiles
+### SQLs versionados
+
+- `/opt/cs2-portal/sql/`
+
+### Scripts operacionais
+
+- `/usr/local/bin/`
+
+### Fonte de dados principal
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
+
+### Backup identificado da fonte
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db`
+
+Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
+
+---
+
+## Componentes estruturais relevantes
+
+Os componentes estruturais mais importantes já reconciliados neste contexto são:
+
+### Portal estático
+
+Papel:
+- frontend público do ecossistema
+- consumo da Static API v2
+- navegação SPA sob `/portal/cs2/`
+
+### Static API v2
+
+Papel:
+- camada pública oficial de dados JSON
+- fonte consumida pelo frontend
+- substituta oficial da antiga v1
+
+### ETL Bash
+
+Papel:
+- gerar artefatos públicos a partir da fonte SQLite
+- atualizar a árvore pública da v2
+
+### Nginx da Hostinger
+
+Papel:
+- publicar portal, assets, v2 e mirror de conteúdo
+- aplicar cache e regras de compatibilidade
+
+### SQLite do MatchZy
+
+Papel:
+- fonte principal da v2
+- origem estatística do portal
+
+### Mirror same-origin de conteúdo
+
+Papel:
+- publicar conteúdo JSON sob o mesmo domínio do portal
+- reduzir atrito de consumo pelo frontend
+
+---
+
+## Componentes já reconciliados
+
+Os itens abaixo já possuem relevância reconciliada suficiente no contexto atual.
+
+### Hostnames canônicos da camada pública
+
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
+
+### Prefixo oficial do portal
+
+- `/portal/cs2/`
+
+### Prefixo oficial da Static API v2
+
+- `/api/cs2/v2/`
+
+### Prefixo oficial do mirror de News
+
+- `/content/news/`
+
+### Fonte principal da v2
+
+- `matchzy.db`
+
+### Tabelas estruturais da fonte
+
+- `matchzy_stats_matches`
+- `matchzy_stats_maps`
+- `matchzy_stats_players`
+
+### Desativação explícita da v1
+
+- `/api/cs2/v1/` retorna `404`
+
+### Compatibilidades públicas ativas
+
+- `/api/ranking.json` → `/api/cs2/v2/ranking.json`
+- `/api/matches.json` → `/api/cs2/v2/matches.json`
+- `/api/health.json` → `/api/cs2/v2/health.json`
+- `/api/steam/<id>.json` → `/api/cs2/v2/player/<id>.json`
+- `/portal/` → `/portal/cs2/`
+- `/portal/ranking/` → `/portal/cs2/ranking/`
+- `/portal/matches/` → `/portal/cs2/matches/`
+
+Esses itens já devem ser tratados como parte da verdade operacional do contexto.
+
+---
+
+## Paths críticos
+
+Os paths críticos conhecidos deste contexto incluem:
+
+### Portal público
+
+- `/var/www/portal/cs2/`
+
+### Assets públicos do portal
+
+- `/var/www/portal/cs2/assets/`
+
+### Static API v2 pública
+
+- `/var/www/api/cs2/v2/`
+
+### Base operacional do portal
+
+- `/opt/cs2-portal/`
+
+### Locks do ETL
+
+- `/opt/cs2-portal/locks/`
+
+### Statefiles do ETL
 
 - `/opt/cs2-portal/state/`
 
@@ -189,280 +376,169 @@ Os artefatos reais conhecidos ou esperados do contexto Portal Estático incluem:
 
 ### Scripts operacionais
 
-- `/usr/local/bin/*.sh`
-
-### Fonte de dados
-
-- `matchzy.db` sob a árvore operacional da instância `MixHAXIXE01`
-
-### Artefato de saúde
-
-- `health.json` na árvore pública da v2
-
-Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
-
----
-
-## Componentes operacionais centrais
-
-Os componentes principais conhecidos deste contexto são:
-
-### Portal estático
-
-Papel:
-- interface pública do HSC
-- consumo de dados da v2
-- renderização em HTML/CSS/JS ESModules
-
-### Static API v2
-
-Papel:
-- camada pública de dados
-- contrato entre ETL e frontend
-- publicação por arquivos JSON
-
-### ETL Bash
-
-Papel:
-- transformar o SQLite em JSON público
-- orquestrar geração e incremental
-- preservar lock e atomicidade
-
-### SQLite MatchZy
-
-Papel:
-- fonte primária de dados estatísticos
-- origem de ranking, matches, players e maps
-
-### Nginx
-
-Papel:
-- servir o portal
-- servir a v2
-- publicar same-origin de conteúdo quando aplicável
-- proteger artefatos não públicos
-
----
-
-## Paths críticos
-
-Os paths críticos conhecidos deste contexto incluem:
-
-### Publicação do portal
-
-- `/var/www/portal/cs2/`
-
-### Publicação da v2
-
-- `/var/www/api/cs2/v2/`
-
-### Base operacional do portal
-
-- `/opt/cs2-portal/`
-
-### Locks
-
-- `/opt/cs2-portal/locks/`
-
-### Lock global
-
-- `/opt/cs2-portal/locks/gen-all-v2.lock`
-
-### Statefiles
-
-- `/opt/cs2-portal/state/`
-
-### SQLs
-
-- `/opt/cs2-portal/sql/`
-
-### Scripts operacionais
-
 - `/usr/local/bin/`
 
-### Banco de origem
+### Fonte viva do `matchzy.db`
 
-- path do `matchzy.db` dentro da árvore da instância `MixHAXIXE01`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
+
+### Backup identificado do `matchzy.db`
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db`
 
 Regra prática:
+
+- o path em `addons/counterstrikesharp/plugins/MatchZy/` é a fonte viva canônica
+- o path em `backup-hsc/` é backup histórico e não deve ser tratado como fonte ativa
 - qualquer mudança nesses paths deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
 
-## Recursos públicos principais
+## Regras públicas de publicação já reconciliadas
 
-Os recursos públicos já reconciliados como centrais neste contexto incluem:
+As regras públicas mais relevantes já reconciliadas no runtime incluem:
 
-### Saúde
+### Assets estáveis do portal
 
-- `health.json`
+- publicados em `/portal/cs2/assets/`
+- `alias /var/www/portal/cs2/assets/`
+- `expires 1h`
+- `Cache-Control: public, max-age=3600`
 
-### Coleções públicas
+### Assets legados desativados
 
-- `ranking.json`
-- `matches.json`
-- `maps.json`
+- `/portal/cs2/assets/releases/` → `410`
+- `/portal/cs2/assets/current/` → `410`
 
-### Recursos de detalhe
+### Static API v2
 
-- `match/{id}.json`
-- `map/{map}.json`
-- `player/{steamid64}.json`
+- publicada em `/api/cs2/v2/`
+- `alias /var/www/api/cs2/v2/`
+- `default_type application/json`
+- `Cache-Control: no-store, no-cache, max-age=0, must-revalidate`
+- `Pragma: no-cache`
+- `Expires: 0`
+- `X-HSC-API: v2`
 
-### Recursos auxiliares
+### Mirror de News
 
-- `steam-cache/{steamid64}.json`
+- publicado em `/content/news/`
+- servido a partir da base `/var/www/api/cs2/v2/`
+- política de `Cache-Control: no-store, max-age=0`
 
-### Conteúdo same-origin, quando aplicável
+### Neutralização de Service Worker
 
-- path público de News ou conteúdo espelhado sob o domínio do portal
-
-Regra editorial:
-- este documento inventaria recursos
-- a semântica operacional detalhada vive em `static-api-v2.md` e `json-contracts.md`
-
----
-
-## Tabelas e entidades operacionais relevantes
-
-As estruturas de persistência já reconciliadas como relevantes para a v2 incluem:
-
-- `matchzy_stats_matches`
-- `matchzy_stats_maps`
-- `matchzy_stats_players`
-
-Essas tabelas sustentam, em nível macro:
-
-- listagem e detalhe de partidas
-- agregados e detalhe por mapa
-- ranking e dossiê público de jogador
-
-Também há dependência de identificadores estruturais, especialmente:
-
-- `steamid64`
-- identificadores de match
-- identificadores/nomes públicos de mapa
+- `/ServiceWorker.js`
+- alias para `/var/www/portal/sw-kill-ServiceWorker.js`
+- `Cache-Control: no-store, max-age=0`
 
 ---
 
-## Serviços e dependências indiretas
+## Dependências cruzadas
 
-Embora o contexto do portal não tenha backend dinâmico próprio, ele depende indiretamente de:
+Os principais workloads e dependências cruzadas deste contexto incluem:
 
-### Nginx
+### Dependência da Infra Hostinger
 
-- serving público do portal e da v2
+O Portal Estático depende de:
 
-### Automação do host
+- host Debian
+- Nginx
+- filesystem público
+- systemd/timers do host
+- permissões corretas
 
-- timers e/ou execução operacional do ETL
+### Dependência do Game Panel
 
-### Runtime do jogo
+O Portal Estático depende do Game Panel para:
 
-- produção do `matchzy.db`
+- origem do `matchzy.db`
+- continuidade da produção de stats
+- estabilidade do schema e do path da persistência local
 
-### Filesystem e permissões
+### Dependência do ETL
 
-- escrita pelo ETL
-- leitura pelo Nginx
+A borda pública depende de:
 
-### Browser
+- geração correta dos arquivos JSON
+- publicação correta na árvore pública
+- ausência de artefato parcial ou stale
 
-- consumo dos JSONs e assets públicos
+### Dependência do frontend
 
-Essas dependências explicam por que o contexto precisa de documentação separada da Infra Hostinger e do Game Panel, mesmo rodando sobre eles.
+O frontend depende de:
+
+- paths públicos corretos
+- contratos JSON coerentes
+- borda pública previsível
+- cache compatível com a cadência de atualização
 
 ---
 
 ## Comandos de validação
 
-Os comandos abaixo formam um kit mínimo de validação do contexto.
+Os comandos abaixo formam um kit mínimo de validação da camada pública.
 
-### Validar árvore pública do portal
-
-```bash
-ls -lah /var/www/portal/cs2/
-```
-
-### Validar árvore pública da v2
+### Validar portal público
 
 ```bash
-ls -lah /var/www/api/cs2/v2/
+curl -I https://haxixesmokeclub.com/portal/cs2/
+curl -I https://www.haxixesmokeclub.com/portal/cs2/
 ```
 
-### Validar `health.json`
+### Validar health da v2
 
 ```bash
-cat /var/www/api/cs2/v2/health.json
+curl -I https://haxixesmokeclub.com/api/cs2/v2/health.json
+curl -sS https://haxixesmokeclub.com/api/cs2/v2/health.json
 ```
 
-### Validar JSONs principais com `jq`
+### Validar ranking da v2
 
 ```bash
-jq . /var/www/api/cs2/v2/health.json
-jq . /var/www/api/cs2/v2/ranking.json
-jq . /var/www/api/cs2/v2/matches.json
-jq . /var/www/api/cs2/v2/maps.json
+curl -I https://haxixesmokeclub.com/api/cs2/v2/ranking.json
+curl -sS https://haxixesmokeclub.com/api/cs2/v2/ranking.json
 ```
 
-### Validar lock global
+### Validar mirror same-origin de News
 
 ```bash
-ls -l /opt/cs2-portal/locks/
+curl -I https://haxixesmokeclub.com/content/news/
+curl -sS https://haxixesmokeclub.com/content/news/
 ```
 
-### Validar statefiles
+### Validar redirects de compatibilidade
 
 ```bash
-ls -lah /opt/cs2-portal/state/
+curl -I https://haxixesmokeclub.com/api/health.json
+curl -I https://haxixesmokeclub.com/api/matches.json
+curl -I https://haxixesmokeclub.com/api/ranking.json
 ```
 
-### Validar árvore de SQLs
+### Validar desativação da v1
 
 ```bash
-ls -lah /opt/cs2-portal/sql/
+curl -I https://haxixesmokeclub.com/api/cs2/v1/
 ```
 
-### Validar Nginx
+### Validar sintaxe do Nginx no host
 
 ```bash
 sudo nginx -t
-sudo systemctl status nginx
 ```
 
-### Validar acesso público ao portal
-
-Substitua pelo domínio público vigente.
+### Validar configuração relevante do Nginx
 
 ```bash
-curl -I https://SEU_DOMINIO/
+sudo nginx -T | grep -nE "server_name|root |alias "
+sudo nginx -T | sed -n '200,320p'
 ```
 
-### Validar acesso público à v2
-
-Substitua pelo path público real da v2.
+### Validar presença da fonte ativa
 
 ```bash
-curl -sS https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/health.json
-curl -sS https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/ranking.json
-curl -sS https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/matches.json
-```
-
-### Validar fonte SQLite
-
-Substitua pelo path real validado do banco.
-
-```bash
-ls -l /CAMINHO/DO/matchzy.db
-sqlite3 /CAMINHO/DO/matchzy.db ".tables"
-```
-
-### Validar state do recurso detalhado
-
-Exemplo representativo:
-
-```bash
-jq . /var/www/api/cs2/v2/player/SEU_STEAMID64.json
+ls -l /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db ".tables"
 ```
 
 ---
@@ -471,44 +547,40 @@ jq . /var/www/api/cs2/v2/player/SEU_STEAMID64.json
 
 Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Path final público da v2 sob o domínio
+### 1. Nomes exatos de services e timers do host
 
-O path em filesystem está reconciliado.  
-O path HTTP público final da v2 ainda deve ser fixado sem ambiguidade no ambiente real.
+A intenção operacional já está reconciliada, mas ainda falta congelar os nomes exatos de todas as units relevantes da geração da v2 e do health.
 
-### 2. Comando agregador real de regeneração
+### 2. Comando agregador real da regeneração da v2
 
-A lógica da pipeline está clara, mas o comando operacional único ou fluxo real exato de execução agregada ainda precisa ser fixado diretamente no host.
+A ordem normativa da pipeline já está correta, mas ainda falta fixar sem ambiguidade qual é o comando agregador real usado no runtime atual.
 
-### 3. Path exato do `matchzy.db`
+### 3. Inventário final dos scripts `gen-*` ativos
 
-A dependência estrutural da instância `MixHAXIXE01` já está reconciliada, mas o path final completo do banco deve ser confirmado de forma explícita no ambiente real.
+A família de scripts já está conceitualmente reconciliada, mas a fotografia final dos scripts realmente ativos em produção ainda pode ser refinada.
 
-### 4. Diretório e convenção final dos scripts `gen-*`
+### 4. Root/alias final completo de todos os blocos públicos relevantes
 
-A existência da camada de scripts está reconciliada, mas o inventário final do local exato de cada script precisa ser confirmado contra o host.
+Os blocos principais já estão reconciliados, mas ainda pode haver ganho em congelar a fotografia final completa do vhost para troubleshooting futuro.
 
-### 5. Path público vigente do conteúdo same-origin de News
+### 5. Eventuais statefiles específicos que mereçam citação formal
 
-A existência do fluxo está reconciliada, mas o path final canônico deve ser fixado no ambiente real.
-
-### 6. Eventuais logs adicionais além de `journalctl`
-
-É útil confirmar se há logs locais específicos do ETL ou da publicação que devam ser citados formalmente no contexto.
+A base `state/` já está posicionada corretamente, mas ainda pode ser útil formalizar statefiles críticos após validação adicional do host.
 
 ---
 
 ## Itens fora do escopo deste contexto
 
-Os itens abaixo não pertencem ao inventário canônico do contexto Portal Estático:
+Os itens abaixo não pertencem ao inventário canônico do Portal Estático:
 
-- detalhes da infraestrutura base da VPS Hostinger
-- configuração completa de Certbot e TLS da Hostinger
-- operação do AMP e do servidor CS2
-- MatchZy como ferramenta operacional de jogo
-- runbooks de scrim, veto, coach ou warmup
-- Auth API no Lightsail
-- credenciais e arquivos sensíveis
+- runtime da Auth API no Lightsail
+- MariaDB local da Auth API
+- operação detalhada do servidor CS2
+- AMP
+- MatchZy como workflow competitivo completo
+- DNS/TLS detalhado do Lightsail
+- credenciais reais
+- arquivos de acesso sensíveis
 - documentação histórica não reconciliada
 
 Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo normal do repositório documental.
@@ -519,9 +591,9 @@ Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo norma
 
 Os limites documentais deste contexto são:
 
-- ele documenta a camada pública do portal e sua cadeia de dados
-- ele não documenta sozinho a infraestrutura base do host
-- ele não documenta sozinho a origem operacional do jogo
+- ele documenta a camada pública estática do ecossistema
+- ele não documenta sozinho o substrate da Hostinger
+- ele não documenta sozinho o lado jogo
 - ele não substitui o índice mestre
 - ele não substitui impl-logs históricos
 - ele depende de confirmação periódica contra o ambiente real para permanecer confiável
@@ -532,11 +604,12 @@ Os limites documentais deste contexto são:
 
 Este documento deve ser atualizado quando houver:
 
-- mudança de path crítico
-- mudança de path público da v2
-- mudança de localização do `matchzy.db`
-- mudança relevante no inventário de scripts
-- alteração dos recursos públicos centrais
+- mudança de hostname público canônico
+- mudança do prefixo público do portal
+- mudança do prefixo público da v2
+- mudança de path estrutural do `matchzy.db`
+- mudança relevante na política de cache
+- mudança de redirects de compatibilidade
 - confirmação ou resolução de item pendente listado aqui
 
 Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
@@ -547,12 +620,11 @@ Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no d
 
 Este documento pode ser considerado maduro quando:
 
-- os artefatos reais do contexto estiverem confirmados sem ambiguidade
-- os paths críticos estiverem validados no ambiente real
-- o path público final da v2 estiver fixado
-- o path final do `matchzy.db` estiver fixado
+- os artefatos reais da borda pública estiverem confirmados sem ambiguidade
+- os hostnames canônicos, os prefixes públicos e os paths de filesystem estiverem claramente reconciliados
+- o path vivo do `matchzy.db` estiver fixado
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
-- ele puder ser usado como inventário confiável do contexto sem depender do master legado
+- ele puder ser usado como inventário confiável do Portal Estático sem depender do master legado
 
 ---
 

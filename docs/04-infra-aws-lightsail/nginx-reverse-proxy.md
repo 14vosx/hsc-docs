@@ -2,16 +2,16 @@
 
 ## Objetivo
 
-Documentar o papel do Nginx como edge público e reverse proxy da Auth API no contexto AWS Lightsail.
+Documentar o papel do Nginx como reverse proxy da Auth API no contexto Infra AWS Lightsail do ecossistema HSC.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- a função do Nginx na borda pública da Auth API
-- a relação entre TLS termination e upstream interno
-- o modelo de reverse proxy adotado no contexto
-- os limites entre responsabilidades do edge e da aplicação
-- os cuidados operacionais necessários para manter a exposição pública saudável
-- os problemas mais comuns ligados a proxy, upstream e headers
+- como o Nginx participa da borda pública da Auth API
+- qual é o hostname canônico dessa camada
+- para qual upstream local o proxy aponta no runtime real
+- como o Nginx se relaciona com o serviço Node.js da Auth API
+- quais validações mínimas ajudam a manter essa camada íntegra
+- quais falhas comuns surgem quando a borda de proxy sai do estado esperado
 
 ---
 
@@ -19,60 +19,63 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- o papel do Nginx no contexto AWS Lightsail
-- o modelo de reverse proxy para a Auth API
-- a relação entre hostname público e upstream local
-- TLS termination na borda
-- headers relevantes do edge
-- interação entre Nginx e CORS da aplicação
-- validações operacionais do proxy
-- sintomas e falhas comuns do edge
+- o papel do Nginx no Lightsail
+- o hostname público da Auth API
+- o upstream local da aplicação
+- a relação entre TLS, Nginx e Node.js
+- a localização reconciliada da configuração do vhost
+- validações operacionais mínimas da borda
+- riscos e problemas comuns dessa camada
 
 Este documento não cobre em profundidade:
 
-- DNS e política geral de TLS
-- unit file da aplicação
-- contratos HTTP completos da Auth API
-- fluxo de deploy e rollback
-- troubleshooting geral do host
-- modelagem funcional do backend
+- deploy/release/rollback da aplicação
+- configuração detalhada do systemd do Node.js
+- modelagem do MariaDB local
+- rotinas de backup/restore
+- troubleshooting aprofundado da aplicação Express
+- infraestrutura da Hostinger
 
-Esses assuntos vivem em documentos próprios do contexto.
+Esses tópicos vivem em documentos próprios deste contexto ou em outros contextos canônicos.
 
 ---
 
 ## Estado atual
 
-O estado operacional conhecido do edge deste contexto é:
+O estado operacional conhecido e reconciliado desta camada é:
 
-- o Nginx é a camada pública de entrada da Auth API
-- o Nginx recebe tráfego HTTP/HTTPS do hostname público do contexto
-- o TLS é encerrado no Nginx
-- o Nginx encaminha requisições para a aplicação Node.js rodando localmente
-- a aplicação permanece atrás do proxy e não deve ser tratada como superfície pública direta
-- o banco MariaDB não participa da borda pública
-- a saúde pública do backend depende da combinação entre Nginx funcional e upstream local saudável
+- a Auth API está canonicamente no AWS Lightsail
+- o hostname público canônico da Auth API é:
+  - `auth-api.haxixesmokeclub.com`
+- o Nginx no Lightsail atua como reverse proxy dessa API
+- o upstream local reconciliado da aplicação é:
+  - `http://127.0.0.1:3000`
+- o endpoint `/health` responde publicamente com sucesso por essa borda
+- a configuração reconciliada do vhost ativo existe em:
+  - `/etc/nginx/sites-available/hsc-auth-api`
 
-Esse desenho preserva a separação entre:
+Também ficou evidenciado no runtime real que:
 
-- borda pública
-- aplicação interna
-- banco local
+- existe um bloco default separado com `server_name _`
+- esse bloco default não altera a leitura canônica da Auth API
+- a borda pública oficial da API é o vhost específico de `auth-api.haxixesmokeclub.com`
 
 ---
 
 ## Source of truth / evidências
 
-As principais evidências deste documento, nesta fase de migração documental, são:
+As principais evidências deste documento, nesta fase de reconciliação, são:
 
-- manual operacional da Auth API em AWS Lightsail
-- documentação consolidada do ecossistema HSC
-- blueprint técnico consolidado
-- reconciliação do health local em `127.0.0.1:3000`
-- documentação operacional que posiciona o Nginx como edge público do contexto
-- impl-logs ligados a CORS e endurecimento operacional da aplicação
+- documentação consolidada atual do ecossistema HSC
+- blueprint técnico consolidado do HSC
+- documentação reconciliada do contexto AWS Lightsail
+- runtime real do Lightsail
+- saída direta de `nginx -T`
+- resposta pública validada de:
+  - `https://auth-api.haxixesmokeclub.com/health`
+- inventário real de arquivos em `/etc/nginx`
 
-Enquanto a migração canônica do contexto não estiver concluída, essas fontes seguem sendo usadas como base de reconciliação.
+Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
 ---
 
@@ -86,191 +89,208 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/references-inventory.md`
 
-Este documento descreve o reverse proxy do contexto.  
-Ele não substitui os documentos de DNS/TLS, runtime da aplicação ou operação funcional.
+Este documento descreve a borda Nginx da Auth API no Lightsail.  
+Ele não substitui os documentos de runtime da aplicação, TLS, systemd ou troubleshooting aprofundado.
 
 ---
 
 ## Papel do Nginx no contexto
 
-O Nginx é o edge oficial do contexto AWS Lightsail.
+No contexto Lightsail, o Nginx existe para:
 
-Suas responsabilidades neste contexto são:
+- receber tráfego público da Auth API
+- responder pelo hostname canônico da API
+- encerrar a camada de borda HTTP/HTTPS
+- encaminhar as requisições para a aplicação Node.js local
+- isolar a aplicação do acesso público direto ao processo Node
+- servir como ponto de validação e troubleshooting da borda da API
 
-- receber tráfego público HTTP/HTTPS
-- encerrar TLS
-- expor o hostname público da Auth API
-- encaminhar requisições para a aplicação local
-- servir como primeira camada de validação operacional da borda
-- isolar a aplicação Node.js do tráfego direto da internet
+Em termos arquiteturais:
 
-O Nginx não é o responsável primário pela lógica de negócio da aplicação, pela persistência em banco ou pela política completa de CORS do backend.
-
----
-
-## Modelo de reverse proxy
-
-O modelo canônico do contexto é:
-
-- cliente externo acessa o hostname público da Auth API
-- Nginx recebe a requisição
-- Nginx encerra TLS
-- Nginx encaminha a requisição para o upstream local da aplicação
-- a aplicação Node.js processa a requisição
-- a resposta retorna ao cliente via Nginx
-
-Esse desenho implica:
-
-- a aplicação roda em porta interna/local
-- o cliente não deve consumir diretamente essa porta
-- o proxy é a camada oficial de exposição pública do backend
+- o cliente acessa `auth-api.haxixesmokeclub.com`
+- o Nginx recebe essa requisição
+- o Nginx encaminha a requisição para `127.0.0.1:3000`
+- a aplicação Node responde
+- o Nginx devolve a resposta ao cliente
 
 ---
 
-## Upstream da Auth API
+## Hostname canônico da Auth API
 
-O upstream local conhecido do contexto é a aplicação Node.js escutando em loopback, com health local observado em:
+O hostname público canônico reconciliado da Auth API é:
 
-- `http://127.0.0.1:3000/health`
+- `auth-api.haxixesmokeclub.com`
 
-Isso indica que o upstream interno esperado é, conceitualmente:
+Este hostname deve ser tratado como:
 
-- host local: `127.0.0.1`
-- porta interna da aplicação: `3000`
+- entrada pública oficial da API
+- referência canônica da borda dinâmica do ecossistema HSC
+- substituto da leitura antiga que ainda podia deixar resquícios de Hostinger como runtime da Auth API
+
+Regra canônica:
+
+- `auth-api.haxixesmokeclub.com` pertence ao contexto Lightsail
+- ele não deve ser documentado como borda canônica da Hostinger
+
+---
+
+## Upstream local da aplicação
+
+O upstream local reconciliado no runtime real é:
+
+```text
+http://127.0.0.1:3000
+```
+
+Isso significa que:
+
+- a aplicação Node.js da Auth API escuta localmente na porta `3000`
+- o Nginx faz proxy reverso para esse processo local
+- a porta da aplicação não é a superfície pública canônica da API
+- a superfície pública canônica é o hostname servido pelo Nginx
+
+Regra importante:
+
+- `127.0.0.1:3000` é upstream interno
+- `auth-api.haxixesmokeclub.com` é borda pública
+
+---
+
+## Configuração reconciliada do vhost
+
+A evidência reconciliada do host mostra a presença de configuração específica da API em:
+
+```text
+/etc/nginx/sites-available/hsc-auth-api
+```
+
+Também ficou reconciliado em `nginx -T` que existem blocos com:
+
+- `server_name auth-api.haxixesmokeclub.com;`
+- `proxy_pass http://127.0.0.1:3000;`
+
+Leitura canônica:
+
+- o vhost específico da Auth API existe no Lightsail
+- o reverse proxy ativo da API está no próprio Lightsail
+- qualquer configuração residual em outro host deve ser tratada como legado ou cleanup pendente, não como borda canônica ativa
+
+---
+
+## Relação entre Nginx e Node.js
+
+A Auth API não deve ser exposta publicamente como processo Node puro.
+
+A relação correta entre as camadas é:
+
+- Node.js roda localmente
+- systemd mantém o processo da aplicação
+- Nginx faz a borda pública e o proxy reverso
+- o cliente consome a API pelo hostname da borda, não pelo processo interno
+
+Benefícios dessa separação:
+
+- isola o processo da aplicação
+- mantém a borda padronizada
+- facilita TLS, proxy e observabilidade
+- permite troubleshooting por camada
 
 Regra operacional:
-- o upstream deve permanecer acessível localmente
-- a indisponibilidade do upstream transforma o edge em proxy sem backend útil
-- um Nginx “de pé” não significa backend saudável se o upstream estiver falhando
+
+- problema de aplicação e problema de proxy não são a mesma coisa
+- o Nginx pode estar saudável com a aplicação degradada
+- ou a aplicação pode estar saudável com a borda degradada
 
 ---
 
-## Fluxo do proxy
+## Relação com TLS
 
-O fluxo esperado do reverse proxy é:
+A camada de proxy reverso deve ser lida em conjunto com a camada de rede e TLS do Lightsail.
 
-1. cliente resolve o hostname público
-2. cliente conecta ao Nginx
-3. Nginx aceita conexão e encerra TLS
-4. Nginx encaminha a requisição para o upstream local
-5. aplicação Node.js responde
-6. Nginx devolve a resposta ao cliente
+Isso significa que:
 
-Esse fluxo permite diferenciar duas classes de incidente:
+- o hostname canônico da API depende de borda Nginx correta
+- a experiência pública saudável depende de HTTPS funcional
+- troubleshooting da Auth API precisa distinguir:
+  - falha de DNS
+  - falha de TLS
+  - falha de Nginx
+  - falha da aplicação Node
 
-- problema de edge/proxy
-- problema de upstream/aplicação
-
----
-
-## TLS termination
-
-A terminação TLS acontece no Nginx do contexto.
-
-Isso significa:
-
-- o certificado público pertence à borda Nginx
-- a aplicação não precisa expor TLS diretamente na malha interna local
-- o tráfego público seguro é responsabilidade do edge
-
-Implicações operacionais:
-
-- falhas de certificado afetam a disponibilidade percebida externamente
-- falhas no Nginx podem indisponibilizar o backend mesmo com a aplicação viva localmente
-- troubleshooting público deve sempre considerar a separação entre edge e upstream
+Este documento foca no reverse proxy.  
+Os detalhes gerais de DNS/TLS vivem em `network-dns-tls.md`.
 
 ---
 
-## Headers e segurança
+## Evidência de saúde pública
 
-O Nginx participa da construção do contexto HTTP entregue ao backend e ao cliente.
+A borda reconciliada já respondeu com sucesso ao endpoint:
 
-Em nível conceitual, essa camada deve preservar:
+- `https://auth-api.haxixesmokeclub.com/health`
 
-- encaminhamento correto para o upstream
-- integridade de headers necessários ao backend
-- consistência entre esquema HTTPS público e percepção interna da aplicação
-- postura mínima de segurança no edge
+A resposta pública confirmou:
 
-Headers e políticas específicos devem ser mantidos coerentes com o runtime real, mas este documento evita congelar uma configuração textual completa sem validação direta do host.
+- HTTP `200 OK`
+- resposta JSON da aplicação
+- presença de headers do Nginx e da aplicação Express
+- aplicação respondendo através do proxy reverso do Lightsail
 
-Princípios esperados:
+Leitura canônica:
 
-- o backend deve receber contexto suficiente para interpretar corretamente a requisição original
-- o edge deve evitar se tornar uma fonte de ambiguidade entre HTTP interno e HTTPS público
-- políticas básicas de segurança de borda devem ser mantidas de forma consistente
-
----
-
-## CORS: o que é do app e o que é do edge
-
-A distinção correta neste contexto é:
-
-- Nginx = edge público e reverse proxy
-- aplicação = autoridade principal sobre política de CORS
-
-Isso significa:
-
-- o Nginx participa da entrega pública do serviço
-- mas a semântica principal de quais origens de browser podem consumir a API pertence ao runtime da aplicação
-- mudanças em allowlist de origem devem ser tratadas prioritariamente no backend, não apenas na borda
-
-O edge e a aplicação precisam permanecer coerentes, mas o Nginx não deve ser tratado como substituto da política de CORS da Auth API.
+- a borda pública da Auth API está funcional no Lightsail
+- o reverse proxy está de fato apontando para uma aplicação ativa
 
 ---
 
-## Responsabilidades do edge
+## Camada default do Nginx
 
-As responsabilidades esperadas do Nginx neste contexto incluem:
+Também foi identificada no runtime uma configuração default com:
 
-- expor a Auth API por hostname público correto
-- encerrar TLS corretamente
-- encaminhar o tráfego ao upstream local correto
-- preservar headers essenciais
-- responder de forma previsível quando o upstream estiver indisponível
-- manter clara a separação entre borda e runtime interno
+- `server_name _`
+- `root /var/www/html`
 
----
+Esse bloco deve ser tratado como:
 
-## Responsabilidades que não pertencem ao edge
+- configuração default do host
+- não como vhost canônico da Auth API
 
-Não pertencem primariamente ao Nginx, neste contexto:
+Regra importante:
 
-- lógica de autenticação administrativa
-- decisão de autorização funcional
-- persistência em banco
-- modelagem de domínio de News, Seasons ou Events
-- semântica principal de CORS
-- registro de auditoria administrativa
-- controle de sessão do backend
-
-Esses pontos pertencem à aplicação e às suas dependências internas.
+- o vhost default não substitui o vhost específico de `auth-api.haxixesmokeclub.com`
+- a documentação da Auth API deve continuar centrada no bloco específico da API
 
 ---
 
-## Validação operacional
+## Dependências operacionais
 
-As validações mínimas do reverse proxy devem incluir:
+Esta camada depende, no mínimo, de:
 
-### Validar health público
+- DNS correto para `auth-api.haxixesmokeclub.com`
+- Nginx funcional no Lightsail
+- upstream local `127.0.0.1:3000` ativo
+- aplicação Node.js saudável
+- systemd mantendo a aplicação disponível
+- configuração do vhost coerente com o runtime real
+- ausência de drift entre hostname, proxy e app local
 
-Substitua pelo hostname vigente do contexto.
+Dependências cruzadas importantes:
+
+- se o Node cair, o Nginx pode continuar “de pé” sem entregar valor
+- se o Nginx quebrar, a aplicação pode continuar ativa localmente e ainda assim ficar indisponível ao público
+- a leitura canônica da borda deve sempre considerar as duas camadas
+
+---
+
+## Comandos de validação
+
+Os comandos abaixo representam a validação mínima desta camada.
+
+### Validar sintaxe do Nginx
 
 ```bash
-curl -sS https://SEU_DOMINIO/health
-```
-
-### Verificar headers da resposta pública
-
-```bash
-curl -I https://SEU_DOMINIO/health
-```
-
-### Validar health local do upstream
-
-```bash
-curl -sS http://127.0.0.1:3000/health
+sudo nginx -t
 ```
 
 ### Validar status do Nginx
@@ -279,171 +299,131 @@ curl -sS http://127.0.0.1:3000/health
 sudo systemctl status nginx
 ```
 
-### Validar sintaxe da configuração
+### Validar configuração ativa da Auth API
 
 ```bash
-sudo nginx -t
+sudo nginx -T | grep -nE "server_name|proxy_pass|root |alias "
 ```
 
-### Ver logs recentes do Nginx
-
-O path exato pode variar conforme o host.  
-Quando necessário, consultar os logs padrão do serviço e do access/error log vigentes no sistema.
-
-Exemplo representativo:
+### Validar presença do vhost reconciliado
 
 ```bash
-sudo journalctl -u nginx -n 100 --no-pager
+find /etc/nginx -maxdepth 3 -type f | sort
 ```
 
-A combinação entre health público, health local e status do Nginx é a forma mais eficiente de separar falhas de edge e upstream.
+### Validar health público da Auth API
 
----
+```bash
+curl -I https://auth-api.haxixesmokeclub.com/health
+curl -sS https://auth-api.haxixesmokeclub.com/health
+```
 
-## Sinais de saúde do proxy
+### Validar upstream local diretamente no host
 
-Os sinais de saúde esperados desta camada incluem:
+```bash
+curl -I http://127.0.0.1:3000/health
+curl -sS http://127.0.0.1:3000/health
+```
 
-- `nginx -t` sem erro
-- serviço Nginx ativo
-- health público respondendo corretamente
-- health local do upstream respondendo corretamente
-- ausência de erro recorrente de upstream nos logs
-- TLS funcionando sem erro para o hostname público
-- ausência de exposição direta indevida da porta interna da aplicação
+Regra prática:
+
+- se o upstream local responde, mas o hostname público não, o problema tende a estar na borda
+- se nem o upstream local responde, o problema tende a estar na aplicação ou no systemd
 
 ---
 
 ## Problemas comuns
 
-### 1. Nginx ativo, mas upstream indisponível
+### 1. Nginx saudável, aplicação indisponível
 
 Causas comuns:
 
-- aplicação Node.js parada
-- serviço `hsc-auth-api` falhando
-- porta interna incorreta
-- upstream local inacessível
+- processo Node parado
+- serviço systemd da app degradado
+- app respondendo fora da porta esperada
+- falha de boot da aplicação
 
 Impacto:
-- borda responde com erro de upstream
-- health público falha, mesmo com o Nginx ativo
+- a borda pública responde erro de upstream
+- o problema parece “de Nginx”, mas a raiz está na aplicação
 
 ---
 
-### 2. Upstream responde localmente, mas público falha
+### 2. Aplicação saudável localmente, hostname público falha
 
 Causas comuns:
 
-- Nginx parado
-- configuração incorreta do proxy
-- TLS quebrado
-- hostname apontando para edge incorreto
-- firewall/borda em estado inconsistente
+- problema no vhost
+- problema de DNS
+- problema de TLS
+- Nginx não carregou a config esperada
 
 Impacto:
-- aplicação viva localmente
-- indisponibilidade pública do backend
+- o processo Node continua útil apenas localmente
+- a API fica indisponível ao público
 
 ---
 
-### 3. Configuração do Nginx inválida
+### 3. `server_name` incorreto ou stale
 
 Causas comuns:
 
-- sintaxe incorreta
-- diretiva inválida
-- edição manual malformada
-- conflito entre arquivos de configuração
+- drift de configuração
+- hostname antigo mantido no host
+- borda reconfigurada sem atualização documental
 
 Impacto:
-- reload/restart falha
-- risco de indisponibilidade pública imediata
+- tráfego pode cair em bloco errado
+- troubleshooting fica ambíguo
+- a documentação perde aderência ao runtime
 
 ---
 
-### 4. Proxy aponta para upstream errado
+### 4. Proxy apontando para porta errada
 
 Causas comuns:
 
-- porta incorreta
-- host interno incorreto
-- drift entre configuração do Nginx e runtime atual da aplicação
+- mudança do runtime da aplicação sem ajuste do vhost
+- múltiplas versões da aplicação
+- intervenção manual não reconciliada
 
 Impacto:
-- tráfego encaminhado para destino inválido
-- health público quebra
-- troubleshooting fica confuso
+- hostname público deixa de responder corretamente
+- a app pode continuar saudável em outra porta, mas invisível para a borda correta
 
 ---
 
-### 5. Browser consome o endpoint, mas falha por origem
+### 5. Drift entre Lightsail e Hostinger
 
 Causas comuns:
 
-- problema de CORS no backend
-- allowlist não atualizada
-- mudança de hostname sem coordenação com a aplicação
+- configuração residual antiga no host errado
+- vhost legado ainda presente em Hostinger
+- arquitetura atual não refletida em limpeza técnica completa
 
 Impacto:
-- Nginx e upstream podem estar corretos
-- integração em browser continua quebrada
+- confusão documental
+- troubleshooting mais lento
+- percepção errada de onde a Auth API realmente roda
+
+Regra canônica:
+
+- a presença de config residual em outro host não invalida a borda canônica reconciliada no Lightsail
 
 ---
 
-### 6. Certificado válido, mas serviço funcionalmente degradado
+## Invariantes operacionais
 
-Causas comuns:
+Os invariantes conhecidos desta camada incluem:
 
-- upstream parcial
-- banco degradado
-- regressão da aplicação
-- health insuficiente para detectar problema funcional
+- a Auth API canônica está no Lightsail
+- o hostname canônico é `auth-api.haxixesmokeclub.com`
+- o Nginx do Lightsail faz proxy reverso para `127.0.0.1:3000`
+- o vhost específico da API existe em `/etc/nginx/sites-available/hsc-auth-api`
+- o endpoint `/health` responde publicamente pela borda do Lightsail
+- a aplicação Node e o Nginx devem ser lidos como camadas separadas, porém acopladas operacionalmente
 
-Impacto:
-- borda saudável do ponto de vista de TLS
-- backend ainda assim problemático
-
----
-
-## Sequência básica de diagnóstico
-
-Quando houver falha pública no contexto, a sequência recomendada é:
-
-1. validar `nginx -t`
-2. validar status do serviço Nginx
-3. testar health público
-4. testar health local do upstream
-5. verificar logs do Nginx
-6. verificar status e logs do serviço `hsc-auth-api`
-7. só depois aprofundar em banco, CORS ou semântica funcional
-
-Essa sequência ajuda a responder rapidamente:
-
-- o edge está vivo?
-- o upstream está vivo?
-- o problema é de proxy ou de aplicação?
-
----
-
-## Riscos e cuidados
-
-Os principais riscos desta camada incluem:
-
-- proxy apontando para upstream incorreto
-- edição manual não validada com `nginx -t`
-- edge saudável mascarando backend parcialmente degradado
-- interpretação errada de CORS como se fosse problema do Nginx
-- drift entre hostname público, TLS e vhost ativo
-- exposição indevida de superfície interna fora do proxy
-
-Cuidados operacionais permanentes:
-
-- testar sintaxe antes de reload/restart
-- manter o edge alinhado ao upstream real
-- preservar a separação entre responsabilidades do Nginx e da aplicação
-- validar público e local sempre em conjunto
-- tratar falha de proxy e falha de upstream como problemas distintos
+Esses invariantes ajudam a preservar a leitura correta da borda dinâmica do ecossistema.
 
 ---
 
@@ -451,14 +431,14 @@ Cuidados operacionais permanentes:
 
 Este documento não detalha:
 
-- arquivo completo de configuração do Nginx
-- cada diretiva do vhost
-- política detalhada de headers de segurança
-- emissão e renovação de certificados
-- troubleshooting completo do serviço
-- modelagem funcional da Auth API
+- arquivo completo do vhost linha a linha
+- configuração detalhada do serviço Node.js
+- estratégias completas de reload/restart da app
+- política detalhada de TLS
+- recovery completo após falha de borda
+- cleanup da configuração residual da Hostinger
 
-Esses tópicos devem ser tratados em documentos complementares ou impl-logs quando necessário.
+Esses tópicos pertencem a documentos complementares ou a futuras reconciliações finas.
 
 ---
 
@@ -466,12 +446,11 @@ Esses tópicos devem ser tratados em documentos complementares ou impl-logs quan
 
 Este documento pode ser considerado maduro quando:
 
-- o upstream local estiver confirmado sem ambiguidade
-- a relação entre hostname público, Nginx e aplicação estiver reconciliada com o runtime real
-- a distinção entre responsabilidades do edge e da aplicação estiver clara
-- os comandos de validação refletirem a prática operacional real
-- os problemas de proxy mais comuns estiverem representados de forma útil
-- ele puder ser usado como referência do reverse proxy sem depender do master legado
+- o hostname canônico da Auth API estiver explícito sem ambiguidade
+- o upstream local reconciliado estiver claro
+- a relação entre Nginx e Node.js estiver descrita corretamente
+- o vhost da API estiver identificado no runtime
+- ele puder ser usado como referência confiável da camada de reverse proxy da Auth API sem depender do master legado
 
 ---
 

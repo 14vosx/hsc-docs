@@ -54,7 +54,20 @@ O contexto `02-game-panel` já possui estrutura canônica definida para document
 - runbooks operacionais
 - observabilidade e troubleshooting do lado game
 
-Neste estágio da migração, o contexto já foi estruturado documentalmente, mas ainda depende de reconciliação progressiva com o ambiente real para fechar alguns pontos específicos de inventário completo de plugins, paths finais de certos artefatos internos e fotografia operacional exata do runtime atual.
+Neste estágio da reconciliação, o contexto já possui confirmação operacional suficiente para fixar sem ambiguidade:
+
+- a instância oficial `MixHAXIXE01`
+- o container relevante `AMP_MixHAXIXE01`
+- a versão reconciliada do MatchZy `0.8.15`
+- o path vivo do `matchzy.db`
+- o path de backup identificado do `matchzy.db`
+
+Ainda restam pendências menores, principalmente ligadas a:
+
+- inventário completo de plugins ativos
+- versões exatas além do MatchZy
+- inventário final de presets e aliases
+- eventuais persistências auxiliares além do SQLite principal
 
 ---
 
@@ -84,7 +97,7 @@ Usada para:
 
 Usados para:
 
-- rastrear mudanças em plugins, permissões, presets e fluxo operacional
+- rastrear mudanças em plugins, presets, permissões e fluxo operacional
 - registrar endurecimentos administrativos
 - preservar rastreabilidade de ajustes relevantes do lado jogo
 
@@ -187,7 +200,7 @@ Os artefatos reais conhecidos ou esperados do contexto Game Panel incluem:
 
 - WeaponPaints
 
-### Persistência estatística estrutural
+### Persistência estatística estrutural ativa
 
 - `matchzy.db`
 
@@ -256,12 +269,18 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/home/amp/.ampdata/instances/MixHAXIXE01/`
 
-### Path estrutural do banco do MatchZy
+### Path canônico vivo do `matchzy.db`
 
-- dentro da árvore operacional da instância `MixHAXIXE01`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
+
+### Path de backup identificado do `matchzy.db`
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db`
 
 Regra prática:
 
+- o path em `addons/counterstrikesharp/plugins/MatchZy/` é a fonte viva canônica
+- o path em `backup-hsc/` é backup histórico e não deve ser tratado como fonte ativa
 - qualquer mudança nesses paths deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
@@ -282,7 +301,7 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - WeaponPaints
 
-### Persistência estatística principal
+### Persistência estatística principal ativa
 
 - `matchzy.db`
 
@@ -295,6 +314,10 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 ### Comando operacional de inventário de plugins
 
 - `css_plugins list`
+
+### Container relevante do host
+
+- `AMP_MixHAXIXE01`
 
 Esses itens já devem ser tratados como parte da verdade operacional do contexto.
 
@@ -354,38 +377,43 @@ docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}"
 docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
 ```
 
+### Validar associação da instância ao runtime conhecido
+
+```bash
+docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" | grep MixHAXIXE01
+```
+
 ### Validar camada de plugins
 
 ```bash
 css_plugins list
 ```
 
-### Validar presença estrutural do banco do MatchZy
-
-Substitua pelo path real reconciliado do ambiente.
+### Validar presença estrutural do banco ativo do MatchZy
 
 ```bash
-ls -l /CAMINHO/DO/matchzy.db
+ls -l /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
+realpath /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db
 ```
 
-### Validar tabelas principais do banco
+### Validar presença do backup identificado
 
 ```bash
-sqlite3 /CAMINHO/DO/matchzy.db ".tables"
+ls -l /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db
+```
+
+### Validar tabelas principais do banco ativo
+
+```bash
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db ".tables"
 ```
 
 ### Validar volume básico das tabelas principais
 
 ```bash
-sqlite3 /CAMINHO/DO/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_matches;"
-sqlite3 /CAMINHO/DO/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_players;"
-sqlite3 /CAMINHO/DO/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_maps;"
-```
-
-### Validar associação da instância ao runtime conhecido
-
-```bash
-docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" | grep MixHAXIXE01
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_matches;"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_players;"
+sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db "SELECT COUNT(*) FROM matchzy_stats_maps;"
 ```
 
 ---
@@ -403,15 +431,11 @@ Já há evidência de múltiplos plugins, mas a lista final precisa ser capturad
 A versão do MatchZy já foi reconciliada como `0.8.15`.  
 As demais versões ainda precisam de validação direta no runtime atual.
 
-### 3. Path final completo do `matchzy.db`
-
-A dependência estrutural da instância `MixHAXIXE01` já está reconciliada, mas o path final completo do banco ainda deve ser formalizado sem ambiguidade.
-
-### 4. Inventário final dos presets e aliases realmente usados
+### 3. Inventário final dos presets e aliases realmente usados
 
 Já há evidência de presets e aliases úteis, mas a lista atual em produção ainda precisa ser consolidada a partir do ambiente real.
 
-### 5. Baseline exato entre config principal e configs auxiliares
+### 4. Baseline exato entre config principal e configs auxiliares
 
 É desejável fechar explicitamente quais arquivos e presets representam:
 - baseline do servidor
@@ -420,7 +444,7 @@ Já há evidência de presets e aliases úteis, mas a lista atual em produção 
 - modo BO3
 - treino e presets auxiliares
 
-### 6. Eventuais persistências auxiliares além do `matchzy.db`
+### 5. Eventuais persistências auxiliares além do `matchzy.db`
 
 É útil confirmar se plugins auxiliares em produção mantêm bases ou artefatos adicionais que devam ser citados formalmente neste contexto.
 
