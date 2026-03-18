@@ -8,8 +8,8 @@ Este documento existe para registrar, de forma estável e auditável:
 
 - quais documentos alimentam este contexto
 - quais artefatos reais do host são source of truth operacional
-- quais paths e componentes são críticos para a camada-base
-- quais comandos ajudam a validar rapidamente a infraestrutura
+- quais componentes, serviços e paths são críticos para a camada Hostinger
+- quais comandos ajudam a validar rapidamente a infraestrutura base
 - quais pontos ainda dependem de confirmação direta no ambiente real
 - quais são os limites documentais deste contexto
 
@@ -21,23 +21,24 @@ Este documento cobre:
 
 - documentos de origem do contexto
 - artefatos reais do host Hostinger
-- serviços principais da camada-base
-- paths críticos conhecidos
-- componentes estruturais relevantes
+- serviços principais da camada base
+- hostnames e arquivos de Nginx conhecidos
+- timers, services e automações relevantes
+- paths críticos de filesystem
 - comandos de validação
 - itens pendentes de confirmação
 - limites documentais do contexto
 
 Este documento não cobre em profundidade:
 
-- explicação detalhada da operação do AMP
-- runbooks do servidor CS2
-- troubleshooting aprofundado do ETL
-- contratos JSON da Static API v2
-- operação da Auth API no Lightsail
+- operação completa do servidor CS2
+- inventário detalhado de plugins do Game Panel
+- ETL detalhado da Static API v2
+- Auth API canônica no Lightsail
+- credenciais e arquivos sensíveis
 - histórico completo de mudanças
 
-Esses assuntos vivem nos documentos especializados dos contextos `02-game-panel`, `03-portal-estatico` e `04-infra-aws-lightsail`, bem como em impl-logs e material legado.
+Esses assuntos vivem nos documentos especializados de outros contextos, bem como em impl-logs e material legado.
 
 ---
 
@@ -45,15 +46,44 @@ Esses assuntos vivem nos documentos especializados dos contextos `02-game-panel`
 
 O contexto `01-infra-hostinger` já possui estrutura canônica definida para documentar:
 
-- arquitetura de runtime da VPS Hostinger
-- borda pública via Nginx
-- DNS, TLS e Certbot do lado Hostinger
-- Docker como substrate do host
-- systemd e automações do host
+- substrate Debian do host
+- Nginx como edge do portal e da v2
+- Docker host do lado jogo
+- Certbot / TLS
+- automação via `systemd`
 - filesystem, paths e permissões
-- observabilidade e troubleshooting da camada-base
+- observabilidade e troubleshooting da camada base
 
-Neste estágio da migração, o contexto já foi estruturado documentalmente, mas ainda depende de reconciliação progressiva com o host real para fechar alguns pontos específicos de hostname público final, nomes exatos de units/timers e detalhes finos da camada de borda.
+Neste estágio da reconciliação, o contexto já possui confirmação operacional suficiente para fixar sem ambiguidade:
+
+- hostname técnico do host:
+  - `srv1353392.hstgr.cloud`
+- hostnames públicos canônicos do lado Hostinger:
+  - `haxixesmokeclub.com`
+  - `www.haxixesmokeclub.com`
+- hostnames não ativos para esta borda no estado atual:
+  - `portal.haxixesmokeclub.com`
+  - `api.haxixesmokeclub.com`
+- arquivo principal de configuração Nginx reconciliado do host:
+  - `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
+- timers ativos principais da camada portal/v2:
+  - `gen-health.timer`
+  - `gen-all-v2.timer`
+- service agregador real da v2:
+  - `gen-all-v2.service`
+- comando agregador real da v2:
+  - `/usr/local/bin/gen-all-v2.sh`
+
+Também ficou reconciliado que o host ainda contém drift residual ligado à Auth API, incluindo:
+
+- configuração Nginx com `server_name auth-api.haxixesmokeclub.com`
+- unit `hsc-auth-api.service`
+
+Leitura canônica:
+
+- a Hostinger continua sendo substrate de portal + v2 + lado jogo
+- a Auth API canônica não pertence mais a esta infraestrutura
+- qualquer artefato de Auth API neste host deve ser tratado como residual/stale até cleanup explícito
 
 ---
 
@@ -66,35 +96,39 @@ As evidências que sustentam este contexto se dividem em quatro grupos principai
 Usada para:
 
 - visão macro do papel da Hostinger no HSC
-- separação entre Infra Hostinger, Game Panel, Portal Estático e Lightsail
+- separação entre Hostinger, Game Panel, Portal Estático e Lightsail
 - topologia geral do lado game + portal
 
 ### 2. Documentação específica da camada Hostinger
 
 Usada para:
 
-- runtime do host Debian
-- publishing público do portal e da v2
-- uso de Nginx, Certbot, Docker e systemd
-- paths e áreas operacionais do host
+- Nginx
+- Docker host
+- Certbot
+- systemd
+- filesystem e permissões
+- observabilidade da infraestrutura base
 
 ### 3. Impl-logs e registros incrementais
 
 Usados para:
 
-- rastrear mudanças em publishing, paths, cache, assets e automações
-- registrar ajustes operacionais do lado Hostinger
-- preservar rastreabilidade de correções relevantes de infraestrutura
+- rastrear mudanças em publishing, automação, paths, assets e endurecimento operacional
+- registrar ajustes relevantes do substrate da Hostinger
+- preservar rastreabilidade da evolução do host
 
-### 4. Ambiente real do host
+### 4. Ambiente real da Hostinger
 
 Usado para:
 
-- validar paths efetivos
-- validar domínio/hostname público vigente
-- confirmar serviços e timers reais
-- confirmar ownership e grupos
-- confirmar a topologia real de Docker, Nginx e automação
+- validar hostname técnico e hostnames públicos reais
+- validar configuração Nginx
+- validar paths públicos e internos
+- validar timers/services reais
+- validar scripts em `/usr/local/bin`
+- validar a base operacional em `/opt/cs2-portal/`
+- confirmar o estado real do substrate do host
 
 Regra principal:
 
@@ -115,6 +149,8 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/03-portal-estatico/references-inventory.md`
+- `docs/02-game-panel/references-inventory.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.
@@ -129,21 +165,21 @@ Os documentos abaixo são as principais fontes de extração e reconciliação d
 
 - documentação consolidada atual do ecossistema HSC
 - blueprint técnico consolidado do HSC
-- documentação específica da infraestrutura Hostinger
-- documentação específica da camada AMP/CS2 que ajuda a revelar dependências estruturais do host
+- documentação específica da Infra Hostinger
+- documentação reconciliada da camada Nginx/systemd/publicação
 
 ### Fontes secundárias
 
 - documentação reconciliada do Portal Estático
 - documentação reconciliada do Game Panel
-- impl-logs ligados a publishing, mirror same-origin, paths, permissões e automação
+- impl-logs ligados a automação, publishing, assets e endurecimento da borda
 
 ### Fontes de apoio histórico
 
 - master antigo
 - blueprint histórico
-- documentação legada do lado Hostinger
-- materiais `_old` úteis para reconciliação de paths, topologia e decisões operacionais
+- documentação legada da VPS Hostinger
+- materiais `_old` úteis para reconciliar naming, paths, timers e vhosts
 
 Regra documental:
 
@@ -154,49 +190,84 @@ Regra documental:
 
 ## Artefatos reais do host
 
-Os artefatos reais conhecidos ou esperados do host Hostinger para este contexto incluem:
+Os artefatos reais conhecidos ou esperados do host Hostinger incluem:
 
 ### Host e sistema
 
 - VPS Hostinger
 - Debian
+- hostname técnico:
+  - `srv1353392.hstgr.cloud`
 
-### Edge público
+### Hostnames públicos canônicos
+
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
+
+### Hostnames não ativos para esta borda
+
+- `portal.haxixesmokeclub.com`
+- `api.haxixesmokeclub.com`
+
+### Borda pública
 
 - Nginx
-- borda pública do portal
-- borda pública da Static API v2
+- arquivo principal reconciliado:
+  - `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
 
-### TLS
+### Inventário de Nginx observado
 
-- Certbot
-- certificados do lado Hostinger
-- exposição HTTPS do domínio público do portal
+- `/etc/nginx/nginx.conf`
+- `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
+- `/etc/nginx/sites-available/default`
+- `/etc/nginx/sites-available/redirect_to_https`
+- `/etc/nginx/sites-available/auth-api.haxixesmokeclub.com`
 
-### Substrate de containers
+### Automação `systemd`
 
-- Docker
-- daemon Docker no host
+- `gen-all-v2.service`
+- `gen-all-v2.timer`
+- `gen-health.service`
+- `gen-health.timer`
+- units granulares instaladas para `matches`, `players`, `ranking` e `content/news`
 
-### Automação
+### Scripts reconciliados no host
 
-- `systemd`
-- timers e services do host ligados à geração/publicação do lado portal
+- `/usr/local/bin/gen-all-v2.sh`
+- `/usr/local/bin/gen-health.sh`
+- `/usr/local/bin/gen-maps.sh`
+- `/usr/local/bin/gen-match-details-incremental.sh`
+- `/usr/local/bin/gen-matches.sh`
+- `/usr/local/bin/gen-players-from-ranking.sh`
+- `/usr/local/bin/gen-player.sh`
+- `/usr/local/bin/gen-players-incremental.sh`
+- `/usr/local/bin/gen-ranking.sh`
 
-### Filesystem público
+### Base operacional do portal
+
+- `/opt/cs2-portal/`
+- `/opt/cs2-portal/bin/`
+- `/opt/cs2-portal/locks/`
+- `/opt/cs2-portal/sql/`
+- `/opt/cs2-portal/state/`
+
+### Locks reconciliados
+
+- `/opt/cs2-portal/locks/gen-all-v2.lock`
+- `/opt/cs2-portal/locks/gen-content-news.lock`
+- `/opt/cs2-portal/locks/gen-content-news-items.lock`
+
+### Statefiles reconciliados
+
+- `/opt/cs2-portal/state/matches_last_matchid`
+- `/opt/cs2-portal/state/players_last_matchid`
+
+### Raízes públicas relevantes
 
 - `/var/www/portal/cs2/`
 - `/var/www/api/cs2/v2/`
 
-### Filesystem operacional
-
-- `/opt/cs2-portal/`
-- `/opt/cs2-portal/locks/`
-- `/opt/cs2-portal/state/`
-- `/opt/cs2-portal/sql/`
-- `/usr/local/bin/`
-
-### Base estrutural do lado AMP
+### Árvore AMP / jogo
 
 - `/home/amp/.ampdata/instances/`
 
@@ -211,27 +282,42 @@ Os serviços principais conhecidos desta camada são:
 ### `nginx`
 
 Papel:
-- edge público do lado Hostinger
-- serving do portal e da Static API v2
+- edge HTTP/HTTPS do lado Hostinger
+- publicação do portal e da v2
+- terminação TLS do lado portal/game
 
 ### `docker`
 
 Papel:
-- substrate do lado game
-- sustentação do runtime containerizado associado ao Game Panel
+- substrate do workload do lado jogo
+- apoio operacional ao container `AMP_MixHAXIXE01`
 
-### `systemd`
-
-Papel:
-- orquestração de services e timers do host
-- suporte à automação recorrente da camada pública
-
-### Certbot e renovação de certificados
+### `certbot`
 
 Papel:
-- manutenção da camada HTTPS do lado Hostinger
+- renovação de certificados do lado Hostinger
 
-Esses componentes formam o núcleo mínimo da infraestrutura base do lado game + portal.
+### `gen-all-v2.service`
+
+Papel:
+- pipeline agregada principal da Static API v2
+
+### `gen-health.service`
+
+Papel:
+- geração recorrente do `health.json`
+
+### units granulares de geração
+
+Papel:
+- infraestrutura instalada para geração segmentada
+- suporte técnico e histórico da pipeline
+
+### `hsc-auth-api.service` (residual)
+
+Papel atual correto:
+- drift residual / legado operacional
+- não runtime canônico da Auth API
 
 ---
 
@@ -239,11 +325,19 @@ Esses componentes formam o núcleo mínimo da infraestrutura base do lado game +
 
 Os paths críticos conhecidos deste contexto incluem:
 
-### Publicação do portal
+### Configuração principal do Nginx
+
+- `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
+
+### Árvore principal do Nginx
+
+- `/etc/nginx/`
+
+### Portal público
 
 - `/var/www/portal/cs2/`
 
-### Publicação da Static API v2
+### Static API v2 pública
 
 - `/var/www/api/cs2/v2/`
 
@@ -251,15 +345,15 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/opt/cs2-portal/`
 
-### Locks
+### Scripts operacionais
+
+- `/usr/local/bin/`
+
+### Locks do pipeline
 
 - `/opt/cs2-portal/locks/`
 
-### Lock global principal
-
-- `/opt/cs2-portal/locks/gen-all-v2.lock`
-
-### Statefiles
+### Statefiles do pipeline
 
 - `/opt/cs2-portal/state/`
 
@@ -267,17 +361,17 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/opt/cs2-portal/sql/`
 
-### Scripts operacionais
-
-- `/usr/local/bin/`
-
-### Base estrutural da instância AMP
+### Árvore das instâncias AMP
 
 - `/home/amp/.ampdata/instances/`
 
+### Unit residual da Auth API
+
+- `/etc/systemd/system/hsc-auth-api.service`
+
 Regra prática:
 
-- qualquer mudança nesses paths deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
+- qualquer mudança nesses paths ou na relação entre borda, automação e publicação deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
 
@@ -285,161 +379,203 @@ Regra prática:
 
 Os componentes estruturais mais importantes já reconciliados neste contexto são:
 
+### VPS Hostinger
+
+Base física/lógica do lado game + portal do ecossistema.
+
 ### Debian
 
-Base do host que sustenta serviços, paths, automação e publishing.
+Sistema operacional do substrate.
 
 ### Nginx
 
-Borda pública do lado Hostinger.
-
-### Certbot
-
-Suporte de TLS da borda pública.
+Borda pública e camada de publicação do lado Hostinger.
 
 ### Docker host
 
-Substrate do lado game.
+Substrate do lado jogo.
 
-### systemd + timers
+### Certbot
 
-Automação recorrente do host.
+Sustentação da camada TLS.
 
-### Filesystem público
+### systemd
 
-Camada efetivamente servida ao usuário final.
+Heartbeat operacional da automação do host.
 
-### Filesystem operacional
+### Base operacional `/opt/cs2-portal/`
 
-Camada onde vivem ETL, locks, statefiles, SQLs e scripts.
+Estrutura viva da pipeline pública do portal/v2.
 
-### Árvore AMP
+### Família `gen-*`
 
-Base estrutural do lado game, relevante para dependências indiretas do portal.
-
----
-
-## Ownership, grupos e leitura pública
-
-As convenções de ownership e grupo já reconciliadas como relevantes incluem a coexistência operacional entre:
-
-- `amp`
-- `www-data`
-
-Esse ponto é importante porque:
-
-- `amp` preserva o lado operacional do runtime do jogo e da árvore AMP
-- `www-data` representa a leitura pública do Nginx
-- a camada pública do host depende de artefatos que precisam ser gerados por uma parte do sistema e lidos por outra
-
-Regra importante:
-
-- qualquer drift de owner/group em paths críticos pode quebrar publicação, ETL ou serving mesmo com serviços aparentemente saudáveis
+Scripts reais do pipeline e geração pública.
 
 ---
 
-## Workloads dependentes desta base
+## Componentes já reconciliados
 
-Os principais workloads sustentados por esta infraestrutura são:
+Os itens abaixo já possuem relevância reconciliada suficiente no contexto atual.
 
-### Lado Game Panel
+### Hostname técnico do host
 
-- AMP
-- instância `MixHAXIXE01`
-- servidor CS2
-- origem do `matchzy.db`
+- `srv1353392.hstgr.cloud`
 
-### Lado Portal Estático
+### Hostnames públicos canônicos do lado Hostinger
 
-- portal público
-- Static API v2
-- ETL Bash
-- publishing público
-- same-origin de conteúdo, quando aplicável
+- `haxixesmokeclub.com`
+- `www.haxixesmokeclub.com`
 
-Regra arquitetural:
+### Edge pública principal do host
 
-- este documento inventaria a base
-- a semântica operacional dos workloads vive em seus próprios contextos
+- Nginx
+- `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
+
+### Timers ativos principais do lado portal/v2
+
+- `gen-health.timer`
+- `gen-all-v2.timer`
+
+### Services principais da automação pública
+
+- `gen-health.service`
+- `gen-all-v2.service`
+
+### Comando agregador real da v2
+
+- `/usr/local/bin/gen-all-v2.sh`
+
+### Base operacional reconciliada
+
+- `/opt/cs2-portal/`
+
+### Locks reconciliados
+
+- `gen-all-v2.lock`
+- `gen-content-news.lock`
+- `gen-content-news-items.lock`
+
+### Drift residual identificado
+
+- vhost/config residual de `auth-api.haxixesmokeclub.com` na Hostinger
+- `hsc-auth-api.service` ainda presente no host
+
+Esses itens já devem ser tratados como parte da verdade operacional do contexto.
+
+---
+
+## Dependências cruzadas
+
+Os principais workloads e dependências cruzadas deste contexto incluem:
+
+### Dependência do lado portal
+
+A publicação pública depende de:
+
+- Nginx íntegro
+- paths públicos corretos
+- timers/services funcionando
+- scripts `gen-*` íntegros
+- base `/opt/cs2-portal/` saudável
+
+### Dependência do lado jogo
+
+O substrate da Hostinger depende de:
+
+- Docker íntegro
+- árvore AMP íntegra
+- persistência do lado CS2 saudável
+
+### Dependência de TLS
+
+O host depende de:
+
+- Nginx
+- Certbot
+- hostnames públicos reais corretos
+
+### Dependência de separação arquitetural
+
+A leitura correta do ecossistema depende de:
+
+- Hostinger = jogo + portal + v2
+- Lightsail = Auth API
+- qualquer resquício de Auth API na Hostinger = drift residual
 
 ---
 
 ## Comandos de validação
 
-Os comandos abaixo formam um kit mínimo de validação da camada-base Hostinger.
+Os comandos abaixo formam um kit mínimo de validação da camada Hostinger.
 
-### Validar Nginx
+### Validar hostname técnico
+
+```bash
+hostname -f
+```
+
+### Validar hostnames públicos principais
+
+```bash
+curl -I https://haxixesmokeclub.com/
+curl -I https://www.haxixesmokeclub.com/
+```
+
+### Validar sintaxe do Nginx
 
 ```bash
 sudo nginx -t
-sudo systemctl status nginx
-sudo journalctl -u nginx -n 100 --no-pager
 ```
 
-### Validar Docker
+### Validar configuração relevante do Nginx
 
 ```bash
-sudo systemctl status docker
+sudo nginx -T | grep -nE "server_name|root |alias "
+sudo nginx -T | sed -n '200,320p'
+```
+
+### Validar inventário de arquivos do Nginx
+
+```bash
+find /etc/nginx -maxdepth 3 -type f | sort
+```
+
+### Validar timers relevantes do host
+
+```bash
+systemctl list-timers --all --no-pager | grep -Ei 'gen|v2|health|hsc|portal'
+```
+
+### Validar unit files relevantes
+
+```bash
+systemctl list-unit-files --type=service --no-pager | grep -Ei 'gen|v2|health|hsc|portal'
+systemctl list-unit-files --type=timer --no-pager | grep -Ei 'gen|v2|health|hsc|portal'
+```
+
+### Validar campos principais das units
+
+```bash
+grep -RInE 'Description=|ExecStart=|WorkingDirectory=|User=|Group=|OnCalendar=|WantedBy=' /etc/systemd /lib/systemd/system 2>/dev/null | grep -Ei 'gen|v2|health|hsc|portal'
+```
+
+### Validar scripts principais do host
+
+```bash
+ls -lah /usr/local/bin | grep -Ei 'gen|v2|health|portal|hsc'
+```
+
+### Validar base operacional do portal
+
+```bash
+ls -lah /opt/cs2-portal
+find /opt/cs2-portal -maxdepth 2 -type f | sort
+```
+
+### Validar workload Docker do lado jogo
+
+```bash
 docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}"
-sudo journalctl -u docker -n 100 --no-pager
-```
-
-### Validar timers e services do host
-
-```bash
-systemctl list-timers --all
-```
-
-### Validar árvores públicas
-
-```bash
-ls -lah /var/www/portal/cs2/
-ls -lah /var/www/api/cs2/v2/
-```
-
-### Validar artefato público da v2
-
-```bash
-jq . /var/www/api/cs2/v2/health.json
-```
-
-### Validar árvores operacionais
-
-```bash
-ls -lah /opt/cs2-portal/
-ls -lah /opt/cs2-portal/locks/
-ls -lah /opt/cs2-portal/state/
-ls -lah /opt/cs2-portal/sql/
-ls -lah /usr/local/bin/
-```
-
-### Validar árvore AMP
-
-```bash
-ls -lah /home/amp/.ampdata/instances/
-```
-
-### Validar acesso público ao portal
-
-Substitua pelo domínio público vigente.
-
-```bash
-curl -I https://SEU_DOMINIO/
-```
-
-### Validar acesso público à v2
-
-Substitua pelo path público real da v2.
-
-```bash
-curl -I https://SEU_DOMINIO/SEU_PATH_PUBLICO_DA_V2/health.json
-```
-
-### Validar camada TLS
-
-```bash
-certbot --version
-sudo certbot certificates
 ```
 
 ---
@@ -448,30 +584,27 @@ sudo certbot certificates
 
 Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Hostname público canônico final do lado Hostinger
+### 1. Root/alias final completo de todos os blocos públicos relevantes
 
-É necessário fixar com confirmação operacional qual é o domínio/hostname produtivo oficial vigente do portal e da v2.
+Os blocos principais já estão reconciliados, mas ainda há ganho possível em congelar a fotografia final completa do vhost público.
 
-### 2. Nomes exatos dos timers e services do lado portal
+### 2. Política fina de renovação/certificados em runtime
 
-A intenção operacional da automação está reconciliada, mas os nomes finais de todas as units relevantes ainda precisam ser confirmados diretamente no host.
+A camada Certbot já está corretamente posicionada, mas detalhes finos do fluxo de renovação ainda podem ser refinados no documento específico.
 
-### 3. Root/alias final exato dos vhosts públicos
+### 3. Papel atual exato das units granulares desativadas
 
-Os paths em filesystem estão reconciliados.  
-A confirmação final da forma como o Nginx aponta para eles ainda deve ser fechada no ambiente real.
+Elas já estão reconciliadas como instaladas, mas o papel operacional pretendido delas ainda pode ser explicitado melhor no futuro.
 
-### 4. Convenção final de ownership e grupo dos diretórios mais sensíveis
+### 4. Cleanup técnico do drift residual da Auth API na Hostinger
 
-A lógica entre `amp` e `www-data` está clara, mas a fotografia final exata dos diretórios mais críticos ainda pode ser refinada com validação direta do host.
+O drift já foi identificado.  
+Ainda falta decidir e executar a limpeza técnica correspondente no host.
 
-### 5. Detalhes finos da renovação automática de certificados
+### 5. Auditoria de eventuais backups/configs antigas do Nginx
 
-A presença do Certbot e o papel da camada TLS estão reconciliados, mas o mecanismo exato já configurado no host ainda pode ser explicitado melhor após validação direta.
-
-### 6. Eventuais logs adicionais fora de `journalctl`
-
-É útil confirmar, no host real, se existem logs locais específicos da camada Hostinger que devam ser referenciados formalmente neste contexto.
+Já há evidência de arquivos `.bak` na árvore de configuração do host.  
+Uma auditoria futura ainda pode classificá-los melhor.
 
 ---
 
@@ -479,13 +612,11 @@ A presença do Certbot e o papel da camada TLS estão reconciliados, mas o mecan
 
 Os itens abaixo não pertencem ao inventário canônico da Infra Hostinger:
 
-- runbooks de scrim, veto, coach e warmup
-- operação detalhada do AMP
-- MatchZy em profundidade
-- pipeline ETL em detalhe operacional fino
-- contratos JSON campo a campo
-- frontend do portal em detalhe
-- Auth API no Lightsail
+- runtime canônico da Auth API no Lightsail
+- MariaDB local da Auth API
+- inventário detalhado dos plugins carregados no Game Panel
+- contratos JSON da v2
+- frontend em nível de componente
 - credenciais reais
 - arquivos de acesso sensíveis
 - documentação histórica não reconciliada
@@ -498,12 +629,12 @@ Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo norma
 
 Os limites documentais deste contexto são:
 
-- ele documenta a camada-base da VPS Hostinger
-- ele não documenta sozinho os workloads superiores
+- ele documenta o substrate Hostinger
+- ele não documenta sozinho o lado jogo em detalhe
+- ele não documenta sozinho o Portal Estático em detalhe
 - ele não substitui o índice mestre
 - ele não substitui impl-logs históricos
-- ele não deve absorver material sensível
-- ele depende de confirmação periódica contra o host real para permanecer confiável
+- ele depende de confirmação periódica contra o ambiente real para permanecer confiável
 
 ---
 
@@ -511,14 +642,15 @@ Os limites documentais deste contexto são:
 
 Este documento deve ser atualizado quando houver:
 
-- mudança de path crítico
-- mudança de hostname público oficial do lado Hostinger
-- mudança de serviço estrutural da camada
-- mudança relevante de ownership/grupo em áreas críticas
-- alteração relevante do inventário de automação do host
+- mudança de hostname público canônico do lado Hostinger
+- mudança relevante na estrutura Nginx do host
+- mudança do comando agregador da v2
+- mudança relevante na base `/opt/cs2-portal/`
+- mudança relevante na malha de timers/services do host
 - confirmação ou resolução de item pendente listado aqui
+- cleanup do drift residual da Auth API neste host
 
-Mudanças pequenas de comportamento de um workload superior devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
+Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
 
 ---
 
@@ -527,10 +659,11 @@ Mudanças pequenas de comportamento de um workload superior devem ser refletidas
 Este documento pode ser considerado maduro quando:
 
 - os artefatos reais do host estiverem confirmados sem ambiguidade
-- os paths críticos estiverem validados no ambiente real
-- o hostname público oficial do lado Hostinger estiver fixado
+- hostnames, configuração principal do Nginx e automação `systemd` estiverem claramente reconciliados
+- a base operacional do portal estiver corretamente posicionada
+- o drift residual da Auth API na Hostinger estiver explicitado
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
-- ele puder ser usado como inventário confiável da camada-base sem depender do master legado
+- ele puder ser usado como inventário confiável da Infra Hostinger sem depender do master legado
 
 ---
 
