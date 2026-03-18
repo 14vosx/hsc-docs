@@ -2,16 +2,17 @@
 
 ## Objetivo
 
-Documentar a rotina operacional de backup e restore do contexto AWS Lightsail da Auth API, com foco na persistência local em MariaDB e nos cuidados necessários para preservar recuperabilidade, previsibilidade e rastreabilidade.
+Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o diretório reconciliado dos dumps, o script real observado no host, o formato dos artefatos de backup, o estado atual da evidência de retenção e o procedimento seguro de restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação prática.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- o que é considerado artefato crítico de backup neste contexto
-- como o backup do banco é tratado operacionalmente
-- qual a rotina conhecida de execução e retenção
-- como validar se os backups estão sendo gerados
-- quais cuidados devem existir antes de qualquer restore
-- quais limites e riscos operacionais existem no processo de recuperação
+- onde os dumps reais do banco estão sendo gravados
+- qual script real de backup existe no host
+- qual é o padrão de naming dos dumps observados
+- qual log de backup já foi reconciliado
+- como validar a existência e a saúde básica da camada de backup
+- como executar um restore de forma controlada
+- quais partes do fluxo já estão confirmadas e quais ainda precisam de validação prática
 
 ---
 
@@ -19,56 +20,83 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- artefatos críticos de backup do contexto
-- backup do MariaDB local
-- rotina conhecida de backup
-- retenção conhecida
-- verificação operacional do backup
-- princípios de restore
-- riscos de restore no contexto da Auth API
+- diretório real de dumps do MariaDB no Lightsail
+- script real de backup observado no host
+- arquivos de dump já encontrados
+- log real da camada de backup
+- estado observado do serviço MariaDB
+- convenções reconciliadas de naming dos dumps
+- validações operacionais mínimas da camada
+- procedimento seguro de restore em nível operacional
+- limitações e pendências ainda abertas dessa camada
 
 Este documento não cobre em profundidade:
 
-- backup completo do host em nível de infraestrutura
-- dump detalhado de cada tabela
-- procedimentos avançados de recuperação ponto no tempo
-- backup de secrets em sistemas externos
-- fluxo completo de deploy e rollback de aplicação
-- troubleshooting geral do host
+- modelagem do schema da Auth API
+- deploy/release da aplicação Node
+- configuração completa do Nginx
+- tuning avançado do MariaDB
+- política final de retenção, porque ainda não foi congelada a partir do script
+- restore end-to-end já executado e certificado no host atual
 
-Esses tópicos vivem em documentos complementares ou ainda dependem de formalização adicional.
+Esses tópicos vivem em documentos próprios do contexto `04-infra-aws-lightsail` ou exigem nova reconciliação prática.
 
 ---
 
 ## Estado atual
 
-O estado operacional conhecido deste contexto indica:
+O estado operacional conhecido e reconciliado da camada de backup do Lightsail é:
 
-- MariaDB local como persistência da Auth API
-- existência de script operacional de backup em `/opt/hsc/backup-mariadb.sh`
-- rotina diária de execução
-- retenção operacional conhecida de 14 dias
-- foco principal do backup na preservação do banco `hsc_auth`
+- existe um script real de backup em:
+  - `/opt/hsc/backup-mariadb.sh`
+- existe um diretório real de dumps em:
+  - `/opt/hsc/backups/mariadb/`
+- existe um log real da camada de backup em:
+  - `/opt/hsc/backups/mariadb/backup.log`
+- existem múltiplos dumps reais comprimidos no host com naming consistente
+- os dumps observados usam extensão:
+  - `.sql.gz`
+- o prefixo observado dos arquivos é:
+  - `hsc_auth_`
+- o MariaDB local está ativo no host
+- o serviço reconciliado do banco é:
+  - `mariadb.service`
+- o banco está aceitando conexões locais via socket:
+  - `/run/mysqld/mysqld.sock`
 
-Também é conhecido que:
+Também ficou reconciliado no host que:
 
-- o banco roda localmente no host Lightsail
-- o restore precisa ser tratado com cautela, pois rollback de aplicação não equivale a rollback de banco
-- a recuperabilidade do contexto depende não apenas da existência do dump, mas também de sua consistência e utilizabilidade real
+- o diretório `/var/backups` não é o diretório real dos dumps da Auth API
+- `/var/backups` contém backups de sistema/pacote, não os dumps principais do banco da Auth API
+- a automação exata que dispara o script de backup ainda não foi completamente reconciliada por `systemd` ou `cron`
+- a evidência atual sugere execução recorrente diária por volta de `03:15Z`, mas essa cadência ainda deve ser tratada como observação empírica, não como contrato formal congelado
+
+Leitura canônica:
+
+- o diretório real dos dumps já está fechado sem ambiguidade
+- o fluxo de backup existe de forma material no host
+- o ponto ainda não totalmente fechado é o mecanismo exato de agendamento e a política final de retenção extraída do script
 
 ---
 
 ## Source of truth / evidências
 
-As principais evidências deste documento, nesta fase de migração documental, são:
+As principais evidências deste documento, nesta fase de reconciliação, são:
 
-- manual operacional da Auth API em AWS Lightsail
-- documentação consolidada do ecossistema HSC
-- reconciliação documental do script `/opt/hsc/backup-mariadb.sh`
-- reconciliação documental da rotina diária de backup
-- impl-logs e snapshots técnicos ligados ao schema da Auth API
+- presença do script:
+  - `/opt/hsc/backup-mariadb.sh`
+- presença do diretório:
+  - `/opt/hsc/backups/mariadb/`
+- presença do log:
+  - `/opt/hsc/backups/mariadb/backup.log`
+- presença dos dumps reais:
+  - `hsc_auth_*.sql.gz`
+- saída real de `systemctl status mariadb`
+- presença do socket local:
+  - `/run/mysqld/mysqld.sock`
+- inventário real do filesystem no host
 
-Enquanto a migração canônica do contexto não estiver concluída, essas fontes seguem servindo como base de reconciliação.
+Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
 
 ---
 
@@ -79,411 +107,526 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/README.md`
 - `docs/04-infra-aws-lightsail/architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
-- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
+- `docs/04-infra-aws-lightsail/node-systemd.md`
+- `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/95-impl-log/`
+- `docs/04-infra-aws-lightsail/references-inventory.md`
 
-Este documento trata da preservação e recuperação de persistência.  
-Ele não substitui deploy/rollback de código nem troubleshooting geral do runtime.
-
----
-
-## Artefatos cobertos
-
-Os artefatos críticos cobertos por este documento são, prioritariamente:
-
-- banco MariaDB local da Auth API
-- database operacional `hsc_auth`
-- dumps gerados pela rotina de backup do banco
-
-Este documento não assume, nesta fase, uma política canônica já consolidada para backup versionado de:
-
-- working directory da aplicação
-- `.env`
-- certificados
-- arquivos completos do host
-- logs históricos
-
-Esses itens podem até existir em práticas operacionais paralelas, mas não devem ser afirmados como parte do backup canônico sem validação explícita.
+Este documento descreve a camada de backup e restore.  
+Ele não substitui os documentos de runtime da aplicação, inventário geral ou operação do MariaDB.
 
 ---
 
-## Papel do backup neste contexto
+## Diretório real dos dumps
 
-O backup existe para preservar a recuperabilidade da camada dinâmica do HSC.
+O diretório real reconciliado dos dumps do MariaDB da Auth API é:
 
-No contexto AWS Lightsail, isso é especialmente importante porque:
-
-- a Auth API depende de persistência local
-- sessões, auditoria, conteúdo e estruturas de domínio vivem no banco
-- falha de banco ou erro destrutivo pode comprometer operação administrativa e conteúdo
-- rollback de aplicação não reverte dados persistidos
-
-Portanto, o backup do banco é parte essencial da segurança operacional do contexto.
-
----
-
-## Backup do MariaDB
-
-O elemento principal de backup conhecido deste contexto é o MariaDB local.
-
-Estado operacional conhecido:
-
-- database principal: `hsc_auth`
-- estratégia: dump operacional automatizado via script
-- script conhecido: `/opt/hsc/backup-mariadb.sh`
-
-O objetivo desse backup é gerar cópia recuperável do estado do banco, suficiente para:
-
-- contingência
-- recuperação após incidente
-- validação de integridade estrutural
-- apoio operacional em situações de erro destrutivo
-
----
-
-## Script operacional conhecido
-
-O script operacional conhecido para backup do banco é:
-
-- `/opt/hsc/backup-mariadb.sh`
-
-Este script deve ser tratado como artefato operacional do contexto.
-
-Regras documentais importantes:
-
-- o caminho do script é canônico até revisão explícita
-- o conteúdo do script não precisa ser colado integralmente na documentação canônica
-- qualquer alteração relevante no comportamento do script deve ser refletida no impl-log e, se necessário, neste documento
-
----
-
-## Rotina e agendamento
-
-A rotina operacional conhecida para o backup do banco é:
-
-- execução diária
-- horário reconciliado: `03:15 UTC`
-
-Esse agendamento existe para:
-
-- garantir cadência mínima de preservação
-- reduzir risco de janelas longas sem backup
-- tornar o processo previsível e auditável
-
-Se o agendamento real mudar no host, este documento deve ser atualizado.
-
----
-
-## Retenção
-
-A retenção operacional conhecida é:
-
-- 14 dias
-
-Objetivo da retenção:
-
-- manter janela recente de recuperação
-- limitar acúmulo excessivo de artefatos
-- preservar histórico curto suficiente para contingência operacional básica
-
-Limite conhecido:
-- retenção curta não substitui estratégia mais ampla de continuidade
-- mas atende a uma postura prática e simples de operação, compatível com o desenho atual do contexto
-
----
-
-## Princípios de backup saudável
-
-Um backup saudável, neste contexto, não é apenas “arquivo gerado”.
-
-Ele precisa ser, idealmente:
-
-- recente
-- íntegro
-- utilizável
-- coerente com o banco atual
-- localizado em path conhecido
-- verificável sem ambiguidade
-
-Regra operacional:
-- backup não validado é melhor do que ausência total de backup, mas não deve ser tratado como garantia plena de recuperação
-
----
-
-## Validação de backup
-
-As validações mínimas esperadas de backup incluem:
-
-- confirmar que a rotina está executando
-- confirmar que os artefatos recentes existem
-- confirmar que o tamanho/estrutura dos dumps parecem coerentes
-- confirmar que a retenção está funcionando como esperado
-- registrar falha de geração como incidente operacional relevante
-
-Sem validação mínima, o contexto corre o risco de “achar” que possui backup quando, na prática, possui apenas automação quebrada.
-
----
-
-## Comandos de validação
-
-Como o path final de saída do dump não foi fixado aqui como canônico reconciliado, a validação deve começar pelo script e pelo resultado operacional real observado no host.
-
-### Verificar existência do script
-
-```bash
-ls -l /opt/hsc/backup-mariadb.sh
+```text
+/opt/hsc/backups/mariadb/
 ```
 
-### Inspecionar a rotina, quando necessário
+Leitura canônica:
 
-```bash
-sudo cat /opt/hsc/backup-mariadb.sh
-```
-
-### Procurar artefatos recentes de backup
-
-Substitua `SEU_DIRETORIO_DE_BACKUP` pelo diretório real validado no host.
-
-```bash
-ls -lah SEU_DIRETORIO_DE_BACKUP
-```
-
-### Verificar cron ou rotina equivalente, quando aplicável
-
-A forma exata depende da configuração real do host.  
-Quando necessário, validar a agenda efetivamente usada no sistema.
-
-### Validar serviço MariaDB antes de inferir qualquer problema de backup
-
-```bash
-sudo systemctl status mariadb
-```
+- este é o diretório principal da camada de backup do banco
+- qualquer documentação anterior apontando para outro local deve ser tratada como stale até nova validação
+- este diretório deve ser tratado como o alvo operacional principal de inventário, checagem de espaço, rotação e restore
 
 ---
 
-## Restore
+## Script real de backup
 
-O restore deve ser tratado como operação sensível e controlada.
+O script real reconciliado no host é:
 
-Objetivo do restore:
+```text
+/opt/hsc/backup-mariadb.sh
+```
 
-- recuperar estado persistido após incidente
-- restaurar banco a partir de dump conhecido
-- reduzir perda de dados dentro da janela disponível de retenção
+Leitura canônica:
+
+- este script existe materialmente no host
+- ele deve ser tratado como entrypoint real da rotina de backup do MariaDB
+- a lógica completa de retenção e disparo ainda precisa de leitura direta do script para congelamento absoluto
+- mesmo sem essa leitura linha a linha, já existe evidência suficiente para fechar o diretório real de destino e o naming dos dumps
+
+---
+
+## Log real da camada de backup
+
+O log reconciliado da camada de backup é:
+
+```text
+/opt/hsc/backups/mariadb/backup.log
+```
+
+Leitura canônica:
+
+- este arquivo é parte real do fluxo de backup
+- ele registra o caminho de saída dos dumps
+- ele já mostrou evidência de sucesso recorrente
+- ele também já mostrou ao menos um episódio histórico de falha de conexão do `mysqldump`
+
+Trecho operacional relevante já observado no host:
+
+- o log contém linhas `Out: /opt/hsc/backups/mariadb/...`
+- o log também registrou erro de conexão ao socket local em um momento anterior
+- isso confirma que o log deve ser tratado como artefato importante de troubleshooting da camada
+
+---
+
+## Artefatos de dump observados
+
+Os dumps reais observados no host incluem, entre outros:
+
+- `hsc_auth_2026-03-04T031501Z.sql.gz`
+- `hsc_auth_2026-03-05T031501Z.sql.gz`
+- `hsc_auth_2026-03-06T031501Z.sql.gz`
+- `hsc_auth_2026-03-07T031501Z.sql.gz`
+- `hsc_auth_2026-03-08T031501Z.sql.gz`
+- `hsc_auth_2026-03-09T031501Z.sql.gz`
+- `hsc_auth_2026-03-10T031501Z.sql.gz`
+- `hsc_auth_2026-03-11T031501Z.sql.gz`
+- `hsc_auth_2026-03-12T031501Z.sql.gz`
+- `hsc_auth_2026-03-13T031501Z.sql.gz`
+- `hsc_auth_2026-03-14T031501Z.sql.gz`
+- `hsc_auth_2026-03-15T031501Z.sql.gz`
+- `hsc_auth_2026-03-16T031501Z.sql.gz`
+- `hsc_auth_2026-03-17T031501Z.sql.gz`
+- `hsc_auth_2026-03-18T031502Z.sql.gz`
+
+Leitura canônica:
+
+- existe materialidade histórica suficiente para afirmar que a rotina de dump está funcionando de forma recorrente
+- o formato comprimido `.sql.gz` já está reconciliado
+- o prefixo `hsc_auth_` sugere fortemente associação com a base da Auth API
+- a convenção temporal está em UTC com marca no nome do arquivo
+
+---
+
+## Convenção de naming observada
+
+O padrão observado nos dumps é:
+
+```text
+hsc_auth_<timestamp UTC>.sql.gz
+```
+
+Exemplo:
+
+```text
+hsc_auth_2026-03-18T031502Z.sql.gz
+```
+
+Leitura canônica:
+
+- o naming inclui data e hora em UTC
+- a extensão final é `.sql.gz`
+- isso é adequado para:
+  - inventário rápido
+  - ordenação cronológica
+  - retenção por script
+  - restore direcionado por data
+
+---
+
+## Estado reconciliado do MariaDB
+
+O serviço de banco local reconciliado no host é:
+
+```text
+mariadb.service
+```
+
+Estado observado:
+
+- `active (running)`
+
+Versão observada no `systemctl status`:
+
+- `10.6.23-MariaDB-0ubuntu0.22.04.1`
+
+Socket observado:
+
+```text
+/run/mysqld/mysqld.sock
+```
+
+Porta observada:
+
+- `3306`
+
+Binding observado pelo próprio status do serviço:
+
+- `127.0.0.1`
+
+Leitura canônica:
+
+- o MariaDB local está saudável no momento da validação
+- o banco está preparado para atender a aplicação local e a rotina de dump
+- o socket local é parte importante da camada de backup, porque a falha histórica registrada no log foi justamente de conexão ao socket
+
+---
+
+## Cadência observada dos backups
+
+Com base nos dumps observados e no log reconciliado, existe evidência empírica de uma cadência recorrente próxima de:
+
+- um dump por dia
+- aproximadamente às `03:15Z`
+
+Leitura de precisão:
+
+- esta cadência ainda deve ser tratada como observação reconciliada
+- ela ainda não deve ser tratada como contrato formal definitivo até leitura completa do mecanismo de agendamento
+- o host não mostrou, nesta rodada, unit `systemd` ou entrada `cron` explicitamente nomeada para este backup
+- isso significa que o mecanismo de disparo ainda precisa de reconciliação adicional
+
+---
+
+## Retenção observada
+
+O conjunto de arquivos observados mostra uma sequência contínua recente de dumps diários.
+
+Também há indícios no `backup.log` de que arquivos mais antigos já foram manipulados ou removidos em algum momento.
+
+Leitura honesta:
+
+- existe evidência de retenção/rotação em prática
+- a política exata de retenção ainda não foi congelada com base no conteúdo do script
+- este documento não deve afirmar um número fechado de dias sem inspeção direta do `backup-mariadb.sh`
+
+Regra canônica:
+
+- política exata de retenção = ainda pendente de confirmação fina
+- diretório real e naming dos dumps = já reconciliados
+
+---
+
+## O que já está confirmado
+
+Os pontos abaixo já podem ser tratados como fechados:
+
+- existe script real de backup
+- o script real está em `/opt/hsc/backup-mariadb.sh`
+- os dumps reais vivem em `/opt/hsc/backups/mariadb/`
+- o log real vive em `/opt/hsc/backups/mariadb/backup.log`
+- os dumps usam `.sql.gz`
+- o prefixo observado é `hsc_auth_`
+- o MariaDB local está ativo no host
+- existe histórico recente suficiente de dumps para considerar a camada real, não hipotética
+
+---
+
+## O que ainda não está 100% fechado
+
+Os pontos abaixo ainda precisam de validação adicional para congelamento absoluto:
+
+- mecanismo exato de agendamento do backup
+- política exata de retenção
+- comando exato usado no script
+- base exata restaurada pelo dump, embora o naming aponte fortemente para `hsc_auth`
+- restore end-to-end já executado com validação prática no host atual
 
 Regra importante:
-- restore não deve ser executado de forma impulsiva
-- sempre considerar compatibilidade entre:
-  - dump restaurado
-  - release atual da aplicação
-  - schema esperado pela versão em produção
-  - necessidade de rollback ou não do código
+
+- este documento deve distinguir claramente evidência observada de inferência operacional
+- a confiabilidade aumenta muito quando essa distinção é preservada
 
 ---
 
-## Princípios de restore seguro
+## Runbook de validação rápida da camada de backup
 
-Antes de qualquer restore, validar:
+Este runbook deve ser usado:
 
-- qual incidente ocorreu
-- qual banco será restaurado
-- qual dump será usado
-- qual é a data/hora do dump
-- se a aplicação atual é compatível com o estado restaurado
-- se o host atual está saudável o suficiente para receber a restauração
-- se o estado atual precisa ser preservado antes do restore
+- após mudança em MariaDB
+- após mudança em deploy da Auth API
+- quando houver suspeita de ausência de dump recente
+- antes de executar restore
+- quando houver suspeita de falta de espaço ou falha histórica de backup
 
-Regra de ouro:
+### Objetivo
 
-**restore de banco é operação destrutiva ou potencialmente substitutiva, então nunca deve ser tratado como simples “reexecução de script”**
+Confirmar rapidamente se a camada de backup do banco parece saudável.
 
----
-
-## Estratégia mínima antes de restaurar
-
-Antes de restaurar, a prática recomendada é:
-
-1. identificar o escopo real do incidente
-2. congelar mudanças concorrentes no contexto
-3. registrar o estado atual
-4. gerar snapshot/dump do estado presente antes de sobrescrever qualquer coisa
-5. selecionar o dump de restore explicitamente
-6. validar compatibilidade com a release ativa
-7. restaurar de forma controlada
-8. validar app, banco e rotas funcionais após a operação
-
-Mesmo quando o restore for necessário, preservar o estado imediatamente anterior continua sendo prática importante de segurança operacional.
-
----
-
-## Validação pós-restore
-
-Depois de qualquer restore, validar no mínimo:
-
-- serviço MariaDB ativo
-- aplicação `hsc-auth-api` ativa
-- health local respondendo
-- health público respondendo
-- rotas públicas críticas respondendo
-- fluxos administrativos mínimos coerentes
-- ausência de erro crítico recorrente no `journalctl`
-
-Comandos típicos:
+### Validar presença do script
 
 ```bash
-sudo systemctl status mariadb
-sudo systemctl status hsc-auth-api
-curl -sS http://127.0.0.1:3000/health
-curl -sS https://SEU_DOMINIO/health
-curl -sS https://SEU_DOMINIO/content/news
-curl -sS https://SEU_DOMINIO/content/seasons
+ls -lah /opt/hsc/backup-mariadb.sh
 ```
 
+### Validar diretório de dumps
+
+```bash
+ls -lah /opt/hsc/backups/mariadb/
+```
+
+### Validar dump mais recente
+
+```bash
+find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | sort | tail -n 5
+```
+
+### Validar log
+
+```bash
+tail -n 50 /opt/hsc/backups/mariadb/backup.log
+```
+
+### Validar MariaDB
+
+```bash
+systemctl status mariadb --no-pager
+```
+
+### Critério de sucesso
+
+A camada é considerada minimamente saudável quando:
+
+- o script existe
+- o diretório de dumps existe
+- há dumps recentes no diretório
+- o log não indica falha persistente recente
+- o MariaDB está ativo
+
 ---
 
-## Restore e compatibilidade com aplicação
+## Runbook de inspeção de um dump antes do restore
 
-Restore de banco deve sempre ser interpretado junto com a release ativa da aplicação.
+Este runbook deve ser usado antes de qualquer restore.
 
-Risco central:
+### Objetivo
 
-- restaurar banco para estado incompatível com a versão atual do código
+Inspecionar um dump comprimido sem ainda restaurá-lo.
 
-Exemplos de incompatibilidade:
+### Ver arquivo alvo
 
-- tabela esperada pela aplicação não existe no dump restaurado
-- coluna usada pela release atual não existe
-- estado restaurado pressupõe versão mais antiga da aplicação
-- auditoria ou sessão ficam estruturalmente inconsistentes
+Substitua pelo arquivo desejado.
 
-Quando houver dúvida relevante de compatibilidade:
+```bash
+ls -lah /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz
+```
 
-- tratar restore junto com análise de release/rollback
-- consultar impl-log estrutural correspondente
-- evitar restore cego
+### Ver cabeçalho do dump descomprimido
+
+```bash
+gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | head -n 50
+```
+
+### Procurar linhas úteis no dump
+
+```bash
+gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | grep -Ei 'create database|use |insert into|drop table' | head -n 50
+```
+
+Leitura canônica:
+
+- a inspeção do dump deve preceder restore destrutivo
+- isso ajuda a confirmar:
+  - base alvo
+  - estrutura do dump
+  - presença de DDL e DML
+  - compatibilidade geral do artefato com a expectativa operacional
 
 ---
 
-## Restore e auditoria administrativa
+## Runbook de restore seguro
 
-Como o contexto usa trilha de auditoria administrativa, restore também pode impactar:
+Este runbook deve ser tratado como procedimento operacional seguro e conservador.
 
-- histórico de ações administrativas
-- consistência temporal de mutações
-- rastreabilidade de writes recentes
+### Objetivo
 
-Isso não impede restore, mas exige consciência operacional.
+Restaurar um dump de forma controlada, evitando sobrescrever a base viva sem validação.
 
-Regra prática:
-- restore de banco em ambiente vivo deve considerar que parte do histórico administrativo recente pode ser revertida junto com os dados
+### Regra de ouro
+
+**não restaurar diretamente sobre a base produtiva sem confirmar o arquivo, a base-alvo e o plano de rollback**
+
+### Estratégia preferida
+
+1. inspecionar o dump
+2. restaurar primeiro em base temporária
+3. validar schema e volume
+4. só então decidir por restore produtivo
+
+### Exemplo de restore para base temporária
+
+Crie uma base temporária de validação:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE hsc_auth_restore_test;"
+```
+
+Restaure o dump nela:
+
+```bash
+gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | mysql -u root -p hsc_auth_restore_test
+```
+
+Valide presença de tabelas:
+
+```bash
+mysql -u root -p -e "SHOW TABLES FROM hsc_auth_restore_test;"
+```
+
+Valide volume básico:
+
+```bash
+mysql -u root -p -e "SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema = 'hsc_auth_restore_test';"
+```
+
+### Restore produtivo
+
+Restore produtivo só deve acontecer depois de:
+
+- confirmar o dump correto
+- confirmar a base-alvo correta
+- garantir janela operacional adequada
+- garantir rollback ou snapshot anterior
+- garantir que a Auth API seja parada se isso fizer parte do plano seguro
+
+Exemplo genérico, apenas quando o alvo estiver 100% confirmado:
+
+```bash
+gunzip -c /opt/hsc/backups/mariadb/hsc_auth_2026-03-18T031502Z.sql.gz | mysql -u root -p NOME_REAL_DA_BASE
+```
+
+Observação importante:
+- o naming observado sugere fortemente que a base real seja `hsc_auth`
+- ainda assim, o nome da base produtiva deve ser confirmado antes de restore destrutivo
+
+---
+
+## Relação entre restore e aplicação Node
+
+O restore do banco deve ser lido em conjunto com a aplicação.
+
+Isso significa:
+
+- restore pode afetar imediatamente a Auth API
+- inconsistência entre schema restaurado e versão da app pode quebrar endpoints
+- restore não deve ser tratado como tarefa isolada do banco
+
+Sequência prudente em operações sensíveis:
+
+1. validar unit da app
+2. validar backup escolhido
+3. decidir se a app será parada
+4. executar restore
+5. validar MariaDB
+6. validar `hsc-auth-api.service`
+7. validar `/health` local e público
+
+Comandos úteis:
+
+```bash
+systemctl status hsc-auth-api.service --no-pager
+curl -I http://127.0.0.1:3000/health
+curl -I https://auth-api.haxixesmokeclub.com/health
+```
 
 ---
 
 ## Problemas comuns
 
-### 1. Backup existe, mas não é utilizável
+### 1. Dump recente não aparece
+
+Causas comuns:
+
+- backup não executou
+- script falhou
+- problema de permissões
+- problema no MariaDB
+- agendamento real ainda desconhecido e interrompido
+
+Impacto:
+- falsa sensação de segurança
+- risco operacional alto antes de deploy ou mudança de schema
+
+---
+
+### 2. Log mostra falha de socket
+
+Causas comuns:
+
+- MariaDB indisponível no momento do backup
+- socket local não acessível
+- banco reiniciando
+- serviço parado
+
+Impacto:
+- dump do dia pode falhar
+- retenção histórica pode mascarar ausência de backup recente
+
+Evidência já reconciliada:
+- houve pelo menos um erro histórico de `mysqldump` ao tentar conectar em `/run/mysqld/mysqld.sock`
+
+---
+
+### 3. Dump existe, mas restore quebra
 
 Causas comuns:
 
 - dump incompleto
-- rotina quebrada há dias
-- arquivo corrompido
-- path de backup errado ou não documentado corretamente
+- base-alvo errada
+- incompatibilidade de schema
+- restore sobre app viva sem coordenação
+- permissões ou credenciais inadequadas
 
 Impacto:
-- falsa sensação de segurança
-- restore inviável no momento crítico
+- downtime
+- inconsistência de dados
+- troubleshooting mais complexo
 
 ---
 
-### 2. Backup recente, mas schema incompatível com a release atual
+### 4. Restore em base produtiva sem validação prévia
 
 Causas comuns:
 
-- aplicação evoluiu mais que o dump
-- mudança estrutural não reconciliada
-- tentativa de restore sem considerar compatibilidade de release
+- pressa operacional
+- ausência de base temporária
+- confiança excessiva no naming do arquivo
 
 Impacto:
-- aplicação volta a falhar após restore
-- troubleshooting se torna mais confuso
+- sobrescrita indevida
+- perda de estado atual
+- incidente evitável
 
 ---
 
-### 3. Restore é feito sem preservar o estado atual
+### 5. Confundir `/var/backups` com backup real da Auth API
 
 Causas comuns:
 
-- pressa em incidente
-- ausência de procedimento explícito
-- suposição de que o estado atual “já está perdido”
+- leitura superficial do host
+- presença de backups do sistema em `/var/backups`
 
 Impacto:
-- perda da chance de recuperar parcialmente o estado presente
-- perda de material útil para auditoria e pós-mortem
+- operador olha o diretório errado
+- camada real de dump do banco fica sem validação
+
+Regra canônica:
+
+- o diretório real da Auth API é `/opt/hsc/backups/mariadb/`
+- `/var/backups` não é a fonte principal desta camada
 
 ---
 
-### 4. Rotina diária deixou de rodar
+## Invariantes operacionais
 
-Causas comuns:
+Os invariantes conhecidos desta camada incluem:
 
-- agendamento quebrado
-- script alterado
-- permissões incorretas
-- problema de espaço ou ambiente
+- o script real de backup vive em `/opt/hsc/backup-mariadb.sh`
+- o diretório real dos dumps vive em `/opt/hsc/backups/mariadb/`
+- o log real da camada vive em `/opt/hsc/backups/mariadb/backup.log`
+- o naming observado dos dumps usa prefixo `hsc_auth_`
+- a extensão observada é `.sql.gz`
+- o MariaDB local está ativo via `mariadb.service`
+- o socket local observado é `/run/mysqld/mysqld.sock`
+- `/var/backups` não é o diretório principal da camada de backup da Auth API
+- a política exata de retenção ainda não está congelada sem leitura do script
+- o mecanismo exato de agendamento ainda não está 100% reconciliado
 
-Impacto:
-- aumento silencioso da janela sem backup válido
-
----
-
-### 5. Restore resolve banco, mas app continua falhando
-
-Causas comuns:
-
-- problema real estava também na release ativa
-- `.env` inconsistente
-- Nginx ou runtime do serviço degradado
-- incompatibilidade entre restore e aplicação
-
-Impacto:
-- recuperação parcial, mas não funcional
-
----
-
-## Riscos e cuidados
-
-Os principais riscos desta camada incluem:
-
-- confiar em backup não validado
-- tratar restore como procedimento trivial
-- restaurar dump incompatível com a release ativa
-- esquecer de preservar o estado atual antes de restaurar
-- assumir que rollback de aplicação resolve problema de banco
-- manter retenção funcionando “por suposição”, sem conferência
-
-Cuidados permanentes:
-
-- validar periodicamente a existência dos dumps
-- registrar mudanças relevantes no fluxo de backup
-- tratar restore como operação controlada
-- sempre correlacionar banco e release da aplicação
-- manter este documento alinhado ao runtime real
-
----
-
-## Lacunas atuais
-
-As lacunas conhecidas ou prováveis deste contexto incluem:
-
-- ausência, nesta fase documental, de um passo a passo canônico completo de restore já reconciliado com o host real
-- ausência, até aqui, de formalização canônica do diretório exato de armazenamento dos dumps
-- dependência de validação futura para transformar restore em runbook totalmente operacional e detalhado
-
-Regra editorial importante:
-- registrar a lacuna explicitamente é melhor do que inventar procedimento “completo” sem lastro operacional
+Esses invariantes ajudam a preservar a leitura correta da camada de backup atual sem inventar certezas que ainda não foram confirmadas.
 
 ---
 
@@ -491,14 +634,14 @@ Regra editorial importante:
 
 Este documento não detalha:
 
-- script completo de backup
-- credenciais
-- diretório definitivo dos dumps sem validação adicional
-- restore completo comando a comando já certificado no host
-- políticas de backup de todo o servidor
-- snapshots de filesystem ou imagem da VM
+- conteúdo completo linha a linha do `backup-mariadb.sh`
+- credenciais reais de acesso ao banco
+- restore end-to-end já executado com certificação formal
+- política exata de retenção
+- política exata de agendamento
+- estratégia de snapshot do host além dos dumps SQL
 
-Esses pontos podem ser formalizados futuramente, após reconciliação adicional com o runtime real.
+Esses tópicos pertencem a futuras reconciliações finas.
 
 ---
 
@@ -506,12 +649,13 @@ Esses pontos podem ser formalizados futuramente, após reconciliação adicional
 
 Este documento pode ser considerado maduro quando:
 
-- o script de backup e seu agendamento estiverem confirmados no host real
-- o diretório real dos dumps estiver documentado sem ambiguidade
-- a retenção estiver validada
-- a rotina mínima de verificação estiver consolidada
-- o restore tiver um procedimento reconciliado com o ambiente real
-- ele puder ser usado como base confiável de preservação e recuperação do contexto sem depender do master legado
+- o diretório real dos dumps estiver explícito sem ambiguidade
+- o script real de backup estiver corretamente posicionado
+- o log da camada estiver formalizado
+- o runbook de validação estiver claro
+- o restore seguro estiver descrito com cautela adequada
+- a distinção entre fatos confirmados e pontos ainda pendentes estiver preservada
+- ele puder ser usado como referência confiável de backup/restore da Auth API sem depender do master legado
 
 ---
 

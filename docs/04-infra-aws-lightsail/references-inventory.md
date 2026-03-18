@@ -79,11 +79,18 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
 - a presença do vhost reconciliado em:
   - `/etc/nginx/sites-available/hsc-auth-api`
 - a resposta pública bem-sucedida de `/health`
+- o script real de backup do MariaDB:
+  - `/opt/hsc/backup-mariadb.sh`
+- o diretório real dos dumps:
+  - `/opt/hsc/backups/mariadb/`
+- o log real da camada de backup:
+  - `/opt/hsc/backups/mariadb/backup.log`
 
 Ainda restam pendências menores, principalmente ligadas a:
 
-- diretório final dos dumps de backup
-- detalhes finos do restore validado em host
+- mecanismo exato de agendamento do backup
+- política exata de retenção dos dumps
+- procedimento de restore validado de ponta a ponta
 - eventual confirmação de outras variáveis de ambiente fora da unit
 - cleanup do drift residual da borda antiga ainda presente na Hostinger
 
@@ -132,6 +139,7 @@ Usado para:
 - validar processo Node e porta local
 - validar arquivos de Nginx no host
 - validar o endpoint `/health`
+- validar script, diretório e log reais de backup
 - confirmar o estado real do runtime da Auth API
 
 Regra principal:
@@ -250,10 +258,21 @@ Os artefatos reais conhecidos ou esperados do host Lightsail para este contexto 
 
 - MariaDB local do contexto da Auth API
 
-### Camada de backup
+### Script real de backup
 
-- script e rotina de dump local
-- retenção operacional já reconciliada em alto nível
+- `/opt/hsc/backup-mariadb.sh`
+
+### Diretório real dos dumps
+
+- `/opt/hsc/backups/mariadb/`
+
+### Log real da camada de backup
+
+- `/opt/hsc/backups/mariadb/backup.log`
+
+### Dumps reais observados
+
+- `hsc_auth_*.sql.gz`
 
 Esses artefatos devem ser tratados como inventário-base do contexto até revisão explícita.
 
@@ -283,17 +302,25 @@ Papel:
 - aplicação dinâmica do ecossistema
 - runtime local atrás do reverse proxy
 
-### MariaDB local
+### `mariadb.service`
 
 Papel:
 - persistência relacional da Auth API
 - storage principal da camada dinâmica
+- dependência direta da camada de backup
 
-### systemd
+### `systemd`
 
 Papel:
 - sustentação do serviço da aplicação
 - apoio operacional para start, stop, restart e observabilidade
+
+### script `backup-mariadb.sh`
+
+Papel:
+- entrypoint real reconciliado da camada de backup do banco
+- geração dos dumps `.sql.gz`
+- alimentação do diretório real de backups da Auth API
 
 Esses componentes formam o núcleo mínimo da infraestrutura dinâmica do Lightsail.
 
@@ -331,9 +358,21 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `0.0.0.0:3000`
 
+### Script real de backup
+
+- `/opt/hsc/backup-mariadb.sh`
+
+### Diretório real dos dumps
+
+- `/opt/hsc/backups/mariadb/`
+
+### Log real da camada de backup
+
+- `/opt/hsc/backups/mariadb/backup.log`
+
 Regra prática:
 
-- qualquer mudança nesses paths ou nessa relação entre hostname, proxy, unit e runtime Node deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
+- qualquer mudança nesses paths ou nessa relação entre hostname, proxy, unit, runtime Node e backup do banco deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
 
@@ -385,6 +424,12 @@ Borda pública da API.
 
 Persistência principal do backend dinâmico.
 
+### Camada real de backup
+
+- `/opt/hsc/backup-mariadb.sh`
+- `/opt/hsc/backups/mariadb/`
+- `/opt/hsc/backups/mariadb/backup.log`
+
 ### Endpoint `/health`
 
 Ponto mínimo de validação pública e operacional da borda e da app.
@@ -435,6 +480,18 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - `/etc/nginx/sites-available/hsc-auth-api`
 
+### Script real de backup
+
+- `/opt/hsc/backup-mariadb.sh`
+
+### Diretório real dos dumps
+
+- `/opt/hsc/backups/mariadb/`
+
+### Log real da camada de backup
+
+- `/opt/hsc/backups/mariadb/backup.log`
+
 ### Endpoint público validado
 
 - `https://auth-api.haxixesmokeclub.com/health`
@@ -473,6 +530,16 @@ A aplicação depende de:
 - MariaDB local íntegro
 - credenciais e configuração operacional corretas
 - compatibilidade de schema com a versão atual da app
+
+### Dependência da camada de backup
+
+A resiliência do contexto depende de:
+
+- existência do script real de backup
+- escrita contínua no diretório `/opt/hsc/backups/mariadb/`
+- presença de dumps recentes
+- integridade do `backup.log`
+- disponibilidade do MariaDB local para permitir o dump
 
 ### Dependência de separação arquitetural
 
@@ -570,10 +637,41 @@ curl -I http://127.0.0.1:3000/health
 curl -sS http://127.0.0.1:3000/health
 ```
 
+### Validar presença do script de backup
+
+```bash
+ls -lah /opt/hsc/backup-mariadb.sh
+```
+
+### Validar diretório real dos dumps
+
+```bash
+ls -lah /opt/hsc/backups/mariadb/
+```
+
+### Validar dumps recentes
+
+```bash
+find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | sort | tail -n 10
+```
+
+### Validar log da camada de backup
+
+```bash
+tail -n 50 /opt/hsc/backups/mariadb/backup.log
+```
+
+### Validar MariaDB
+
+```bash
+systemctl status mariadb --no-pager
+```
+
 Regra prática:
 
 - se o processo existe e a porta responde, mas o hostname público não, o problema tende a estar na borda
 - se nem a unit, nem a porta respondem, o problema tende a estar no runtime da app ou no `systemd`
+- se a app está saudável, mas não há dump recente, o problema tende a estar na camada de backup e não no runtime principal da API
 
 ---
 
@@ -581,24 +679,29 @@ Regra prática:
 
 Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Diretório final dos dumps do backup
+### 1. Mecanismo exato de agendamento do backup
 
-Já está reconciliado que existe rotina de backup.  
-Ainda falta fixar sem ambiguidade o diretório final dos arquivos de dump.
+O diretório real e o script real já estão reconciliados.  
+Ainda falta congelar com total precisão como o backup é disparado no runtime atual.
 
-### 2. Procedimento de restore validado de ponta a ponta
+### 2. Política exata de retenção dos dumps
 
-A camada de backup já está posicionada corretamente, mas ainda pode ser refinada com validação prática do restore no host atual.
+Já há evidência prática de rotação/retensão.  
+Ainda falta extrair a regra exata do script ou do mecanismo real de agendamento.
 
-### 3. Eventuais outras variáveis de ambiente fora da unit
+### 3. Procedimento de restore validado de ponta a ponta
+
+A camada de backup já está corretamente posicionada, mas ainda pode ser refinada com validação prática do restore no host atual.
+
+### 4. Eventuais outras variáveis de ambiente fora da unit
 
 A unit já explicita `NODE_ENV=production`, mas ainda pode haver variáveis relevantes fora dela que mereçam ser formalizadas em momento próprio.
 
-### 4. Eventuais arquivos auxiliares de deploy
+### 5. Eventuais arquivos auxiliares de deploy
 
 É útil confirmar se existem paths adicionais estáveis de release/deploy que mereçam ser citados formalmente neste contexto.
 
-### 5. Cleanup do drift residual da Hostinger
+### 6. Cleanup do drift residual da Hostinger
 
 A presença de configuração residual antiga da Auth API na Hostinger já foi identificada, mas o cleanup ainda pertence a uma etapa posterior.
 
@@ -646,6 +749,8 @@ Este documento deve ser atualizado quando houver:
 - mudança do binding observado da app
 - mudança relevante no vhost do Nginx
 - mudança de path estrutural da operação da Auth API
+- mudança do script real de backup
+- mudança do diretório real dos dumps
 - confirmação ou resolução de item pendente listado aqui
 - mudança relevante na estratégia de backup ou runtime
 
@@ -658,8 +763,8 @@ Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no d
 Este documento pode ser considerado maduro quando:
 
 - os artefatos reais do host estiverem confirmados sem ambiguidade
-- hostname canônico, reverse proxy, unit `systemd` e runtime Node estiverem claramente reconciliados
-- o path do vhost da API e o path real do runtime estiverem fixados
+- hostname canônico, reverse proxy, unit `systemd`, runtime Node e camada de backup estiverem claramente reconciliados
+- o path do vhost da API, o path real do runtime e o diretório real dos dumps estiverem fixados
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
 - ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 
