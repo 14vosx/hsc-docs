@@ -18,18 +18,23 @@ Ela existe para registrar, de forma estável e auditável:
 
 O sistema documental do HSC já saiu da fase de intenção e entrou em estruturação real.
 
-Os **4 contextos canônicos iniciais já estão estruturados**:
+Os **4 contextos canônicos iniciais já foram estruturados**:
 
 1. Infra Hostinger
 2. Game Panel
 3. Portal Estático
 4. Infra AWS Lightsail
 
+Além deles, o contexto administrativo do produto já foi formalizado como novo contexto canônico:
+
+5. Backoffice Admin
+
 Isso significa que:
 
 - a navegação principal do repositório já deve acontecer por contexto
 - os antigos documentos amplos deixam de ser a navegação principal
 - a documentação nova já possui base suficiente para crescer de forma incremental
+- o Backoffice Admin já passa a existir como camada documental própria
 - a próxima fase passa a ser manutenção, reconciliação fina, impl-log, auditoria e expansão controlada
 
 ---
@@ -53,7 +58,7 @@ Regra importante:
 
 ---
 
-## Contextos canônicos iniciais
+## Contextos canônicos ativos
 
 ## `01-infra-hostinger/`
 
@@ -115,6 +120,28 @@ Cobre:
 - deploy/release/rollback
 - operações da Auth API
 - observabilidade e backup/restore
+
+---
+
+## `05-backoffice-admin/`
+
+Contexto da SPA administrativa do ecossistema HSC.
+
+Cobre:
+
+- shell administrativo
+- estrutura frontend Angular 20 + TypeScript + Signals
+- autenticação administrativa no frontend
+- guards e RBAC
+- contratos administrativos com a Auth API
+- runbooks funcionais do Backoffice
+- superfícies administrativas de `seasons`, `news` e `events`
+
+Regra importante:
+
+- este contexto existe para a camada administrativa protegida
+- ele não substitui o Portal público
+- ele não absorve operação de host, ETL ou runtime profundo da Auth API
 
 ---
 
@@ -182,10 +209,11 @@ Papel:
 
 ## Estado da migração
 
-A migração documental inicial pode ser lida assim:
+A migração documental atual pode ser lida assim:
 
 - governança → ativa
-- contextos canônicos iniciais → estruturados
+- 4 contextos canônicos iniciais → estruturados
+- contexto `05-backoffice-admin` → formalizado
 - documentação antiga ampla → ainda útil como apoio histórico
 - legado → deixa de governar o sistema documental
 - próxima fase → manutenção incremental e expansão disciplinada
@@ -193,13 +221,14 @@ A migração documental inicial pode ser lida assim:
 Em termos práticos:
 
 - a base nova já existe
+- o contexto administrativo já nasceu formalmente
 - agora o objetivo é evitar voltar ao padrão antigo de acúmulo difuso
 
 ---
 
 ## O que ainda não é a fase principal
 
-Apesar dos 4 contextos iniciais já estarem estruturados, ainda não estamos, por padrão, na fase de:
+Apesar de os contextos principais já estarem estruturados, ainda não estamos, por padrão, na fase de:
 
 - publicação web da documentação
 - expansão indiscriminada de subcontextos
@@ -218,7 +247,7 @@ A prioridade agora é:
 
 ## Próxima fase recomendada do repositório
 
-Com os 4 contextos canônicos iniciais estruturados, a próxima fase natural do sistema documental é:
+Com os contextos canônicos ativos já formalizados, a próxima fase natural do sistema documental é:
 
 ### 1. ativar o diretório `95-impl-log/`
 
@@ -298,7 +327,7 @@ Esta pasta deve ser revisada quando houver:
 A governança documental do HSC pode ser considerada saudável quando:
 
 - qualquer pessoa consegue entender por onde começar
-- os 4 contextos iniciais canônicos estão claramente posicionados
+- os contextos canônicos ativos estão claramente posicionados
 - o índice mestre está coerente com a estrutura real
 - o sistema documental está explícito e utilizável
 - o repositório consegue crescer sem voltar a depender de masters monolíticos

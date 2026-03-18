@@ -59,16 +59,21 @@ Se um arquivo não reduz ambiguidade, ele provavelmente não precisa existir naq
 
 ---
 
-## Contextos canônicos iniciais
+## Contextos canônicos ativos
 
-Os contextos canônicos iniciais do HSC são:
+Os contextos canônicos ativos do HSC, neste estágio, são:
 
 1. Infra Hostinger
 2. Game Panel
 3. Portal Estático
 4. Infra AWS Lightsail
+5. Backoffice Admin
 
-Eles correspondem às quatro áreas operacionais principais do ecossistema neste estágio.
+Leitura importante:
+
+- os quatro primeiros formam a base inicial da estruturação por contexto
+- `05-backoffice-admin` formaliza a camada administrativa do produto como contexto canônico próprio
+- a expansão de contexto continua permitida, desde que exista fronteira clara e necessidade real
 
 ---
 
@@ -83,6 +88,7 @@ docs/
 ├── 02-game-panel/
 ├── 03-portal-estatico/
 ├── 04-infra-aws-lightsail/
+├── 05-backoffice-admin/
 ├── 90-adr/
 ├── 95-impl-log/
 ├── 97-audit/
@@ -164,6 +170,27 @@ Função:
 - deploy/release/rollback
 - operações da Auth API
 - observabilidade do backend dinâmico
+
+---
+
+## `05-backoffice-admin/`
+
+Documenta a camada administrativa do ecossistema como SPA própria.
+
+Função:
+- shell administrativo
+- estrutura frontend Angular 20 + TypeScript + Signals
+- auth administrativa no frontend
+- guards e RBAC
+- contratos administrativos com Auth API
+- runbooks funcionais do Backoffice
+- superfícies administrativas de `seasons`, `news` e `events`
+
+Regra importante:
+
+- este contexto documenta a SPA administrativa
+- ele não substitui o Portal público
+- ele não absorve host, ETL ou operação profunda da Auth API
 
 ---
 
@@ -326,6 +353,11 @@ Essa ordem existe porque:
 - depois define operação
 - depois define triagem
 - por fim consolida o inventário
+
+Regra importante:
+
+- contextos podem adaptar a composição interna quando o domínio exigir documentos estruturais próprios
+- no caso do Backoffice Admin, por exemplo, fazem sentido documentos como `frontend-structure.md`, `auth-rbac-and-guards.md` e `admin-api-contracts.md` entre a topologia e os runbooks
 
 ---
 
@@ -633,6 +665,11 @@ Esse fluxo reduz:
 - dependência de memória
 - reescrita traumática posterior
 - acúmulo de drift documental
+
+Regra importante:
+
+- abertura de novo contexto canônico exige atualização explícita de `00-governance/README.md`, `documentation-system.md` e `99-master-index.md`
+- essa atualização faz parte do fechamento da governança, não de uma fase opcional posterior
 
 ---
 
