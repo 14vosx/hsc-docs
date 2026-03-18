@@ -61,13 +61,15 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
 - a versão reconciliada do MatchZy `0.8.15`
 - o path vivo do `matchzy.db`
 - o path de backup identificado do `matchzy.db`
+- o inventário real de plugins atualmente carregados no runtime
+- a presença de CS2-SimpleAdmin como camada administrativa ativa do servidor
 
 Ainda restam pendências menores, principalmente ligadas a:
 
-- inventário completo de plugins ativos
-- versões exatas além do MatchZy
-- inventário final de presets e aliases
-- eventuais persistências auxiliares além do SQLite principal
+- natureza exata de persistências auxiliares administrativas
+- inventário final dos presets e aliases realmente usados
+- baseline final entre config principal e configs auxiliares
+- eventual auditoria de artefatos de plugin instalados no disco, mas não carregados
 
 ---
 
@@ -196,9 +198,20 @@ Os artefatos reais conhecidos ou esperados do contexto Game Panel incluem:
 
 - MatchZy `0.8.15`
 
+### Plugins core reconciliados
+
+- `PlayerSettings [Core]` `0.9.3`
+- `MenuManager [Core]` `1.4.1`
+
+### Camada administrativa reconciliada
+
+- `CS2-SimpleAdmin (RELEASE)` `1.7.8-beta-10b`
+- `[CS2-SimpleAdmin] Stealth Module` `v1.0.2`
+- `CS2-SimpleAdmin Fun Commands` `1.0.0`
+
 ### Plugin auxiliar já reconciliado
 
-- WeaponPaints
+- `WeaponPaints` `3.2b`
 
 ### Persistência estatística estrutural ativa
 
@@ -244,6 +257,19 @@ Papel:
 - plugin competitivo central
 - componente operacional e estrutural de dados
 
+### CS2-SimpleAdmin
+
+Papel:
+- camada administrativa principal do servidor
+- base das capacidades operacionais de admin
+
+### Plugins core auxiliares
+
+Papel:
+- storage de settings de player
+- infraestrutura de menus
+- apoio funcional a outros plugins
+
 ### Plugins auxiliares
 
 Papel:
@@ -269,6 +295,10 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/home/amp/.ampdata/instances/MixHAXIXE01/`
 
+### Árvore base de plugins
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/`
+
 ### Path canônico vivo do `matchzy.db`
 
 - `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
@@ -277,10 +307,21 @@ Os paths críticos conhecidos deste contexto incluem:
 
 - `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/backup-hsc/MatchZy.live-dir.pre-upstream.20260317-205843/matchzy.db`
 
+### Diretórios reconciliados de plugins
+
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/CS2-SimpleAdmin/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/CS2-SimpleAdmin_FunCommands/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/CS2-SimpleAdmin_StealthModule/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MenuManagerCore/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/PlayerSettings/`
+- `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/WeaponPaints/`
+
 Regra prática:
 
-- o path em `addons/counterstrikesharp/plugins/MatchZy/` é a fonte viva canônica
+- o path em `addons/counterstrikesharp/plugins/MatchZy/` é a fonte viva canônica do banco principal
 - o path em `backup-hsc/` é backup histórico e não deve ser tratado como fonte ativa
+- o inventário vivo de plugins deve sempre ser lido em conjunto com `css_plugins list`
 - qualquer mudança nesses paths deve ser tratada como alteração relevante e refletida no canônico e, quando necessário, no impl-log
 
 ---
@@ -297,9 +338,20 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 
 - MatchZy `0.8.15`
 
-### Plugin auxiliar já visto em produção
+### Plugin auxiliar já visto e validado em produção
 
-- WeaponPaints
+- WeaponPaints `3.2b`
+
+### Plugins core reconciliados
+
+- `PlayerSettings [Core]` `0.9.3`
+- `MenuManager [Core]` `1.4.1`
+
+### Camada administrativa reconciliada
+
+- `CS2-SimpleAdmin (RELEASE)` `1.7.8-beta-10b`
+- `[CS2-SimpleAdmin] Stealth Module` `v1.0.2`
+- `CS2-SimpleAdmin Fun Commands` `1.0.0`
 
 ### Persistência estatística principal ativa
 
@@ -320,6 +372,55 @@ Os itens abaixo já possuem relevância reconciliada suficiente no contexto atua
 - `AMP_MixHAXIXE01`
 
 Esses itens já devem ser tratados como parte da verdade operacional do contexto.
+
+---
+
+## Inventário vivo de plugins carregados
+
+O runtime atual reconciliado possui **7 plugins carregados**:
+
+1. `WeaponPaints` `3.2b`
+2. `PlayerSettings [Core]` `0.9.3`
+3. `CS2-SimpleAdmin Fun Commands` `1.0.0`
+4. `MatchZy` `0.8.15`
+5. `MenuManager [Core]` `1.4.1`
+6. `[CS2-SimpleAdmin] Stealth Module` `v1.0.2`
+7. `CS2-SimpleAdmin (RELEASE)` `1.7.8-beta-10b`
+
+Leitura canônica:
+
+- este é o inventário vivo principal do contexto
+- qualquer divergência futura deve ser tratada como mudança real de runtime
+- o documento `plugins-installed.md` é o detalhamento semântico desse inventário
+- este arquivo registra o inventário como parte do fechamento operacional do contexto
+
+---
+
+## Persistências auxiliares já observadas
+
+Além do `matchzy.db`, o runtime em disco já mostrou evidência suficiente de persistências/configurações auxiliares em:
+
+### CS2-SimpleAdmin
+
+Subárvores observadas:
+- `CS2-SimpleAdmin/data`
+- `CS2-SimpleAdmin/Database`
+
+### WeaponPaints
+
+Subárvores observadas:
+- `WeaponPaints/data`
+- `WeaponPaints/gamedata`
+
+### PlayerSettings
+
+Leitura reconciliada:
+- storage central de settings dos jogadores
+
+Regra importante:
+
+- a existência dessas persistências auxiliares não muda o fato de que a persistência estrutural principal da cadeia pública continua sendo o `matchzy.db`
+- mas o contexto agora já deve reconhecer explicitamente que a camada de administração e personalização possui storage auxiliar real
 
 ---
 
@@ -352,6 +453,14 @@ O lado jogo depende de:
 - staff/admins capazes de operar scrim, BO1, BO3, veto, coach e fallback
 - alinhamento entre runtime real e expectativa operacional
 
+### Dependência da camada administrativa
+
+A operação prática do servidor depende hoje, de forma explícita, do ecossistema:
+
+- `CS2-SimpleAdmin`
+- `CS2-SimpleAdmin Stealth Module`
+- `CS2-SimpleAdmin Fun Commands`
+
 ---
 
 ## Comandos de validação
@@ -383,10 +492,16 @@ docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
 docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" | grep MixHAXIXE01
 ```
 
-### Validar camada de plugins
+### Validar camada de plugins no runtime
 
 ```bash
 css_plugins list
+```
+
+### Validar diretórios principais de plugins no host
+
+```bash
+find /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins -maxdepth 2 -type d | sort
 ```
 
 ### Validar presença estrutural do banco ativo do MatchZy
@@ -422,20 +537,15 @@ sqlite3 /home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/a
 
 Os itens abaixo ainda devem ser confirmados diretamente no ambiente real para elevar o grau de confiança do contexto.
 
-### 1. Lista completa dos plugins carregados em produção
+### 1. Natureza exata da subárvore `CS2-SimpleAdmin/Database`
 
-Já há evidência de múltiplos plugins, mas a lista final precisa ser capturada diretamente com `css_plugins list`.
+Já há evidência suficiente de persistência auxiliar administrativa, mas o papel exato dessa camada ainda pode ser detalhado melhor no futuro.
 
-### 2. Versões exatas dos plugins além do MatchZy
-
-A versão do MatchZy já foi reconciliada como `0.8.15`.  
-As demais versões ainda precisam de validação direta no runtime atual.
-
-### 3. Inventário final dos presets e aliases realmente usados
+### 2. Inventário final dos presets e aliases realmente usados
 
 Já há evidência de presets e aliases úteis, mas a lista atual em produção ainda precisa ser consolidada a partir do ambiente real.
 
-### 4. Baseline exato entre config principal e configs auxiliares
+### 3. Baseline exato entre config principal e configs auxiliares
 
 É desejável fechar explicitamente quais arquivos e presets representam:
 - baseline do servidor
@@ -444,9 +554,13 @@ Já há evidência de presets e aliases úteis, mas a lista atual em produção 
 - modo BO3
 - treino e presets auxiliares
 
-### 5. Eventuais persistências auxiliares além do `matchzy.db`
+### 4. Eventuais artefatos de plugin instalados no disco, mas não carregados
 
-É útil confirmar se plugins auxiliares em produção mantêm bases ou artefatos adicionais que devam ser citados formalmente neste contexto.
+O inventário vivo já está reconciliado, mas uma auditoria futura ainda pode mapear artefatos órfãos ou stale no disco.
+
+### 5. Eventuais persistências auxiliares adicionais além das já identificadas
+
+É útil confirmar se outros plugins em produção mantêm bases ou artefatos adicionais que devam ser citados formalmente neste contexto.
 
 ---
 
@@ -486,10 +600,11 @@ Os limites documentais deste contexto são:
 Este documento deve ser atualizado quando houver:
 
 - mudança de instância oficial
-- mudança relevante no inventário de plugins
+- mudança relevante no inventário de plugins carregados
 - mudança de path estrutural do banco do MatchZy
 - mudança importante na organização do runtime do lado jogo
 - atualização relevante de versão do MatchZy
+- mudança relevante na camada administrativa do servidor
 - confirmação ou resolução de item pendente listado aqui
 
 Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
@@ -503,6 +618,7 @@ Este documento pode ser considerado maduro quando:
 - os artefatos reais do lado jogo estiverem confirmados sem ambiguidade
 - o inventário de plugins carregados estiver reconciliado com o runtime atual
 - o path final do `matchzy.db` estiver fixado
+- a camada administrativa baseada em CS2-SimpleAdmin estiver explicitamente refletida
 - os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
 - ele puder ser usado como inventário confiável do Game Panel sem depender do master legado
 
