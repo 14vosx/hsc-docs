@@ -2,16 +2,16 @@
 
 ## Objetivo
 
-Documentar os contratos administrativos entre o Backoffice Admin do HSC e a Auth API, registrando quais superfícies o frontend administrativo deve consumir, quais invariantes precisam ser respeitadas e quais princípios governam leitura, mutação, autorização, erro e evolução contratual.
+Documentar os contratos administrativos consumidos pelo Backoffice Admin do HSC, registrando a fronteira entre a SPA administrativa e a Auth API.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- as superfícies administrativas conhecidas e/ou esperadas da Auth API
-- a relação contratual entre Backoffice e backend dinâmico
-- as regras mínimas de leitura e mutação por domínio
-- as expectativas de autenticação, autorização e auditoria
-- o tratamento esperado de respostas, erros e invariantes de domínio
-- os limites entre contrato funcional, implementação backend e UX administrativa
+- quais superfícies administrativas o Backoffice consome
+- quais contratos já são reais
+- quais contratos ainda são alvo de evolução
+- como o frontend deve interpretar autenticação, autorização e erros
+- quais superfícies são normais de produto e quais são apenas auxiliares de desenvolvimento
+- como preservar a separação entre frontend administrativo e backend autoritativo
 
 ---
 
@@ -20,1012 +20,549 @@ Este documento existe para registrar, de forma estável e auditável:
 Este documento cobre:
 
 - contratos administrativos consumidos pelo Backoffice
-- superfícies de autenticação/identidade relevantes ao admin
-- superfícies administrativas de `news`, `seasons` e `events`
-- expectativas de payload e resposta em alto nível
-- tratamento esperado de 401, 403, 404, 409 e 5xx
-- regras de fail-closed e auditabilidade para mutações sensíveis
-- princípios de versionamento e evolução contratual
+- contrato real de introspecção de sessão
+- contratos administrativos conhecidos de `news`
+- contratos administrativos conhecidos de `seasons`
+- interpretação de respostas HTTP relevantes
+- diferença entre superfícies reais, auxiliares e futuras
+- postura de consumo do frontend diante da Auth API
 
 Este documento não cobre em profundidade:
 
-- implementação interna do backend
-- SQL, transações e repositórios
-- detalhes visuais da UI
-- design detalhado de formulários
-- runbooks operacionais completos
-- contratos públicos do Portal estático
-- shape final de todos os DTOs reais de release, quando ainda não reconciliados
+- implementação interna da Auth API
+- modelagem completa do banco
+- detalhes de Nginx, systemd ou MariaDB
+- fluxo final de autenticação administrativa de produção
+- contratos públicos do portal
+- documentação detalhada de Events além do estado atual conhecido
 
-Esses tópicos vivem em outros documentos do contexto ou em contextos canônicos adjacentes.
+Esses tópicos vivem em outros documentos do ecossistema.
+
+---
+
+## Papel deste documento
+
+Este arquivo define a leitura contratual do Backoffice sobre a Auth API.
+
+Ele existe para responder perguntas como:
+
+- qual endpoint o shell admin usa para resolver sessão?
+- quais contratos admin já podem ser usados pelo frontend?
+- o que é contrato normal de produto e o que é rota dev-only?
+- como interpretar `401`, `403`, `404`, `409` e `5xx`?
+- quais superfícies ainda dependem de ampliação no backend?
+
+Regra importante:
+
+- o frontend administrativo não inventa autoridade
+- o backend continua sendo a fonte final de autenticação, autorização e invariantes de domínio
 
 ---
 
 ## Estado atual
 
-O estado contratual conhecido, nesta fase, é:
+O estado atual reconciliado do contexto é:
 
-- a Auth API é a camada dinâmica central do Backoffice
-- o Backoffice deve consumir superfícies administrativas via contrato explícito
-- `news` e `seasons` já possuem superfícies administrativas mais maduras
-- `events` já aparece como domínio previsto com estrutura inicial
-- o modelo administrativo é session-first, com break-glass mantido como contingência backend
-- mutações administrativas relevantes devem respeitar postura fail-closed
-- auditoria administrativa transacional é requisito crítico para writes sensíveis
-- o frontend deve ser construído para contratos estáveis, mas sem assumir mais maturidade do que a release ativa realmente oferece
+- o Backoffice Admin já consome sessão administrativa real
+- a introspecção canônica da sessão atual já existe
+- a Auth API continua sendo a autoridade final para autenticação e autorização
+- o modelo administrativo continua sendo session-first com fallback break-glass no backend
+- `news` já possui superfícies administrativas reais
+- `seasons` já possui superfícies administrativas reais de escrita e ações
+- a superfície administrativa de leitura para `seasons` ainda pode exigir evolução adicional
+- `events` ainda não está reconciliado como contrato admin completo
 
 Regra importante:
 
-- este documento distingue entre:
-  - superfície conhecida/reconciliada
-  - superfície-alvo esperada para o Backoffice
-- quando houver lacuna, ela deve ser tratada como pendência explícita, não como fato concluído
+- este documento deve separar com clareza:
+  - contratos reais
+  - contratos auxiliares de desenvolvimento
+  - contratos futuros ou ainda incompletos
 
 ---
 
-## Source of truth / evidências do contrato
+## Relação com outros documentos
 
-Este documento se ancora principalmente em:
+Este documento deve ser lido em conjunto com:
 
-- `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/98-legacy/HSC_MASTER_DOCUMENTATION.md`
-- `docs/98-legacy/HSC_Master_Blueprint.md`
+- `docs/05-backoffice-admin/README.md`
 - `docs/05-backoffice-admin/architecture-runtime.md`
+- `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
+- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/04-infra-aws-lightsail/auth-api-operations.md`
 
-Leitura importante:
+Leitura correta:
 
-- o legado já formaliza superfícies administrativas relevantes para `news` e `seasons`
-- o contexto da Auth API já registra operação session-first, trilha administrativa e fail-closed
-- o Backoffice deve consumir essas superfícies sem contornar a autoridade do backend
+- este documento descreve o contrato consumido pelo admin
+- ele não substitui a documentação operacional da Auth API
+- quando houver conflito, a release real da Auth API e sua documentação operacional prevalecem
 
 ---
 
-## Princípios contratuais do contexto
+## Princípios contratuais do Backoffice
 
-Os contratos administrativos do Backoffice devem obedecer aos seguintes princípios:
+O consumo do backend pelo Backoffice deve obedecer a estes princípios:
 
+- session-first
 - backend como autoridade final
-- frontend consumindo contrato explícito
-- session-first como fluxo principal
-- break-glass fora da UX principal
-- mutações relevantes sob fail-closed
-- auditoria obrigatória para writes sensíveis
-- respostas previsíveis e úteis para a UI
-- invariantes de domínio preservadas no backend
-- evolução contratual incremental
-- sem acoplamento do Backoffice ao Portal para mutações
+- frontend sem permissividade inventada
+- ações sensíveis sem optimistic update ingênuo
+- erros de auth claramente diferenciados
+- lacuna explícita melhor do que contrato imaginário
 
-Princípio importante:
+Regra canônica:
 
-- o frontend pode otimizar UX, mas não pode “relaxar” contrato, autorização ou invariantes
+**o Backoffice consome contratos reais; ele não deduz backend por conveniência**
 
 ---
 
-## Topologia contratual
+## Contrato canônico de sessão administrativa
 
-A relação contratual do Backoffice deve ser lida assim:
+A superfície canônica de introspecção da sessão atual é:
 
-```text
-Backoffice SPA
-  -> Auth API
-    -> superfícies de sessão/identidade
-    -> superfícies administrativas de domínio
-    -> respostas de sucesso/erro para leitura e mutação
-```
+- `GET /auth/session`
 
-O Backoffice não deve:
+Esta superfície já deve ser tratada como **contrato real** do Backoffice.
 
-- mutar dados administrativos via Portal
-- depender de ETL Bash
-- depender da Static API v2 para writes
-- contornar a Auth API em ações administrativas
+### Papel do endpoint
 
----
+`GET /auth/session` existe para:
 
-## Classes de contrato do Backoffice
+- resolver a sessão atual no bootstrap do frontend
+- sustentar guards assíncronos
+- sustentar o shell administrativo
+- permitir refresh de página sem perda de identidade
+- servir como source of truth da sessão atual no frontend
 
-Os contratos administrativos do Backoffice se dividem em quatro grupos:
+### Requisição esperada
 
-### 1. Contratos de sessão e identidade
+- método: `GET`
+- credenciais/cookie: necessários
+- sem body
+- consumo normal com `withCredentials: true` no frontend quando aplicável ao ambiente
 
-Usados para:
-
-- descobrir se existe sessão válida
-- obter operador atual
-- obter papel efetivo
-- sustentar guards e UI por permissão
-
-### 2. Contratos de leitura administrativa
-
-Usados para:
-
-- listar entidades
-- carregar dados para edição
-- carregar contexto administrativo
-
-### 3. Contratos de mutação administrativa
-
-Usados para:
-
-- criar
-- editar
-- publicar
-- ativar
-- fechar
-- excluir
-- cancelar
-- demais ações sensíveis de lifecycle
-
-### 4. Contratos de erro e rejeição
-
-Usados para:
-
-- diferenciar autenticação ausente de falta de permissão
-- refletir invariantes de domínio
-- impedir falsa confirmação de sucesso na UI
-
----
-
-## Estratégia geral de autenticação do contrato
-
-O fluxo contratual do Backoffice deve ser session-first.
-
-Leitura recomendada:
-
-- a sessão válida sustenta o acesso normal à API administrativa
-- a identidade atual deve ser resolvida por contrato explícito
-- o papel efetivo deve ser lido da camada dinâmica
-- a UI deve derivar comportamento a partir dessa resolução
-
-Regra importante:
-
-- o contrato normal do Backoffice não deve ser desenhado como se o operador precisasse enviar break-glass manualmente
-- o break-glass continua como contingência operacional do backend
-
----
-
-## Superfícies de sessão e identidade
-
-### Estado conhecido
-
-A documentação existente já indica superfícies de autenticação administrativa, verificação de identidade/sessão e diagnóstico administrativo.
-
-A nomenclatura exata de cada rota deve ser reconciliada com a release ativa.
-
-### Contrato funcional esperado
-
-O Backoffice precisa de pelo menos uma superfície que responda:
-
-- se há sessão válida
-- quem é o operador atual
-- qual é o papel efetivo
-- se existe acesso administrativo válido
-
-Superfícies-alvo naturais para esse papel podem assumir formas como:
-
-```text
-GET /auth/session
-GET /auth/me
-GET /me
-GET /admin/whoami
-```
-
-Regra importante:
-
-- este documento não fixa a rota final sem reconciliação de release
-- mas fixa a necessidade contratual dessa superfície para o Backoffice
-
-### Resposta mínima esperada
-
-A resposta de identidade/sessão deve permitir ao frontend derivar, no mínimo:
-
-- `authenticated`
-- identidade do operador
-- papel efetivo
-- flags administrativas mínimas
-
-Exemplo conceitual:
+### Resposta esperada com sessão válida
 
 ```json
 {
   "authenticated": true,
   "user": {
-    "id": "usr_123",
-    "email": "staff@hsc.local",
-    "name": "HSC Staff"
+    "id": "1",
+    "email": "admin@local.hsc",
+    "name": "HSC Local Admin"
   },
-  "role": "editor"
+  "role": "admin"
 }
 ```
 
-Esse shape é ilustrativo.
+### Resposta esperada sem sessão válida
+
+* `401 Unauthorized`
+
+```json
+{
+  "authenticated": false
+}
+```
+
+### Leitura contratual do frontend
+
+O frontend deve interpretar assim:
+
+* `200` + `authenticated: true`
+
+  * sessão válida
+  * shell pode ser liberado
+  * guards podem permitir navegação
+
+* `401`
+
+  * sessão ausente, inválida, expirada ou não reconhecida
+  * frontend deve convergir para estado `unauthenticated`
 
 Regra importante:
 
-- o contrato final deve privilegiar clareza e estabilidade
-- o frontend não deve depender de shape ambíguo ou excessivamente acoplado à implementação interna
+* `GET /auth/session` representa sessão real
+* ele não deve ser substituído semânticamente por `x-admin-key`
 
 ---
 
-## Convenções de resposta para a UI administrativa
+## Rota dev-only de bootstrap local
 
-O contrato administrativo deve favorecer respostas que sejam simples para o frontend consumir.
+A superfície auxiliar de desenvolvimento validada localmente é:
 
-Padrões desejáveis:
+* `POST /auth/dev/bootstrap-session`
 
-- leitura retorna payload claro
-- mutação retorna recurso atualizado ou confirmação útil
-- erros de domínio retornam mensagem interpretável
-- 401 e 403 são distinguíveis
-- 404 é limpo e sem semântica ambígua
-- 409 ou equivalente é usado quando houver conflito de estado/invariante
+### Papel da rota
 
-O frontend deve evitar depender de:
+Essa rota existe para:
 
-- mensagens livres sem código ou sem estrutura mínima
-- payloads heterogêneos demais entre endpoints equivalentes
-- side effects implícitos não refletidos na resposta
+* criar ou garantir usuário admin local
+* criar sessão local de desenvolvimento
+* devolver cookie admin
+* destravar o Backoffice local sem depender do fluxo final de login administrativo
+
+### Leitura correta
+
+Esta rota é:
+
+* útil para desenvolvimento local
+* auxiliar
+* controlada por flag de ambiente
+* **não** parte do contrato normal de produto
+
+### Resposta esperada com bootstrap ativo
+
+* `200 OK`
+* `Set-Cookie`
+* body com `authenticated: true`, `user`, `role`
+
+### Resposta esperada quando desabilitada
+
+* `404` ou equivalente de indisponibilidade intencional
+
+### Regra contratual importante
+
+* o Backoffice pode usar essa rota para desenvolvimento local
+* o Backoffice **não deve** modelar essa rota como login final de produção
 
 ---
 
-## Contratos administrativos — News
+## Contratos administrativos reais de News
 
-## Estado conhecido
+As superfícies administrativas de `news` já são tratadas como reais no contexto atual.
 
-As superfícies administrativas de `news` já aparecem com maturidade razoável no legado reconciliado.
+### Leitura administrativa
+
+* `GET /admin/news`
+
+Função:
+
+* listar conteúdo administrativo de news
+* popular listagem admin
+* suportar navegação inicial do domínio
+
+### Escrita administrativa
 
 Superfícies conhecidas:
 
-```text
-GET    /admin/news
-POST   /admin/news
-PATCH  /admin/news/:id
-POST   /admin/news/:id/publish
-POST   /admin/news/:id/unpublish
-DELETE /admin/news/:id
-```
+* criação
+* atualização
+* publicação
+* despublicação
+* exclusão
 
-Leitura importante:
+Leitura contratual:
 
-- `news` já é domínio administrativo explícito
-- publish/unpublish e delete são ações sensíveis
-- writes relevantes devem respeitar trilha transacional de auditoria
+* essas operações exigem autenticação administrativa
+* o backend continua sendo a autoridade final de permissão e invariantes
+* a UI deve considerar essas ações sensíveis
 
----
+### Expectativa do frontend
 
-## Objetivo funcional de cada rota de News
+Para `news`, o frontend deve estar preparado para:
 
-### `GET /admin/news`
-
-Responsável por:
-
-- listar itens de notícia no contexto administrativo
-- incluir drafts, publicados e outros estados internos úteis ao admin
-
-Resposta esperada em alto nível:
-
-- coleção administrativa de notícias
-- campos suficientes para listagem, status e navegação de edição
-
-Campos conceitualmente úteis:
-
-- `id`
-- `slug`
-- `title`
-- `status`
-- `publishedAt`
-- `updatedAt`
-
-### `POST /admin/news`
-
-Responsável por:
-
-- criar item de notícia em estado inicial compatível com workflow administrativo
-
-Entrada esperada em alto nível:
-
-- slug
-- título
-- resumo/descrição curta, quando aplicável
-- corpo/conteúdo
-- metadados editoriais mínimos
-
-Regra importante:
-
-- o contrato final deve distinguir campos obrigatórios de opcionais
-- o backend deve validar unicidade e consistência do domínio
-
-### `PATCH /admin/news/:id`
-
-Responsável por:
-
-- editar item existente
-- atualizar metadados ou conteúdo permitidos
-
-### `POST /admin/news/:id/publish`
-
-Responsável por:
-
-- publicar item
-- aplicar transição de lifecycle compatível com domínio
-
-Regra importante:
-
-- publish é ação sensível
-- `published_at` ou equivalente deve ser controlado pelo backend
-
-### `POST /admin/news/:id/unpublish`
-
-Responsável por:
-
-- reverter item para estado não publicado, conforme regra do domínio
-
-### `DELETE /admin/news/:id`
-
-Responsável por:
-
-- excluir item sob política administrativa adequada
-
-Regra importante:
-
-- delete é ação sensível
-- a UI deve exigir confirmação explícita
-- a confirmação visual depende da resposta do backend
+* loading
+* success
+* empty
+* `401`
+* `403`
+* `404`
+* `409` quando aplicável
+* `5xx`
 
 ---
 
-## Invariantes contratuais — News
+## Contratos administrativos reais de Seasons
 
-As invariantes mínimas de `news` devem incluir:
+As superfícies administrativas de `seasons` já existem no backend para escrita e ações de lifecycle.
 
-- slug válido
-- unicidade de slug, quando aplicável
-- publish só em item apto para publicação
-- unpublish só em item em estado compatível
-- delete respeitando autorização adequada
-- writes sensíveis sob audit transacional
-
-A UI pode antecipar algumas validações básicas, mas:
-
-- a validação final é sempre do backend
-
----
-
-## Contratos administrativos — Seasons
-
-## Estado conhecido
-
-As superfícies administrativas de `seasons` já aparecem formalizadas no legado reconciliado.
+### Escrita administrativa
 
 Superfícies conhecidas:
 
-```text
-POST  /admin/seasons
-PATCH /admin/seasons/:slug
-POST  /admin/seasons/:slug/activate
-POST  /admin/seasons/:slug/close
-```
+* criação
+* edição
+* activate
+* close
 
-Superfície de leitura administrativa explícita ainda pode precisar de reconciliação de release para listagem/detail admin.
+Leitura contratual:
 
-Para o Backoffice, a existência de leitura administrativa própria é natural e recomendada.
+* `seasons` já possui base real para mutações administrativas
+* activate/close são ações sensíveis e devem ser tratadas como tal
+* o backend impõe invariantes de domínio
 
-Superfícies-alvo esperadas para suporte pleno ao admin:
+### Leitura administrativa
 
-```text
-GET /admin/seasons
-GET /admin/seasons/:slug
-```
+A leitura admin de `seasons` deve ser tratada como:
 
-Regra importante:
+* contrato parcialmente materializado
+* ou contrato sujeito a ampliação, dependendo da release ativa
 
-- se a release ativa ainda não expuser essas leituras, isso deve entrar como gap contratual explícito
-- o Backoffice não deve fingir que esse contrato já existe se ele ainda não estiver materializado
+Leitura correta para o frontend:
 
----
-
-## Objetivo funcional de cada rota de Seasons
-
-### `GET /admin/seasons` (superfície-alvo esperada)
-
-Responsável por:
-
-- listar seasons no contexto administrativo
-- expor status suficiente para operação e tomada de decisão
-
-Campos conceitualmente úteis:
-
-- `slug`
-- `name`
-- `status`
-- `startsAt`
-- `endsAt`
-- `isActive`
-- `updatedAt`
-
-### `GET /admin/seasons/:slug` (superfície-alvo esperada)
-
-Responsável por:
-
-- carregar season para edição/admin detail
-
-### `POST /admin/seasons`
-
-Responsável por:
-
-- criar season
-
-Entrada esperada em alto nível:
-
-- slug
-- nome
-- descrição, quando aplicável
-- janela temporal, quando aplicável
-- metadados administrativos mínimos
-
-### `PATCH /admin/seasons/:slug`
-
-Responsável por:
-
-- editar campos permitidos da season
-
-### `POST /admin/seasons/:slug/activate`
-
-Responsável por:
-
-- ativar a season
-- executar a transição crítica de lifecycle
+* o domínio `seasons` já pode ser tratado como primeiro domínio forte do admin
+* mas a superfície de leitura pode exigir complementação fina antes de um CRUD/admin ideal completo
 
 Regra importante:
 
-- activate é ação sensível
-- o backend deve preservar a invariante de “uma única season ativa”
-
-### `POST /admin/seasons/:slug/close`
-
-Responsável por:
-
-- fechar a season ativa ou apta a fechamento, conforme regra do domínio
-
-Regra importante:
-
-- close é ação sensível
-- o backend deve preservar coerência de estado
+* o frontend não deve assumir que toda leitura admin de `seasons` já está no mesmo grau de maturidade que o lifecycle de escrita
 
 ---
 
-## Invariantes contratuais — Seasons
+## Contratos administrativos de Events
 
-As invariantes mínimas de `seasons` devem incluir:
-
-- slug válido e estável
-- transições de status válidas
-- apenas uma season ativa por vez
-- activate e close exigem autorização adequada
-- writes sensíveis sob audit transacional
-- mutações inválidas devem falhar de forma explícita
-
-Erros naturais deste domínio podem incluir:
-
-- season não encontrada
-- slug duplicado
-- season já ativa
-- transição inválida de estado
-- operação não permitida para o papel atual
-
----
-
-## Contratos administrativos — Events
-
-## Estado conhecido
-
-`events` já aparece no legado como estrutura inicial de domínio.
-
-Superfícies registradas:
-
-```text
-GET    /content/events
-POST   /admin/events
-PATCH  /admin/events/:id
-DELETE /admin/events/:id
-POST   /admin/events/:id/confirm
-```
-
-Leitura importante:
-
-- o domínio existe como intenção e estrutura inicial
-- a separação entre gestão administrativa e interação pública ainda pede formalização cuidadosa
-
-Regra importante:
-
-- para o Backoffice, o foco inicial deve ser a gestão administrativa de eventos
-- confirmação de presença do usuário final não deve ser confundida com operação administrativa da staff UI
-
----
-
-## Superfícies-alvo esperadas para o Backoffice em Events
-
-Para o Backoffice funcionar de forma saudável, as superfícies administrativas mínimas esperadas são:
-
-```text
-GET    /admin/events
-GET    /admin/events/:id
-POST   /admin/events
-PATCH  /admin/events/:id
-DELETE /admin/events/:id
-```
-
-Opcionalmente, o domínio pode evoluir para:
-
-```text
-POST /admin/events/:id/cancel
-POST /admin/events/:id/reopen
-```
-
-Mas essas superfícies só devem entrar no contrato quando o lifecycle estiver reconciliado.
-
----
-
-## Objetivo funcional de cada rota de Events
-
-### `GET /admin/events` (superfície-alvo esperada)
-
-Responsável por:
-
-- listar eventos no contexto administrativo
-
-Campos conceitualmente úteis:
-
-- `id`
-- `title`
-- `type`
-- `status`
-- `scheduledAt`
-- `createdAt`
-- `updatedAt`
-
-### `GET /admin/events/:id` (superfície-alvo esperada)
-
-Responsável por:
-
-- carregar um evento para edição/admin detail
-
-### `POST /admin/events`
-
-Responsável por:
-
-- criar evento administrativo
-
-Entrada esperada em alto nível:
-
-- título/nome
-- tipo
-- data/hora
-- metadados mínimos do evento
-
-### `PATCH /admin/events/:id`
-
-Responsável por:
-
-- editar evento existente
-
-### `DELETE /admin/events/:id`
-
-Responsável por:
-
-- excluir evento, quando essa for a política do domínio inicial
-
-Regra importante:
-
-- se o domínio migrar de delete físico para cancelamento lógico, o contrato deve ser revisto explicitamente
-
----
-
-## Separação contratual em Events
-
-O domínio `events` precisa de separação clara entre:
-
-### Gestão administrativa
-
-Consumida pelo Backoffice.
-
-Exemplos:
-
-- criar
-- editar
-- excluir/cancelar
-- listar eventos administrativos
-
-### Interação de usuário final
-
-Consumida por Portal ou Account.
-
-Exemplos:
-
-- confirmar presença
-- eventualmente cancelar presença
-- ver meus confirms
-
-Regra importante:
-
-- `POST /admin/events/:id/confirm` é semanticamente ambíguo para o Backoffice
-- a recomendação é não adotar esse endpoint como centro do admin
-- confirmação de presença deve tender a uma superfície orientada ao usuário final, fora do fluxo principal do Backoffice
-
----
-
-## Contratos de erro e rejeição
-
-O Backoffice precisa de contratos de erro previsíveis.
-
-### 401 — Não autenticado
-
-Usar quando:
-
-- não há sessão válida
-- a sessão expirou
-- a identidade não pode ser reconhecida
-
-Comportamento esperado da UI:
-
-- interromper fluxo protegido
-- redirecionar para login
-- limpar estado local inconsistente
-
-### 403 — Sem permissão
-
-Usar quando:
-
-- o operador está autenticado
-- mas não possui permissão suficiente para a rota ou ação
-
-Comportamento esperado da UI:
-
-- mostrar acesso negado ou erro contextual
-- não mascarar como erro genérico
-
-### 404 — Recurso ausente
-
-Usar quando:
-
-- item não existe
-- slug/id não é encontrado
-- recurso já foi removido ou nunca existiu
-
-### 409 — Conflito de estado / invariante
-
-Usar quando:
-
-- season já ativa
-- transição inválida
-- slug duplicado sob política de conflito
-- ação incompatível com o estado atual
-
-### 422 ou erro equivalente de validação
-
-Usar quando:
-
-- payload é semanticamente inválido
-- campos obrigatórios estão ausentes
-- formato ou regra de negócio falha
-
-### 5xx — Falha interna
-
-Usar quando:
-
-- houve falha real de backend
-- a operação não pôde ser concluída
-- fail-closed negou persistência por pré-requisito interno não atendido
-
-Regra importante:
-
-- a UI deve distinguir falha de validação, falha de permissão e falha sistêmica
-
----
-
-## Fail-closed e auditoria administrativa
-
-As mutações administrativas relevantes do Backoffice devem assumir explicitamente a política:
-
-```text
-No audit, no write
-```
+No estado atual, `events` ainda deve ser tratado como domínio administrativo em construção.
 
 Leitura correta:
 
-- se a mutação sensível não puder registrar auditoria conforme exigido
-- a operação deve falhar
-- a UI não deve tratar essa falha como sucesso parcial
-
-Isso impacta especialmente:
-
-- publish/unpublish/delete de news
-- activate/close de season
-- demais writes sensíveis que o domínio passe a adotar
-
-Consequência para o frontend:
-
-- sem optimistic update ingênuo para ações críticas
-- confirmação visual só após resposta de sucesso
-- erro deve ser comunicado de forma clara ao operador
+* não assumir contrato admin completo ainda
+* não misturar fluxo público de presença com fluxo staff/admin
+* só promover `events` a contrato real quando a superfície backend estiver reconciliada
 
 ---
 
-## Shape contratual mínimo recomendado
+## Interpretação contratual de status HTTP
 
-Sem fixar DTO final prematuramente, o contrato administrativo deve privilegiar shapes previsíveis.
+O Backoffice deve tratar as respostas da Auth API com semântica explícita.
 
-### Recomendação para leitura de coleção
+### `200` / `201`
 
-```json
-{
-  "items": []
-}
-```
+Leitura:
 
-ou shape equivalente estável, como:
+* operação bem-sucedida
+* estado final confirmado pelo backend
 
-```json
-{
-  "data": []
-}
-```
+### `401 Unauthorized`
 
-### Recomendação para leitura de item único
+Leitura:
 
-```json
-{
-  "item": {}
-}
-```
+* sessão ausente, inválida ou expirada
+* frontend deve convergir para estado `unauthenticated`
+* guard deve bloquear rota protegida
 
-ou shape equivalente estável.
+### `403 Forbidden`
 
-### Recomendação para mutação bem-sucedida
+Leitura:
 
-Uma das opções abaixo:
+* operador autenticado sem escopo suficiente
+* frontend deve exibir superfície de acesso negado
+* não mascarar como erro genérico
 
-```json
-{
-  "item": {}
-}
-```
+### `404 Not Found`
 
-ou
+Leitura:
 
-```json
-{
-  "ok": true
-}
-```
+* recurso inexistente ou deep link inválido
+* distinguir de `403` quando possível
 
-ou
+### `409 Conflict`
 
-```json
-{
-  "ok": true,
-  "item": {}
-}
-```
+Leitura:
+
+* conflito de domínio ou invariante
+* exemplo: transição inválida de lifecycle
+* não tratar automaticamente como bug de frontend
+
+### `5xx`
+
+Leitura:
+
+* falha sistêmica do backend
+* frontend não deve sinalizar falso sucesso
+* deve expor erro legível e manter consistência visual
+
+---
+
+## Papel de `withCredentials` e cookie
+
+No contexto do Backoffice, o consumo da sessão administrativa real exige que o frontend trate cookie/sessão de forma explícita quando aplicável ao ambiente.
+
+Leitura contratual:
+
+* chamadas de introspecção de sessão devem considerar credenciais
+* ambientes locais podem usar proxy para evitar fricção de CORS/cookie
+* ambientes publicados exigirão reconciliação real de origem, cookie e política de borda
 
 Regra importante:
 
-- escolher um padrão e manter consistência
-- o frontend deve evitar acoplamento a múltiplos shapes arbitrários no mesmo domínio
+* o frontend não deve assumir que “funcionou localmente com proxy” resolve automaticamente o cenário publicado
+* a publicação do admin exige reconciliação própria de cookie/CORS
 
 ---
 
-## Campos administrativos mínimos por domínio
+## Relação entre sessão real e break-glass
 
-Sem fixar schema final, o frontend administrativo deve esperar os seguintes eixos de informação por domínio.
+O backend continua aceitando caminho break-glass por `x-admin-key` em superfícies administrativas relevantes.
 
-### News
+Leitura contratual para o Backoffice:
 
-- identidade (`id`)
-- slug
-- título
-- status
-- timestamps administrativos relevantes
+* `x-admin-key` **não** é contrato de login do produto
+* `x-admin-key` existe como fallback operacional e contingência backend
+* o Backoffice normal deve operar por sessão real
 
-### Seasons
+Isso implica:
 
-- identidade natural (`slug`)
-- nome
-- status
-- indicadores de atividade
-- timestamps administrativos relevantes
-
-### Events
-
-- identidade (`id`)
-- título/nome
-- tipo
-- status
-- agenda (`scheduledAt` ou equivalente)
-- timestamps administrativos relevantes
+* o frontend consome `GET /auth/session`
+* o frontend não deve estruturar fluxo de usuário em torno de `x-admin-key`
+* o break-glass continua sendo assunto prioritariamente operacional da Auth API
 
 ---
 
-## Estratégia de mapeamento no frontend
+## Modelos mínimos esperados no frontend
 
-O Backoffice não deve espalhar shape cru de API em toda a árvore de componentes.
+O frontend do Backoffice deve continuar operando com um modelo mínimo equivalente a:
 
-A recomendação é:
-
-- `services/` fazem chamada HTTP
-- `models/` definem tipos do domínio
-- `store/` consolida estado consumível pela UI
-- o mapeamento da resposta deve acontecer perto da feature
-
-Estrutura recomendada:
+### SessionStatus
 
 ```text
-features/<dominio>/
-  services/
-    <dominio>-api.service.ts
-  models/
-    <dominio>.model.ts
-    <dominio>-dto.model.ts
-  store/
-    <dominio>.store.ts
+unknown | authenticated | unauthenticated | error
 ```
 
+### AppRole
+
+```text
+viewer | editor | admin
+```
+
+### AuthSession mínima
+
+```json
+{
+  "authenticated": true,
+  "user": {
+    "id": "1",
+    "email": "admin@local.hsc",
+    "name": "HSC Local Admin"
+  },
+  "role": "admin"
+}
+```
+
+Esses modelos já conversam com o contrato real de `GET /auth/session`.
+
+---
+
+## Contratos reais vs auxiliares vs futuros
+
+Para evitar ambiguidade, o contexto deve separar explicitamente:
+
+### Contratos reais
+
+* `GET /auth/session`
+* superfícies admin reais de `news`
+* superfícies admin reais de escrita/lifecycle de `seasons`
+
+### Contratos auxiliares de desenvolvimento
+
+* `POST /auth/dev/bootstrap-session`
+
+### Contratos futuros ou ainda incompletos
+
+* superfícies admin completas de `events`
+* fluxo final de login administrativo de produção
+* eventual ampliação da leitura admin de `seasons`
+
 Regra importante:
 
-- DTO da API e model de tela não precisam ser a mesma coisa
-- a separação ajuda a proteger a UI de mudanças contratuais localizadas
+* rota auxiliar de desenvolvimento não deve ser promovida a contrato normal de produto
+* contrato futuro não deve ser documentado como já disponível
 
 ---
 
-## Contratos e paginação
+## Implicações para guards e shell
 
-No MVP, paginação avançada não precisa ser obrigatória.
+Como `GET /auth/session` já é contrato real, o frontend administrativo deve operar assim:
 
-Mas o contrato deve permanecer compatível com evolução futura.
+* rota protegida aguarda resolução assíncrona da sessão
+* shell não precisa “adivinhar” a auth
+* refresh de página deve poder recuperar a identidade atual
+* `/login` local pode oferecer bootstrap controlado de sessão para desenvolvimento
 
-Abordagem recomendada:
-
-- no início, aceitar coleções simples
-- quando houver necessidade real, evoluir para paginação explícita
-- não introduzir paginação complexa sem pressão real do volume
-
-Se paginação existir, o contrato deve manter clareza mínima, por exemplo:
-
-- `items`
-- `page`
-- `pageSize`
-- `total`
+Essa leitura já está alinhada com o estado implementado do Backoffice.
 
 ---
 
-## Contratos e filtros
+## Critérios de aceite contratuais do PR-1
 
-No MVP, filtros devem ser simples.
+Do ponto de vista de contratos, o PR-1 do Backoffice pode ser lido como aceitável quando:
 
-Exemplos razoáveis:
-
-- status
-- busca textual
-- slug ou identificador
-- tipo de evento
-
-Regra importante:
-
-- o frontend não deve depender de filtros complexos inexistentes
-- filtros só entram no contrato conforme necessidade real de operação
+* `GET /auth/session` está integrado
+* o frontend resolve sessão antes de decidir guards
+* a rota dev-only de bootstrap destrava o desenvolvimento local
+* refresh em rota protegida mantém sessão válida
+* `401` leva a estado `unauthenticated`
+* `403` leva a superfície de acesso negado
+* o frontend não trata `x-admin-key` como login de produto
 
 ---
 
-## Evolução contratual
+## Gaps ainda abertos
 
-A evolução dos contratos administrativos do Backoffice deve seguir estas regras:
+Mesmo com a sessão real já materializada, ainda permanecem gaps relevantes:
 
-- mudanças devem ser documentadas
-- o runtime real deve prevalecer sobre hipótese antiga
-- superfícies novas devem nascer com objetivo e papel claro
-- mudanças breaking devem ser reconciliadas com docs e frontend
-- o contexto `05-backoffice-admin` deve ser atualizado junto da mudança relevante
+### 1. Fluxo final de login administrativo de produção
 
-Mudanças que exigem atualização documental imediata:
+Estado:
 
-- nova rota administrativa
-- alteração de payload de mutação
-- alteração de shape de identidade/sessão
-- alteração de regra de RBAC refletida na resposta
-- mudança de lifecycle de `news`, `seasons` ou `events`
+* bootstrap local existe
+* login final de produção ainda não está documentado como fechado
 
----
+### 2. Publicação real do Backoffice com cookie/CORS reconciliados
 
-## Riscos contratuais a evitar
+Estado:
 
-### Risco 1 — o frontend assumir endpoints que ainda não existem
+* local funciona com proxy
+* publicação real ainda exige fechamento operacional
 
-Efeito:
-- documentação fictícia
-- retrabalho
-- gap entre produto e runtime
+### 3. Contrato admin completo de Events
 
-### Risco 2 — shapes inconsistentes entre rotas semelhantes
+Estado:
 
-Efeito:
-- mapeamento frágil
-- store mais complexa
-- componentes contaminados com exceções de contrato
+* ainda não reconciliado como superfície madura
 
-### Risco 3 — confundir gestão administrativa com superfície pública
+### 4. Leitura admin de Seasons pode exigir ampliação fina
 
-Efeito:
-- acoplamento incorreto
-- erosão da separação entre Backoffice e Portal/Account
+Estado:
 
-### Risco 4 — tratar erro de permissão como erro genérico
-
-Efeito:
-- UX opaca
-- troubleshooting pior
-- autorização mal compreendida
-
-### Risco 5 — ignorar fail-closed no desenho do frontend
-
-Efeito:
-- optimistic update indevido
-- falso sucesso visual
-- colisão com a política transacional do backend
-
-### Risco 6 — consolidar cedo demais um contrato ainda imaturo de Events
-
-Efeito:
-- rigidez precoce
-- documentação desalinhada da realidade
-- aumento de custo de mudança
+* escrita e lifecycle já estão fortes
+* leitura admin ainda pode pedir ajuste complementar por release
 
 ---
 
-## Gaps contratuais atuais a observar
+## Limites deste documento
 
-Os gaps mais prováveis, nesta fase, são:
+Este documento não detalha:
 
-- rota final canônica de sessão/identidade ainda a reconciliar
-- superfícies admin de leitura de `seasons` ainda a confirmar no runtime
-- superfícies admin de leitura de `events` ainda a formalizar
-- separação definitiva entre confirmação pública e gestão admin de `events`
-- shape final dos DTOs administrativos ainda a consolidar por release
+* implementação interna do middleware de auth no backend
+* schema completo do banco
+* configuração de cookie linha a linha
+* política detalhada de CORS no runtime publicado
+* fluxo final de login administrativo de produção
+* detalhes completos de domínio de `news`, `seasons` e `events`
 
-Esses gaps não impedem o desenho do Backoffice, mas:
-
-- precisam ser tratados explicitamente no backlog
-- não devem ser escondidos no documento
+Esses tópicos vivem em documentos complementares.
 
 ---
 
-## Ordem de implementação recomendada
+## Critério de pronto deste documento
 
-A ordem mais saudável para materializar contratos no Backoffice é:
+Este documento pode ser considerado maduro quando:
 
-1. reconciliar contrato de sessão/identidade
-2. reconciliar leituras admin mínimas
-3. implementar `seasons`
-4. implementar `news`
-5. formalizar leituras admin de `events`
-6. implementar mutações admin de `events`
-7. revisar gaps, erros e invariantes por domínio
+* `GET /auth/session` estiver tratado como contrato real sem ambiguidade
+* a rota dev-only estiver claramente delimitada como auxiliar de desenvolvimento
+* `news` e `seasons` estiverem posicionados corretamente quanto à maturidade contratual
+* a diferença entre sessão real e break-glass estiver explícita
+* os códigos de resposta relevantes estiverem semanticamente claros
+* ele puder servir como referência confiável para o frontend administrativo sem depender de hipótese sobre o backend
 
 ---
 
-## Resumo executivo
+## Última revisão
 
-Os contratos administrativos do Backoffice Admin do HSC devem ser construídos sobre uma regra simples:
-
-- o Backoffice fala com a Auth API por contrato explícito
-- a Auth API continua sendo a autoridade final
-- mutações relevantes respeitam autorização, invariantes e fail-closed
-- `news` e `seasons` já oferecem base mais madura
-- `events` deve evoluir de forma incremental, sem confundir gestão admin com interação pública
-
-O documento deve ser lido como:
-
-- mapa contratual do admin
-- registro das superfícies conhecidas
-- declaração das superfícies-alvo necessárias
-- guia para implementação disciplinada do frontend administrativo
+* Status: ativo
+* Classificação: canônico
+* Contexto: backoffice admin / contratos com a Auth API
+* Última revisão: 2026-03-19

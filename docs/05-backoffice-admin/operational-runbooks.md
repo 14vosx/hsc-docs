@@ -2,17 +2,16 @@
 
 ## Objetivo
 
-Documentar os runbooks operacionais do contexto Backoffice Admin do HSC, registrando como validar, operar e diagnosticar a SPA administrativa em interação com a Auth API.
+Documentar os runbooks operacionais do Backoffice Admin do HSC, com foco em desenvolvimento local, validação funcional da SPA administrativa e interação controlada com a Auth API.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- os checks mínimos de operação do Backoffice
-- os smoke tests funcionais da camada administrativa
-- os procedimentos de validação após mudanças relevantes
-- os sintomas operacionais mais prováveis do Backoffice
-- os fluxos mínimos de troubleshooting funcional
-- os limites entre problema de frontend, problema de contrato e problema de backend
-- a relação entre a operação do Backoffice e os contextos canônicos adjacentes
+- como subir o Backoffice localmente
+- como conectar o Backoffice à Auth API local
+- como validar o fluxo session-first no ambiente de desenvolvimento
+- como diagnosticar falhas comuns de auth, proxy e guards
+- como confirmar que a SPA está pronta para receber domínios administrativos reais
+- quais fluxos ainda são apenas auxiliares de desenvolvimento
 
 ---
 
@@ -20,840 +19,708 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- runbooks do Backoffice como produto administrativo
-- validações mínimas pós-release
-- smoke tests do shell administrativo
-- validação de auth, guards, RBAC e navegação
-- validação funcional de `seasons`, `news` e `events`
-- troubleshooting funcional do frontend administrativo
-- critérios práticos para separar falha de UI, contrato e backend
-- comportamento esperado diante de 401, 403, 404, 409 e falha sistêmica
+- subida local do Backoffice
+- operação local com proxy
+- fluxo local de sessão administrativa
+- bootstrap local de sessão via Auth API
+- validação de guards e shell administrativo
+- refresh autenticado em rota protegida
+- troubleshooting funcional do admin local
+- critérios mínimos de saúde operacional do Backoffice
 
 Este documento não cobre em profundidade:
 
-- deploy detalhado da Auth API
-- operação de Nginx
-- systemd
-- MariaDB
-- rollback de infraestrutura
-- operação do Portal estático
-- ETL
-- Game Panel / AMP
-- runbooks internos do backend dinâmico
+- deploy final do frontend administrativo
+- hostname final do Backoffice publicado
+- política final de cookies/CORS em produção
+- fluxo final de login administrativo de produção
+- operação detalhada da Auth API
+- runbooks específicos de domínio como `seasons`, `news` ou `events`
 
-Esses tópicos pertencem a outros contextos canônicos, especialmente o contexto da infraestrutura dinâmica.
+Esses assuntos vivem em documentos próprios ou em fases posteriores do produto.
 
 ---
 
 ## Estado atual
 
-O estado operacional conhecido, nesta fase, é:
+O estado operacional conhecido do Backoffice, nesta fase, é:
 
-- o contexto do Backoffice está sendo formalizado agora
-- o produto administrativo é uma SPA separada do Portal público
-- a Auth API é a dependência dinâmica central do Backoffice
-- o fluxo principal de autenticação deve ser session-first
-- o backend continua sendo autoridade de autenticação, autorização e invariantes
-- ações sensíveis devem respeitar fail-closed na camada dinâmica
-- os domínios prioritários do admin são `seasons`, `news` e `events`
-- o runbook do Backoffice deve focar em operação funcional da SPA, não em detalhes profundos de host
+- a SPA administrativa já existe como aplicação Angular 21 standalone-first
+- a navegação protegida já está funcionando
+- a store de sessão já consome introspecção real de sessão
+- o fluxo local usa proxy para a Auth API
+- a rota `/login` já pode bootstrapar sessão local de desenvolvimento
+- o shell administrativo já carrega sob autenticação resolvida
+- o refresh em `/dashboard` já preserva a leitura correta da sessão
+- a base está pronta para receber o primeiro domínio administrativo real
 
 Regra importante:
 
-- este documento não deve simular maturidade operacional que ainda não existe
-- onde o runtime final ainda não estiver fechado, o runbook deve descrever procedimento-alvo, não inventar automação inexistente
+- o fluxo local atual é suficiente para desenvolvimento e validação do admin
+- ele não deve ser confundido com o fluxo final de produção
 
 ---
 
-## Relação com outros contextos
+## Relação com outros documentos
 
-Este runbook depende diretamente de:
+Este documento deve ser lido junto com:
 
+- `docs/05-backoffice-admin/README.md`
 - `docs/05-backoffice-admin/architecture-runtime.md`
 - `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-
-E se relaciona fortemente com:
-
-- `docs/04-infra-aws-lightsail/README.md`
+- `docs/05-backoffice-admin/references-inventory.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 
-Leitura importante:
+Leitura correta:
 
-- este documento valida o Backoffice como produto administrativo
-- ele não substitui runbooks da Auth API
-- quando o erro estiver abaixo da fronteira do frontend, o runbook deve orientar escalonamento para o contexto correto
+- este documento descreve como operar o Backoffice
+- ele não substitui a documentação operacional da Auth API
+- ele assume que a Auth API continua sendo a autoridade final de auth admin
 
 ---
 
 ## Princípios operacionais do Backoffice
 
-A operação do Backoffice deve obedecer aos seguintes princípios:
+Os runbooks do Backoffice seguem estes princípios:
 
-- validar primeiro a superfície administrativa, depois o detalhe técnico
-- distinguir claramente problema de sessão, permissão, contrato e backend
-- não assumir que falha visual é sempre falha de frontend
-- ações sensíveis só confirmam sucesso após resposta do backend
-- smoke tests devem ser simples, repetíveis e de alto valor
-- troubleshooting deve começar pelo fluxo do operador
-- a UI deve refletir erros de forma útil
-- o Backoffice não deve esconder falhas críticas com fallback silencioso
+- frontend administrativo separado do Portal
+- session-first
+- backend como autoridade final
+- proxy local para reduzir fricção no desenvolvimento
+- fluxo local explícito melhor que “mágica” implícita
+- guards assíncronos para evitar navegação ambígua
+- troubleshooting por sintoma observável
+- falha explícita melhor que estado visual enganoso
 
-Princípio importante:
+Regra importante:
 
-- troubleshooting do Backoffice deve preservar a separação entre:
-  - problema de renderização/UI
-  - problema de navegação/guard
-  - problema de contrato HTTP
-  - problema de autorização
-  - problema de domínio/invariante
-  - problema sistêmico da Auth API
+- o objetivo do runbook não é esconder complexidade
+- é permitir operação previsível da SPA administrativa
 
 ---
 
-## Objetivos operacionais mínimos do contexto
+## Pré-requisitos para operação local
 
-O Backoffice está operacionalmente saudável quando:
+Antes de subir o Backoffice localmente, estes pré-requisitos devem estar verdadeiros:
 
-- a SPA carrega
-- o shell administrativo renderiza
-- a sessão do operador é resolvida de forma consistente
-- as rotas protegidas obedecem os guards
-- a navegação administrativa funciona
-- os domínios prioritários conseguem listar dados
-- formulários carregam e submetem de forma previsível
-- 401 e 403 são tratados corretamente
-- ações sensíveis não geram falso positivo visual
-- erros de contrato ou backend ficam visíveis de forma útil
+### 1. Repositório do Backoffice disponível localmente
 
----
+Exemplo de diretório:
 
-## Checklist mínimo pós-release
+```text
+~/work/hsc/hsc-backoffice-admin
+```
 
-Após qualquer release relevante do Backoffice, executar pelo menos o seguinte checklist.
+### 2. Repositório da Auth API disponível localmente
 
-### 1. Carregamento da aplicação
+Exemplo de diretório:
 
-Verificar:
+```text
+~/work/hsc/hsc-auth-api
+```
 
-- aplicação abre sem tela em branco
-- componente raiz carrega
-- layout base renderiza
-- assets críticos carregam
-- não há erro fatal imediato de bootstrap
+### 3. Auth API local funcional
 
-Sinais de falha típicos:
+A Auth API local deve ser capaz de:
 
-- blank screen
-- erro fatal no console
-- erro de import/standalone
-- rota inicial não resolve
+* subir com `.env.local`
+* responder `GET /health`
+* responder `POST /auth/dev/bootstrap-session`
+* responder `GET /auth/session`
 
----
+### 4. Node e npm funcionais no ambiente local
 
-### 2. Resolução de sessão
+A SPA do Backoffice depende do ambiente Node funcional para `npm install` e `npm start`.
 
-Verificar:
+### 5. Proxy local configurado no Backoffice
 
-- a aplicação resolve o estado de sessão
-- usuário autenticado entra no shell administrativo
-- usuário sem sessão não entra em área protegida
-- a store de sessão converge para estado consistente
-
-Sinais de falha típicos:
-
-- loading infinito de auth
-- rota protegida oscilando entre estados
-- usuário autenticado tratado como anônimo
-- usuário sem sessão conseguindo ver shell indevido
+A aplicação local do Backoffice deve ter proxy para a Auth API, evitando depender prematuramente de ajuste fino de CORS/cookies cross-origin no navegador.
 
 ---
 
-### 3. Guards e navegação protegida
+## Fluxo local canônico
 
-Verificar:
+O fluxo local canônico do Backoffice é:
 
-- rotas protegidas exigem autenticação
-- rotas sensíveis respeitam papel mínimo
-- `/403` aparece quando apropriado
-- `/404` funciona corretamente
-- itens de menu compatíveis com papel atual
+1. subir a Auth API local
+2. validar que a Auth API responde health
+3. subir o Backoffice local com proxy
+4. abrir `/login`
+5. bootstrapar ou resolver a sessão atual
+6. navegar para `/dashboard`
+7. validar refresh autenticado
+8. só então continuar com desenvolvimento de domínio
 
-Sinais de falha típicos:
+Regra importante:
 
-- guard deixa passar rota indevida
-- rota válida redireciona incorretamente
-- menu mostra ações incompatíveis
-- operador autenticado cai em loop de navegação
-
----
-
-### 4. Listagens administrativas
-
-Verificar pelo menos uma listagem por domínio disponível:
-
-- `seasons`
-- `news`
-- `events` quando já existir no release
-
-Checks mínimos:
-
-- loading inicial aparece
-- dados carregam
-- empty state aparece se não houver dados
-- erro aparece de forma explícita quando a leitura falha
-- ação primária de criação aparece apenas quando compatível com o papel
+* se a Auth API local não estiver funcional, o Backoffice não deve ser considerado operacionalmente saudável
+* a SPA administrativa depende do contrato real de sessão
 
 ---
 
-### 5. Formulários administrativos
+## Subir a Auth API local
 
-Verificar pelo menos um fluxo create/edit por domínio ativo no release.
+No repositório `hsc-auth-api`, a forma canônica de subir o ambiente local é:
 
-Checks mínimos:
+```bash
+ENV_FILE=.env.local ./ops/dev.sh
+```
 
-- formulário abre
-- estado inicial carrega
-- validação básica funciona
-- submit bloqueia durante envio
-- sucesso é refletido sem ambiguidade
-- erro de domínio ou backend aparece de forma útil
+### Resultado esperado
 
----
+* MariaDB local sobe
+* readiness do banco é aguardada
+* dependências Node são instaladas
+* a API sobe
+* o schema é garantido
+* a aplicação passa a escutar em `http://127.0.0.1:3000`
 
-### 6. Ações sensíveis
+### Smoke mínimo esperado
 
-Quando o release incluir ações sensíveis, verificar explicitamente:
-
-- publish/unpublish de `news`
-- activate/close de `seasons`
-- delete/cancel de `events`, quando aplicável
-
-Checks mínimos:
-
-- botão aparece só quando faz sentido
-- ação exige confirmação
-- UI não confirma antes do backend
-- erro de permissão ou invariante aparece claramente
-- tela/listagem reflete o estado final real após sucesso
-
----
-
-## Smoke test funcional mínimo
-
-O smoke test mínimo do Backoffice deve seguir uma ordem curta e repetível.
-
-### Smoke 1 — Boot da SPA
-
-Objetivo:
-
-- validar que o Backoffice sobe e renderiza
-
-Passos:
-
-1. abrir a URL do Backoffice
-2. confirmar que a aplicação carrega
-3. confirmar ausência de erro fatal visível
-4. confirmar que a rota inicial responde conforme o estado de sessão
+```bash
+curl -i http://127.0.0.1:3000/health
+```
 
 Resultado esperado:
 
-- aplicação funcional
-- sem blank screen
-- sem erro fatal de bootstrap
+* `200 OK`
 
 ---
 
-### Smoke 2 — Auth básica
+## Subir o Backoffice local
 
-Objetivo:
+No repositório `hsc-backoffice-admin`, a forma canônica de subir o ambiente local é:
 
-- validar o fluxo session-first
+```bash
+npm start
+```
 
-Passos:
+### Pré-condição importante
 
-1. acessar rota protegida sem sessão
-2. validar bloqueio/redirecionamento
-3. autenticar operador válido
-4. reabrir a área protegida
-5. confirmar resolução correta da identidade
+O `package.json` local deve usar proxy config no script `start`, por exemplo:
 
-Resultado esperado:
+```text
+ng serve --proxy-config proxy.conf.json
+```
 
-- sem sessão: acesso bloqueado
-- com sessão válida: shell administrativo acessível
+### Resultado esperado
 
----
-
-### Smoke 3 — Shell e menu
-
-Objetivo:
-
-- validar a moldura administrativa
-
-Passos:
-
-1. entrar no shell
-2. validar sidebar
-3. validar header
-4. validar rota dashboard
-5. navegar para pelo menos uma feature disponível
-
-Resultado esperado:
-
-- shell consistente
-- navegação estável
-- sem loop de rota
+* a aplicação Angular sobe localmente
+* chamadas para `/auth`, `/admin`, `/content` e `/health` são encaminhadas para a Auth API local
+* o desenvolvimento local evita dependência imediata de CORS publicado
 
 ---
 
-### Smoke 4 — Leitura administrativa
+## Proxy local do Backoffice
 
-Objetivo:
+O Backoffice usa proxy local para encaminhar chamadas ao backend.
 
-- validar listagem
+### Papel do proxy
 
-Passos:
+Ele existe para:
 
-1. abrir listagem de `seasons`
-2. confirmar loading
-3. confirmar renderização da lista ou empty state
-4. repetir para `news` quando presente
-5. repetir para `events` quando presente
+* simplificar desenvolvimento local
+* reduzir fricção com CORS
+* permitir cookies de sessão no fluxo local
+* tornar o comportamento da SPA mais próximo do uso real
 
-Resultado esperado:
+### Superfícies típicas proxadas
 
-- leitura administrativa funcional
-- estados visuais coerentes
-
----
-
-### Smoke 5 — Mutação administrativa simples
-
-Objetivo:
-
-- validar create/edit básico
-
-Passos:
-
-1. abrir formulário de um domínio ativo
-2. preencher payload válido
-3. submeter
-4. confirmar resposta visual
-5. voltar à listagem
-6. validar reflexo da mutação
-
-Resultado esperado:
-
-- write concluído com resposta clara
-- UI coerente com estado persistido
-
----
-
-### Smoke 6 — Ação sensível
-
-Objetivo:
-
-- validar fail-closed e confirmação de ação crítica
-
-Passos:
-
-1. selecionar ação sensível permitida ao papel
-2. disparar confirmação
-3. executar ação
-4. observar resposta
-5. validar estado final
-
-Resultado esperado:
-
-- sucesso só após backend confirmar
-- erro de permissão/invariante claramente tratado
-- sem optimistic update indevido
-
----
-
-## Procedimento de validação por domínio
-
-## Seasons
-
-Validar, quando disponível no release:
-
-- listagem administrativa
-- create
-- edit
-- activate
-- close
-
-Sinais de saúde:
-
-- existe visualização coerente do estado da season
-- activate respeita a invariante de season única ativa
-- close respeita transição válida
-- erro de conflito é explícito
-
-Sinais de falha:
-
-- duas seasons aparentam ficar ativas
-- ação crítica parece ter sucesso, mas a listagem não reflete
-- erro de conflito aparece como erro genérico
-- formulário permite fluxo incompatível com contrato
-
----
-
-## News
-
-Validar, quando disponível no release:
-
-- listagem
-- create
-- edit
-- publish
-- unpublish
-- delete
-
-Sinais de saúde:
-
-- drafts e publicados aparecem com clareza
-- publish/unpublish alteram estado corretamente
-- delete exige confirmação
-- erros de slug, validação ou permissão ficam legíveis
-
-Sinais de falha:
-
-- item some visualmente sem confirmação real do backend
-- publish parece funcionar, mas o estado não muda
-- 403 vira erro genérico
-- UI confirma write que falhou por fail-closed
-
----
-
-## Events
-
-Validar, quando disponível no release:
-
-- listagem
-- create
-- edit
-- delete ou cancelamento
-
-Sinais de saúde:
-
-- agenda administrativa visível
-- dados básicos do evento aparecem de forma consistente
-- mutação simples funciona
-- separação entre gestão admin e presença pública permanece clara
-
-Sinais de falha:
-
-- contrato admin de leitura inexistente ou improvisado
-- UI tenta tratar confirmação pública como fluxo admin
-- delete/cancel sem confirmação explícita
-- listagem/admin detail divergentes
-
----
-
-## Tratamento operacional de 401
-
-### Sintomas prováveis
-
-- shell some e volta para login
-- rota protegida redireciona inesperadamente
-- ação retorna erro de autenticação
-- refresh de página derruba acesso
-
-### Diagnóstico inicial
-
-Verificar:
-
-- existe sessão válida?
-- o endpoint de identidade/sessão está respondendo?
-- a store de auth está convergindo para `unauthenticated` por motivo legítimo?
-- o interceptor está reagindo corretamente?
-- houve expiração real de sessão?
-
-### Resposta esperada do produto
-
-- limpar estado administrativo inconsistente
-- redirecionar corretamente
-- mostrar feedback claro quando apropriado
-
-### Escalonamento
-
-Se a UI está correta, mas a sessão falha indevidamente, escalar para:
-
-- contrato de auth
-- Auth API
-- operação de sessão/backend
-
----
-
-## Tratamento operacional de 403
-
-### Sintomas prováveis
-
-- rota abre parcialmente e ação falha
-- botão some ou fica desabilitado
-- ação retorna acesso negado
-- usuário autenticado não consegue concluir operação específica
-
-### Diagnóstico inicial
-
-Verificar:
-
-- o papel atual do operador está correto?
-- o guard exigiu papel coerente?
-- a UI está derivando permissão corretamente?
-- o backend rejeitou por autorização real?
-- houve mismatch entre permissão visual e permissão efetiva?
-
-### Resposta esperada do produto
-
-- mostrar estado de acesso negado ou erro contextual
-- não mascarar como falha genérica
-- não deixar a UI confirmar sucesso
-
-### Escalonamento
-
-Se a role visual parece correta, mas o backend diverge, revisar:
-
-- contrato de identidade
-- RBAC do backend
-- mapeamento de papel/permite no frontend
-
----
-
-## Tratamento operacional de 404
-
-### Sintomas prováveis
-
-- tela de edição não carrega
-- item não existe mais
-- slug/id inválido
-- deep link antigo falha
-
-### Diagnóstico inicial
-
-Verificar:
-
-- o identificador existe?
-- a rota foi gerada corretamente?
-- o recurso foi removido?
-- a UI diferencia “não encontrado” de “sem permissão”?
-
-### Resposta esperada do produto
-
-- mensagem clara
-- navegação de retorno previsível
-- sem parecer erro sistêmico
-
----
-
-## Tratamento operacional de 409 e conflitos de domínio
-
-### Sintomas prováveis
-
-- activate de season falha
-- publish falha por estado inválido
-- slug duplicado
-- transição inválida de lifecycle
-
-### Diagnóstico inicial
-
-Verificar:
-
-- o operador tentou ação incompatível com o estado real?
-- a listagem estava atualizada?
-- houve corrida entre operadores?
-- o backend respondeu conflito de invariante de forma explícita?
-
-### Resposta esperada do produto
-
-- erro claro e específico
-- tela continua consistente
-- usuário entende que a operação foi negada por regra de domínio
+* `/auth`
+* `/admin`
+* `/content`
+* `/health`
 
 ### Regra importante
 
-- conflito de domínio não é bug visual por definição
-- pode ser comportamento correto da regra de negócio
+* o sucesso local via proxy não substitui a futura reconciliação de cookies/CORS no ambiente publicado
+* ele é uma ferramenta operacional de desenvolvimento
 
 ---
 
-## Tratamento operacional de 5xx e falha sistêmica
+## Fluxo local de sessão administrativa
 
-### Sintomas prováveis
+O fluxo local atualmente validado é:
 
-- listagem não carrega
-- mutação falha sem conclusão
-- erro interno retorna em múltiplas telas
-- ações sensíveis falham repetidamente
+### 1. Abrir `/login`
 
-### Diagnóstico inicial
+A página `/login` funciona como superfície inicial do admin local.
 
-Verificar:
+### 2. Criar sessão local de desenvolvimento
 
-- a Auth API está saudável?
-- o erro afeta leitura, escrita ou ambos?
-- o problema é geral ou restrito a um domínio?
-- a UI está apenas refletindo falha sistêmica?
+A UI local pode chamar a rota auxiliar:
 
-### Resposta esperada do produto
+* `POST /auth/dev/bootstrap-session`
 
-- erro claro
-- sem falso sucesso
-- sem travamento silencioso
-- possibilidade de retry controlado onde fizer sentido
+Resultado esperado:
 
-### Escalonamento
+* a Auth API garante um usuário admin local
+* cria uma sessão válida
+* devolve `Set-Cookie`
 
-Escalar para o contexto da Auth API e infraestrutura dinâmica.
+### 3. Navegar para `/dashboard`
 
----
+Após sessão válida:
 
-## Checklist de troubleshooting rápido
+* a store passa a reconhecer estado autenticado
+* os guards deixam de bloquear o shell
+* o operador entra no dashboard técnico
 
-Quando o Backoffice “parecer quebrado”, verificar nesta ordem:
+### 4. Refresh em `/dashboard`
 
-1. a SPA carrega?
-2. o shell renderiza?
-3. a sessão resolve?
-4. a rota protegida está correta?
-5. o papel atual está correto?
-6. a chamada HTTP chega?
-7. a resposta é 401, 403, 404, 409 ou 5xx?
-8. a UI está tratando essa resposta corretamente?
-9. o problema é do domínio ou do runtime?
-10. o erro precisa ser escalado para Auth API?
+Ao atualizar a página:
 
-Essa ordem reduz troubleshooting confuso e evita culpar o frontend por todo sintoma.
+* os guards resolvem a sessão antes da navegação
+* `GET /auth/session` confirma a identidade
+* o shell continua acessível
+
+### 5. Perda de sessão
+
+Sem cookie válido:
+
+* `GET /auth/session` responde `401`
+* a store converge para `unauthenticated`
+* a rota protegida deve levar de volta ao `/login`
 
 ---
 
-## Separação prática entre tipo de falha
+## Runbook — validação local mínima do Backoffice
 
-### Falha de frontend puro
+### Passo 1 — subir a Auth API
 
-Exemplos:
+```bash
+cd ~/work/hsc/hsc-auth-api
+ENV_FILE=.env.local ./ops/dev.sh
+```
 
-- componente não renderiza
-- template quebra
-- rota não carrega por erro de import
-- signal não atualiza a tela corretamente
+### Passo 2 — validar health da Auth API
 
-Indícios:
+```bash
+curl -i http://127.0.0.1:3000/health
+```
 
-- erro no console
-- sem request útil chegando ao backend
-- falha reproduzível antes do contrato HTTP
+### Passo 3 — subir o Backoffice
 
-### Falha de contrato
+```bash
+cd ~/work/hsc/hsc-backoffice-admin
+npm start
+```
 
-Exemplos:
-
-- DTO mudou
-- campo esperado sumiu
-- endpoint responde shape inesperado
-- listagem quebra por mismatch de modelo
-
-Indícios:
-
-- request acontece
-- resposta chega
-- UI não consegue mapear ou interpretar
-
-### Falha de autorização
-
-Exemplos:
-
-- 403 em ação crítica
-- usuário autenticado sem papel suficiente
-- UI mais permissiva do que backend
-
-Indícios:
-
-- request válido
-- backend recusa explicitamente
-
-### Falha de domínio/invariante
-
-Exemplos:
-
-- season já ativa
-- publish inválido
-- slug duplicado
-
-Indícios:
-
-- request válido
-- operador autenticado
-- backend recusa por regra de negócio
-
-### Falha sistêmica/backend
-
-Exemplos:
-
-- 5xx
-- indisponibilidade da Auth API
-- falha interna transacional
-- fail-closed impedindo write
-
-Indícios:
-
-- múltiplas operações falhando
-- sintomas cruzados entre features
-- backend incapaz de concluir operação
-
----
-
-## Logs e observabilidade esperada
-
-Mesmo sem detalhar stack de observabilidade aqui, o Backoffice deve operar assumindo que existem ao menos três superfícies úteis de observação:
-
-### 1. Console e Network do navegador
-
-Útil para:
-
-- falha de bootstrap
-- erro de renderização
-- request/response
-- códigos HTTP
-- shape de payload
-
-### 2. Logs da Auth API
-
-Útil para:
-
-- falha de sessão
-- falha de autorização
-- erro interno
-- fail-closed
-- conflito de domínio com detalhe operacional
-
-### 3. Documentação canônica
-
-Útil para:
-
-- confirmar contrato esperado
-- confirmar separação de camadas
-- evitar troubleshooting baseado em hipótese errada
-
----
-
-## Regras para ações sensíveis
-
-Sempre que o release incluir ações sensíveis, aplicar as seguintes regras operacionais:
-
-- exigir confirmação explícita
-- validar papel mínimo antes de expor a ação
-- não confirmar visualmente antes do backend
-- refletir erro de permissão com clareza
-- refletir erro de invariante com clareza
-- revisar estado final da tela/listagem após sucesso
-
-Essas regras se aplicam especialmente a:
-
-- publish/unpublish/delete de `news`
-- activate/close de `seasons`
-- delete/cancel de `events`
-
----
-
-## Critérios de aceite operacionais do MVP
-
-O MVP do Backoffice estará operacionalmente aceitável quando:
-
-- shell administrativo estiver estável
-- auth session-first estiver resolvida
-- guards estiverem consistentes
-- `seasons` estiver operável no mínimo
-- `news` estiver operável no mínimo, quando incluído
-- `events` estiver operável no mínimo, quando incluído
-- 401/403 forem legíveis e previsíveis
-- ações sensíveis não gerarem falso sucesso
-- o troubleshooting básico conseguir separar UI, contrato e backend
-
----
-
-## Estrutura de execução recomendada para validação manual
-
-A validação manual do Backoffice deve ser executada em três camadas.
-
-### Camada 1 — Estrutural
+### Passo 4 — abrir `/login`
 
 Validar:
 
-- bootstrap
-- shell
-- rotas
-- guards
-- estado de sessão
+* a página abre
+* o status da store é visível
+* os botões de desenvolvimento aparecem
 
-### Camada 2 — Funcional
+### Passo 5 — bootstrapar sessão local
 
-Validar:
+Na UI:
 
-- listagens
-- formulários
-- navegação entre telas
-- feedback visual
+* clicar em `Criar sessão local de desenvolvimento`
 
-### Camada 3 — Sensível
+Resultado esperado:
 
-Validar:
+* a sessão é criada
+* a navegação vai para `/dashboard`
 
-- permissões por papel
-- ações críticas
-- conflitos de domínio
-- tratamento de falhas do backend
+### Passo 6 — validar `/dashboard`
 
-Essa ordem reduz ruído operacional e aumenta confiança no release.
+Confirmar:
 
----
+* shell carregado
+* header com status/role/usuário
+* dashboard técnico com status de sessão
+* nenhuma tela de erro inesperada
 
-## Gaps operacionais esperados nesta fase
+### Passo 7 — validar refresh
 
-Os gaps mais prováveis do contexto, agora, são:
+Atualizar a página em `/dashboard`.
 
-- hostname/URL final do Backoffice ainda não formalizado
-- rotina final de deploy do frontend ainda não descrita aqui
-- smoke automatizado ainda pode não existir
-- contrato final de `events` ainda pode evoluir
-- instrumentação e telemetria ainda podem estar em fase inicial
+Resultado esperado:
 
-Esses gaps não invalidam o runbook.
-
-Mas exigem que:
-
-- a validação manual seja disciplinada
-- a documentação seja atualizada conforme a maturidade real do produto
+* a aplicação continua autenticada
+* os guards resolvem a sessão corretamente
+* não há redirecionamento incorreto para `/login`
 
 ---
 
-## Ordem de uso deste documento
+## Runbook — validar a sessão fora da UI
 
-A ordem prática de uso do runbook deve ser:
+Quando necessário, a sessão também pode ser validada diretamente na Auth API local.
 
-1. antes do release relevante
-2. imediatamente após o release
-3. durante troubleshooting funcional
-4. ao validar regressões de auth, RBAC e domínio
-5. ao revisar readiness do MVP administrativo
+### Criar cookie local
+
+```bash
+curl -i -c /tmp/hsc-auth-cookie.txt -X POST http://127.0.0.1:3000/auth/dev/bootstrap-session
+```
+
+### Introspectar sessão com cookie
+
+```bash
+curl -i -b /tmp/hsc-auth-cookie.txt http://127.0.0.1:3000/auth/session
+```
+
+### Testar ausência de sessão
+
+```bash
+curl -i http://127.0.0.1:3000/auth/session
+```
+
+Leitura correta:
+
+* com cookie válido: `200` e `authenticated: true`
+* sem cookie: `401` e `authenticated: false`
+
+Esse runbook é útil quando você quer separar problema de SPA de problema de backend.
 
 ---
 
-## Resumo executivo
+## Runbook — confirmar que os guards estão corretos
 
-O `operational-runbooks.md` do Backoffice Admin do HSC existe para garantir que a SPA administrativa possa ser validada e operada de forma disciplinada, sem confundir problema de UI com problema de backend e sem romper a separação de camadas do ecossistema.
+### Caso 1 — sem sessão
 
-A lógica operacional central é:
+Acesse `/dashboard` sem cookie válido.
 
-- validar shell
-- validar sessão
-- validar guards
-- validar listagens e formulários
-- validar ações sensíveis
-- distinguir 401, 403, 404, 409 e 5xx
-- escalar corretamente quando o problema ultrapassar a fronteira do frontend
+Resultado esperado:
 
-Esse runbook trata o Backoffice como produto administrativo real, dependente da Auth API, e preparado para crescer com clareza operacional.
+* guard bloqueia
+* usuário volta para `/login`
+
+### Caso 2 — com sessão válida
+
+Acesse `/dashboard` depois de bootstrapar sessão local.
+
+Resultado esperado:
+
+* guard permite
+* shell abre
+
+### Caso 3 — refresh em rota protegida
+
+Atualize `/dashboard`.
+
+Resultado esperado:
+
+* guard aguarda resolução assíncrona da sessão
+* rota permanece liberada
+* sem flicker destrutivo
+
+### Caso 4 — sessão perdida entre requests
+
+Se a sessão expirar ou desaparecer:
+
+* recarga ou nova resolução deve convergir para `unauthenticated`
+* o admin deve voltar para `/login`
+
+---
+
+## Runbook — validar o header e o dashboard técnico
+
+### Header
+
+O header local deve refletir, no mínimo:
+
+* status da sessão
+* role atual
+* identidade do operador, quando disponível
+
+### Dashboard técnico
+
+O dashboard local deve refletir, no mínimo:
+
+* estado da sessão
+* flags derivadas (`authenticated`, `adminAllowed`, etc.)
+* operador atual
+* erro atual, quando houver
+* botão de recarga da sessão
+
+Esse dashboard não é ainda um dashboard de produto final.
+Ele funciona como superfície técnica de validação do PR-1.
+
+---
+
+## Runbook — resolver sessão atual pela UI
+
+Na `/login`, o fluxo auxiliar recomendado inclui:
+
+* botão para criar sessão local
+* botão para resolver sessão atual
+
+### Quando usar “Resolver sessão atual”
+
+Use quando:
+
+* você já tem cookie válido no navegador
+* quer verificar se a store se recompõe corretamente
+* quer testar comportamento sem recriar sessão
+
+Resultado esperado:
+
+* se houver cookie válido, navega para `/dashboard`
+* se não houver cookie válido, permanece em estado não autenticado ou erro coerente
+
+---
+
+## Runbook — limpar o ambiente local
+
+### Parar o Backoffice
+
+Encerrar o `ng serve` com `Ctrl+C`.
+
+### Parar a Auth API local
+
+No repo `hsc-auth-api`:
+
+```bash
+./ops/stop.sh
+```
+
+### Parar removendo volumes locais
+
+```bash
+REMOVE_VOLUMES=true ./ops/stop.sh
+```
+
+Use esse caminho quando:
+
+* o schema local ficou inconsistente
+* o volume preservou tabela antiga
+* você quer resetar completamente o banco local
+
+---
+
+## Runbook — reset controlado do banco local da Auth API
+
+Quando o banco local estiver incompatível com a evolução do schema, o caminho correto é:
+
+### 1. Parar e limpar volumes
+
+```bash
+cd ~/work/hsc/hsc-auth-api
+REMOVE_VOLUMES=true ./ops/stop.sh
+```
+
+### 2. Subir novamente
+
+```bash
+ENV_FILE=.env.local ./ops/dev.sh
+```
+
+### 3. Revalidar sessão local
+
+```bash
+curl -i -c /tmp/hsc-auth-cookie.txt -X POST http://127.0.0.1:3000/auth/dev/bootstrap-session
+curl -i -b /tmp/hsc-auth-cookie.txt http://127.0.0.1:3000/auth/session
+```
+
+Esse runbook é especialmente útil quando a tabela `sessions` local ficou com shape obsoleto.
+
+---
+
+## Troubleshooting — `/login` abre, mas o bootstrap falha
+
+### Sintoma
+
+O botão de criar sessão local falha.
+
+### Causas comuns
+
+* Auth API local não está rodando
+* proxy do Angular não está ativo
+* `AUTH_DEV_BOOTSTRAP_ENABLED` está ausente ou falso
+* schema local da Auth API está incompatível
+* sessão dev-only local está quebrada
+
+### Como validar
+
+1. testar `GET /health` na Auth API
+2. testar `POST /auth/dev/bootstrap-session` direto com `curl`
+3. verificar logs da Auth API local
+4. revisar `.env.local` da Auth API
+
+---
+
+## Troubleshooting — `/dashboard` redireciona para `/login` mesmo com cookie
+
+### Sintoma
+
+Você já criou sessão local, mas a rota protegida continua caindo em `/login`.
+
+### Causas comuns
+
+* guard ainda não esperou a resolução da sessão
+* `GET /auth/session` falhou
+* cookie não está sendo reenviado corretamente
+* proxy local não está encaminhando a chamada como esperado
+* a store ficou em `unauthenticated` ou `error`
+
+### Como validar
+
+1. testar `GET /auth/session` com cookie via `curl`
+2. testar recarga explícita da sessão pela UI
+3. inspecionar erro atual na store
+4. confirmar `withCredentials` no consumo da Auth API
+
+---
+
+## Troubleshooting — refresh em rota protegida quebra a sessão
+
+### Sintoma
+
+Entrou em `/dashboard`, mas ao atualizar a página volta para `/login`.
+
+### Causas comuns
+
+* guards síncronos antigos
+* store não resolve a sessão antes da decisão do guard
+* `GET /auth/session` falha no refresh
+* cookie não está sendo preservado
+
+### Leitura correta
+
+Esse sintoma quase sempre indica falha de resolução de sessão antes do guard decidir.
+
+---
+
+## Troubleshooting — header ou dashboard mostram estado incoerente
+
+### Sintoma
+
+O header mostra `status` inesperado ou o dashboard exibe flags contraditórias.
+
+### Causas comuns
+
+* store não recarregada
+* sessão mudou no backend
+* erro capturado na store
+* falha na interpretação do contrato de `GET /auth/session`
+
+### Como agir
+
+1. usar `Resolver sessão atual`
+2. usar `Recarregar sessão`
+3. testar `GET /auth/session` diretamente
+4. verificar se houve perda de cookie
+
+---
+
+## Troubleshooting — Auth API sobe, mas o Backoffice não conecta
+
+### Sintoma
+
+A SPA sobe, mas chamadas para `/auth` falham.
+
+### Causas comuns
+
+* proxy não configurado no `npm start`
+* `proxy.conf.json` ausente ou incorreto
+* Auth API local não está ouvindo em `127.0.0.1:3000`
+* backend indisponível
+* path não proxado
+
+### Como validar
+
+1. revisar `package.json`
+2. revisar `proxy.conf.json`
+3. testar `curl http://127.0.0.1:3000/health`
+4. reiniciar `ng serve`
+
+---
+
+## Troubleshooting — ambiente local da Auth API falha no boot
+
+### Sintoma
+
+O Backoffice não consegue autenticar porque a Auth API local nem sobe corretamente.
+
+### Causas comuns
+
+* MariaDB ainda não pronto
+* volume local preservando schema antigo
+* `.env.local` inconsistente
+* script de operação local desatualizado
+
+### Como agir
+
+1. usar `./ops/dev.sh`
+2. validar readiness do banco
+3. se necessário, resetar volume com `REMOVE_VOLUMES=true ./ops/stop.sh`
+4. subir novamente
+5. revalidar `POST /auth/dev/bootstrap-session`
+
+---
+
+## Invariantes operacionais deste contexto
+
+Os invariantes mínimos do Backoffice local, nesta fase, são:
+
+### 1. O Backoffice não opera sem a Auth API
+
+A SPA administrativa depende de contrato real de sessão.
+
+### 2. O shell só deve abrir com sessão resolvida
+
+Navegação protegida não pode depender de “talvez autenticado”.
+
+### 3. O fluxo local normal deve ser previsível
+
+* `/login`
+* bootstrap ou resolução da sessão
+* `/dashboard`
+* refresh preservado
+
+### 4. O proxy local faz parte da ergonomia oficial de desenvolvimento
+
+Ele não é detalhe cosmético; é parte do fluxo local saudável.
+
+### 5. O bootstrap local é auxiliar, não produto final
+
+Ele existe para desenvolvimento e validação, não como jornada final de autenticação administrativa.
+
+---
+
+## Critério de pronto do PR-1 em operação local
+
+Do ponto de vista operacional, o PR-1 do Backoffice pode ser considerado saudável quando:
+
+* a Auth API local sobe de forma consistente
+* o Backoffice local sobe de forma consistente
+* `/login` abre corretamente
+* o bootstrap local de sessão funciona
+* `/dashboard` abre sob sessão válida
+* refresh em `/dashboard` funciona
+* `401` leva a estado não autenticado
+* `403` permanece como superfície separada
+* o dashboard técnico reflete a store real
+
+---
+
+## Limites deste documento
+
+Este documento não define:
+
+* o hostname final do Backoffice publicado
+* a política final de CORS/cookie em produção
+* o login administrativo final de produção
+* o deploy final da SPA administrativa
+* os runbooks específicos de `seasons`, `news` ou `events`
+
+Esses pontos pertencem a documentos próprios ou a fases posteriores.
+
+---
+
+## Última revisão
+
+* Status: ativo
+* Classificação: canônico
+* Contexto: backoffice admin / operação local e runbooks
+* Última revisão: 2026-03-19
+
+```
+
+O próximo micro-passo natural é revisar `docs/05-backoffice-admin/references-inventory.md` para consolidar Angular 21, proxy local, store de sessão e superfícies reais de auth.
+```

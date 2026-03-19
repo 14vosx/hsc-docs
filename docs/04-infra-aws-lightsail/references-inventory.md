@@ -10,6 +10,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - quais artefatos reais do host são source of truth operacional
 - quais serviços, paths e componentes são críticos para a Auth API
 - quais comandos ajudam a validar rapidamente a infraestrutura do Lightsail
+- quais artefatos operacionais locais passaram a influenciar a evolução da Auth API
 - quais pontos ainda dependem de confirmação direta no ambiente real
 - quais são os limites documentais do contexto
 
@@ -24,6 +25,7 @@ Este documento cobre:
 - serviços principais da camada
 - paths críticos conhecidos
 - componentes estruturais relevantes
+- workflow operacional do repositório da Auth API
 - comandos de validação
 - itens pendentes de confirmação
 - limites documentais do contexto
@@ -53,6 +55,7 @@ O contexto `04-infra-aws-lightsail` já possui estrutura canônica definida para
 - deploy, release e rollback
 - backup e restore
 - observabilidade e troubleshooting da camada dinâmica
+- fundação local do modelo session-first para o Backoffice Admin
 
 Neste estágio da reconciliação, o contexto já possui confirmação operacional suficiente para fixar sem ambiguidade:
 
@@ -98,17 +101,27 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
   - comparação estrutural coerente com a produção
   - base temporária removida após o teste
 
+No fluxo local do repositório da Auth API, também já existe confirmação suficiente para registrar:
+
+- `users.role` como base mínima de RBAC administrativo
+- tabela `sessions` como base mínima de sessão admin
+- `GET /auth/session` como contrato local validado de introspecção de sessão
+- `POST /auth/dev/bootstrap-session` como rota dev-only de bootstrap local
+- `./ops/dev.sh` com espera explícita de readiness do MariaDB
+- `./ops/stop.sh` com suporte real a limpeza de volumes e imagens locais
+
 Ainda restam pendências menores, principalmente ligadas a:
 
-- eventual confirmação de outras variáveis de ambiente fora da unit
-- eventual estratégia externa/off-host de retenção ou cópia
+- eventual confirmação de outros detalhes de sessão no runtime produtivo após deploy
+- eventual estratégia externa/off-host de retenção ou cópia de backups
 - cleanup do drift residual da borda antiga ainda presente na Hostinger
+- consolidação final do fluxo de autenticação administrativa de produção, além do bootstrap local controlado
 
 ---
 
 ## Source of truth / evidências
 
-As evidências que sustentam este contexto se dividem em quatro grupos principais.
+As evidências que sustentam este contexto se dividem em cinco grupos principais.
 
 ### 1. Documentação consolidada do ecossistema
 
@@ -125,11 +138,23 @@ Usada para:
 - runtime da aplicação
 - Nginx reverse proxy
 - MariaDB local
-- deploy/release/rollback
+- deploy, release e rollback
 - backup e restore
 - observabilidade da camada dinâmica
+- operação funcional de auth admin
 
-### 3. Impl-logs e registros incrementais
+### 3. Workflow real do repositório da Auth API
+
+Usado para:
+
+- fluxo de feature branch em `develop`
+- release por TAG a partir de `main`
+- deploy produtivo via `deploy-auth.sh`
+- smoke local
+- bootstrap e stop do ambiente local
+- entendimento confiável do dia-a-dia operacional do repo
+
+### 4. Impl-logs e registros incrementais
 
 Usados para:
 
@@ -137,7 +162,7 @@ Usados para:
 - registrar ajustes relevantes de infraestrutura e aplicação
 - preservar rastreabilidade da evolução da camada dinâmica
 
-### 4. Ambiente real do Lightsail
+### 5. Ambiente real do Lightsail
 
 Usado para:
 
@@ -196,6 +221,7 @@ Os documentos abaixo são as principais fontes de extração e reconciliação d
 
 - documentação reconciliada de borda, Node.js, MariaDB local e backup
 - impl-logs ligados a deploy, rollback, borda pública e ajustes operacionais da API
+- workflow real do repositório em `ops/`
 
 ### Fontes de apoio histórico
 
@@ -305,6 +331,36 @@ Esses artefatos devem ser tratados como inventário-base do contexto até revis�
 
 ---
 
+## Artefatos operacionais locais do repositório
+
+Além do inventário do host produtivo, o contexto agora também precisa reconhecer os artefatos operacionais locais do repositório da Auth API que influenciam diretamente o desenvolvimento e a preparação de releases.
+
+### Scripts de operação local
+
+- `ops/dev.sh`
+- `ops/stop.sh`
+- `ops/smoke-local.sh`
+- `ops/deploy-local.sh`
+- `ops/status.sh`
+- `ops/release.sh`
+- `ops/deploy-auth.sh`
+
+### Papel desses scripts
+
+- subir ambiente local com MariaDB + API
+- aguardar readiness do banco antes do boot da app
+- parar ambiente local com ou sem limpeza de volumes
+- executar smoke local repetível
+- produzir release por TAG
+- publicar TAG em produção no Lightsail
+
+### Observação importante
+
+Esses scripts não substituem o runtime canônico do Lightsail.  
+Eles existem para preservar consistência entre desenvolvimento local, preparação de release e operação produtiva.
+
+---
+
 ## Serviços principais do contexto
 
 Os serviços principais conhecidos desta camada são:
@@ -323,7 +379,7 @@ Papel:
 - sustentação do runtime Node.js da Auth API
 - integração da app ao boot e à operação normal do host
 
-### processo Node.js da Auth API
+### Processo Node.js da Auth API
 
 Papel:
 - aplicação dinâmica do ecossistema
@@ -342,12 +398,12 @@ Papel:
 - sustentação do serviço da aplicação
 - apoio operacional para start, stop, restart e observabilidade
 
-### cron do root
+### Cron do root
 
 Papel:
 - mecanismo real de agendamento da rotina de backup do banco
 
-### script `backup-mariadb.sh`
+### Script `backup-mariadb.sh`
 
 Papel:
 - entrypoint real reconciliado da camada de backup do banco
@@ -466,346 +522,167 @@ Persistência principal do backend dinâmico.
 - `/opt/hsc/backups/mariadb/`
 - `/opt/hsc/backups/mariadb/backup.log`
 
-### Agendamento real do backup
+### Session-first admin foundation
 
-- root cron
-- `15 3 * * * /opt/hsc/backup-mariadb.sh`
+Estruturas locais relevantes já materializadas para evolução da Auth API:
 
-### Restore prático validado
-
-- dump restaurado com sucesso em `hsc_auth_restore_test`
-- inventário estrutural coerente com a produção
-- base temporária removida ao final
-
-### Endpoint `/health`
-
-Ponto mínimo de validação pública e operacional da borda e da app.
+- `users.role`
+- `sessions`
+- `GET /auth/session`
+- `POST /auth/dev/bootstrap-session`
+- camada `adminAuth` com sessão + fallback `x-admin-key`
 
 ---
 
-## Componentes já reconciliados
+## Comandos de validação rápida
 
-Os itens abaixo já possuem relevância reconciliada suficiente no contexto atual.
+Os comandos abaixo ajudam a validar rapidamente o contexto.
 
-### Hostname canônico da API
-
-- `auth-api.haxixesmokeclub.com`
-
-### Reverse proxy local
-
-- Nginx no próprio Lightsail
-
-### Upstream do Nginx
-
-- `http://127.0.0.1:3000`
-
-### Unit canônica da app
-
-- `hsc-auth-api.service`
-
-### Arquivo real da unit
-
-- `/etc/systemd/system/hsc-auth-api.service`
-
-### Working directory real
-
-- `/opt/hsc/hsc-auth-api`
-
-### Usuário real
-
-- `hscadmin`
-
-### ExecStart real
-
-- `/usr/bin/node index.js`
-
-### Binding observado da app
-
-- `0.0.0.0:3000`
-
-### Vhost reconciliado
-
-- `/etc/nginx/sites-available/hsc-auth-api`
-
-### Script real de backup
-
-- `/opt/hsc/backup-mariadb.sh`
-
-### Diretório real dos dumps
-
-- `/opt/hsc/backups/mariadb/`
-
-### Log real da camada de backup
-
-- `/opt/hsc/backups/mariadb/backup.log`
-
-### Mecanismo real de agendamento
-
-- root cron
-
-### Linha exata do cron
-
-- `15 3 * * * /opt/hsc/backup-mariadb.sh`
-
-### Retenção exata do script
-
-- `14 dias`
-
-### Restore prático validado
-
-- restore bem-sucedido em base temporária
-- estrutura e volume básico coerentes com a produção
-- base temporária descartada após o teste
-
-### Endpoint público validado
-
-- `https://auth-api.haxixesmokeclub.com/health`
-
-Esses itens já devem ser tratados como parte da verdade operacional do contexto.
-
----
-
-## Dependências cruzadas
-
-Os principais workloads e dependências cruzadas deste contexto incluem:
-
-### Dependência do DNS e da borda
-
-A Auth API depende de:
-
-- resolução correta de `auth-api.haxixesmokeclub.com`
-- Nginx íntegro
-- TLS saudável
-- proxy coerente com o upstream real
-
-### Dependência da unit e da aplicação local
-
-A borda depende de:
-
-- `hsc-auth-api.service` íntegra
-- working directory correto
-- processo Node funcional
-- porta `3000` respondendo localmente
-- serviço local estável via systemd
-
-### Dependência do banco local
-
-A aplicação depende de:
-
-- MariaDB local íntegro
-- credenciais e configuração operacional corretas
-- compatibilidade de schema com a versão atual da app
-
-### Dependência da camada de backup
-
-A resiliência do contexto depende de:
-
-- existência do script real de backup
-- existência da entrada correta no crontab do root
-- escrita contínua no diretório `/opt/hsc/backups/mariadb/`
-- presença de dumps recentes
-- integridade do `backup.log`
-- disponibilidade do MariaDB local para permitir o dump
-- capacidade comprovada de restaurar o dump em base temporária
-
-### Dependência de separação arquitetural
-
-A leitura correta do ecossistema depende de:
-
-- Hostinger = jogo + portal
-- Lightsail = Auth API
-- documentação e operação respeitando essa fronteira
-
----
-
-## Comandos de validação
-
-Os comandos abaixo formam um kit mínimo de validação da camada Lightsail.
-
-### Validar unit files relevantes
-
-```bash
-systemctl list-unit-files --type=service --no-pager | grep -Ei 'hsc|auth|api|node'
-systemctl list-units --type=service --all --no-pager | grep -Ei 'hsc|auth|api|node'
-```
-
-### Validar localização dos unit files
-
-```bash
-find /etc/systemd /lib/systemd/system -maxdepth 2 -type f | grep -Ei 'hsc|auth|api|node' | sort
-```
-
-### Validar campos principais das units
-
-```bash
-grep -RInE 'Description=|ExecStart=|WorkingDirectory=|User=|Group=|Environment=|EnvironmentFile=|Restart=|WantedBy=' /etc/systemd /lib/systemd/system 2>/dev/null | grep -Ei 'hsc|auth|api|node'
-```
-
-### Validar status e conteúdo da unit canônica
-
-```bash
-systemctl status hsc-auth-api.service --no-pager
-systemctl cat hsc-auth-api.service
-```
-
-### Validar sintaxe do Nginx
-
-```bash
-sudo nginx -t
-```
-
-### Validar status do Nginx
-
-```bash
-sudo systemctl status nginx
-```
-
-### Validar configuração ativa relevante
-
-```bash
-sudo nginx -T | grep -nE "server_name|proxy_pass|root |alias "
-```
-
-### Validar inventário de arquivos do Nginx
-
-```bash
-find /etc/nginx -maxdepth 3 -type f | sort
-```
-
-### Validar health público da API
+### Health público
 
 ```bash
 curl -I https://auth-api.haxixesmokeclub.com/health
 curl -sS https://auth-api.haxixesmokeclub.com/health
 ```
 
-### Validar processo real
-
-```bash
-ps -ef | grep -Ei 'node|hsc-auth-api|index.js' | grep -v grep
-```
-
-### Validar porta local
-
-```bash
-ss -ltnp | grep ':3000'
-```
-
-### Validar working directory real
-
-```bash
-ls -lah /opt/hsc/hsc-auth-api
-```
-
-### Validar health local da aplicação
+### Health local
 
 ```bash
 curl -I http://127.0.0.1:3000/health
 curl -sS http://127.0.0.1:3000/health
 ```
 
-### Validar presença do script de backup
+### Serviço da aplicação
 
 ```bash
-ls -lah /opt/hsc/backup-mariadb.sh
+sudo systemctl status hsc-auth-api --no-pager
+sudo journalctl -u hsc-auth-api -n 100 --no-pager
 ```
 
-### Validar diretório real dos dumps
+### Nginx
 
 ```bash
-ls -lah /opt/hsc/backups/mariadb/
+sudo nginx -t
+sudo systemctl status nginx --no-pager
 ```
 
-### Validar dumps recentes
+### MariaDB
 
 ```bash
-find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | sort | tail -n 10
+sudo systemctl status mariadb --no-pager
 ```
 
-### Validar log da camada de backup
+### Runtime Git no host
 
 ```bash
-tail -n 50 /opt/hsc/backups/mariadb/backup.log
+cd /opt/hsc/hsc-auth-api
+git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD
 ```
 
-### Validar cron real do backup
+### Backup
 
 ```bash
+sudo ls -lah /opt/hsc/backups/mariadb/
+sudo tail -n 50 /opt/hsc/backups/mariadb/backup.log
 sudo crontab -l
-sudo sed -n '1,220p' /var/spool/cron/crontabs/root
 ```
 
-### Validar restore em base temporária
+### Workflow local do repo
 
 ```bash
-LATEST_DUMP="$(find /opt/hsc/backups/mariadb -maxdepth 1 -type f -name 'hsc_auth_*.sql.gz' | sort | tail -n 1)"
-TEST_DB="hsc_auth_restore_test"
-sudo mysql -e "DROP DATABASE IF EXISTS \`$TEST_DB\`;"
-sudo mysql -e "CREATE DATABASE \`$TEST_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-gunzip -c "$LATEST_DUMP" | sudo mysql "$TEST_DB"
-sudo mysql -e "SHOW TABLES FROM \`$TEST_DB\`;"
-sudo mysql -e "DROP DATABASE IF EXISTS \`$TEST_DB\`;"
+./ops/status.sh
+ENV_FILE=.env.local ./ops/dev.sh
+./ops/smoke-local.sh
+./ops/stop.sh
 ```
 
-### Validar MariaDB
+### Sessão admin local
 
 ```bash
-systemctl status mariadb --no-pager
+curl -i -c /tmp/hsc-auth-cookie.txt -X POST http://127.0.0.1:3000/auth/dev/bootstrap-session
+curl -i -b /tmp/hsc-auth-cookie.txt http://127.0.0.1:3000/auth/session
+curl -i http://127.0.0.1:3000/auth/session
 ```
-
-### Validar timezone do host
-
-```bash
-date -u
-date
-timedatectl
-```
-
-Regra prática:
-
-- se o processo existe e a porta responde, mas o hostname público não, o problema tende a estar na borda
-- se nem a unit, nem a porta respondem, o problema tende a estar no runtime da app ou no `systemd`
-- se a app está saudável, mas não há dump recente, o problema tende a estar na camada de backup e não no runtime principal da API
 
 ---
 
-## Itens pendentes de confirmação
+## Itens pendentes / zonas de atenção
 
-Os itens abaixo ainda podem ser confirmados diretamente no ambiente real para elevar ainda mais o grau de confiança do contexto, mas já não bloqueiam o checkpoint.
+Os itens abaixo ainda merecem atenção ou reconciliação posterior.
 
-### 1. Eventuais outras variáveis de ambiente fora da unit
+### 1. Produção ainda precisa ser reconciliada após deploy da nova base de sessão
 
-A unit já explicita `NODE_ENV=production`, mas ainda pode haver variáveis relevantes fora dela que mereçam ser formalizadas em momento próprio.
+Estado:
 
-### 2. Eventual estratégia externa/off-host de retenção ou cópia
+* a fundação session-first foi validada localmente
+* ainda precisa de confirmação explícita no runtime produtivo após release
 
-O backup local está reconciliado.  
-Ainda não foi confirmada nesta rodada a existência de cópia externa ou retenção fora do host.
+Impacto:
 
-### 3. Eventuais arquivos auxiliares de deploy
+* documentar localmente não substitui a verificação pós-deploy no Lightsail
 
-É útil confirmar se existem paths adicionais estáveis de release/deploy que mereçam ser citados formalmente neste contexto.
+### 2. Fluxo final de autenticação administrativa de produção ainda não é o foco deste corte
 
-### 4. Cleanup do drift residual da Hostinger
+Estado:
 
-A presença de configuração residual antiga da Auth API na Hostinger já foi identificada, mas o cleanup ainda pertence a uma etapa posterior.
+* bootstrap local dev-only existe
+* login final de produção para operadores administrativos ainda não está fechado
+
+Impacto:
+
+* o Backoffice já pode evoluir localmente
+* mas a jornada final de auth administrativa ainda exige continuidade
+
+### 3. CORS e cookies do Backoffice produtivo ainda precisam de reconciliação final
+
+Estado:
+
+* o desenvolvimento local usa proxy
+* o comportamento final cross-origin ou same-site ainda depende de publicação real do admin
+
+Impacto:
+
+* afeta deploy do frontend administrativo
+* não afeta a validade do contrato local já implementado
+
+### 4. Scripts locais devem permanecer fiéis ao workflow canônico
+
+Estado:
+
+* `dev.sh` e `stop.sh` foram endurecidos para suportar a nova base de sessão
+* qualquer drift futuro nesses scripts pode afetar confiabilidade do desenvolvimento local
+
+Impacto:
+
+* esses scripts devem ser tratados como artefatos relevantes de operação do repo
+
+### 5. Drift residual da borda antiga na Hostinger continua fora do escopo principal deste contexto
+
+Estado:
+
+* a leitura canônica da Auth API continua sendo Lightsail-first
+* qualquer resíduo antigo fora do Lightsail não governa o contexto
+
+Impacto:
+
+* evitar confundir runtime canônico com configuração residual histórica
 
 ---
 
-## Itens fora do escopo deste contexto
+## Itens explicitamente fora deste inventário
 
 Os itens abaixo não pertencem ao inventário canônico da Infra AWS Lightsail:
 
-- servidor CS2
-- AMP
-- MatchZy
-- `matchzy.db`
-- ETL Bash da v2
-- publicação do portal
-- Nginx do lado Hostinger
-- credenciais reais
-- arquivos de acesso sensíveis
-- documentação histórica não reconciliada
+* servidor CS2
+* AMP
+* MatchZy
+* `matchzy.db`
+* ETL Bash da v2
+* publicação do portal
+* Nginx do lado Hostinger
+* credenciais reais
+* arquivos de acesso sensíveis
+* documentação histórica não reconciliada
 
 Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo normal do repositório documental.
 
@@ -815,11 +692,11 @@ Esses itens pertencem a outros contextos ou devem permanecer fora do fluxo norma
 
 Os limites documentais deste contexto são:
 
-- ele documenta a camada dinâmica da Auth API
-- ele não documenta sozinho o ecossistema HSC inteiro
-- ele não substitui o índice mestre
-- ele não substitui impl-logs históricos
-- ele depende de confirmação periódica contra o ambiente real para permanecer confiável
+* ele documenta a camada dinâmica da Auth API
+* ele não documenta sozinho o ecossistema HSC inteiro
+* ele não substitui o índice mestre
+* ele não substitui impl-logs históricos
+* ele depende de confirmação periódica contra o ambiente real para permanecer confiável
 
 ---
 
@@ -827,20 +704,22 @@ Os limites documentais deste contexto são:
 
 Este documento deve ser atualizado quando houver:
 
-- mudança de hostname público da API
-- mudança da unit canônica da aplicação
-- mudança do usuário ou working directory reais
-- mudança do `ExecStart`
-- mudança do binding observado da app
-- mudança relevante no vhost do Nginx
-- mudança de path estrutural da operação da Auth API
-- mudança do script real de backup
-- mudança do diretório real dos dumps
-- mudança da linha real do cron de backup
-- mudança da retenção configurada
-- mudança relevante no procedimento validado de restore
-- confirmação ou resolução de item pendente listado aqui
-- mudança relevante na estratégia de backup ou runtime
+* mudança de hostname público da API
+* mudança da unit canônica da aplicação
+* mudança do usuário ou working directory reais
+* mudança do `ExecStart`
+* mudança do binding observado da app
+* mudança relevante no vhost do Nginx
+* mudança de path estrutural da operação da Auth API
+* mudança do script real de backup
+* mudança do diretório real dos dumps
+* mudança da linha real do cron de backup
+* mudança da retenção configurada
+* mudança relevante no procedimento validado de restore
+* mudança relevante no workflow do repositório em `ops/`
+* criação ou remoção de superfície operacional relevante de sessão/admin
+* confirmação ou resolução de item pendente listado aqui
+* mudança relevante na estratégia de backup ou runtime
 
 Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no documento especializado correspondente, e não necessariamente aqui.
 
@@ -850,19 +729,22 @@ Mudanças pequenas de comportamento funcional devem ser refletidas primeiro no d
 
 Este documento pode ser considerado maduro quando:
 
-- os artefatos reais do host estiverem confirmados sem ambiguidade
-- hostname canônico, reverse proxy, unit `systemd`, runtime Node e camada de backup estiverem claramente reconciliados
-- o path do vhost da API, o path real do runtime e o diretório real dos dumps estiverem fixados
-- a linha real de agendamento do backup estiver explícita
-- o restore prático em base temporária estiver explícito
-- os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
-- ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
+* os artefatos reais do host estiverem confirmados sem ambiguidade
+* hostname canônico, reverse proxy, unit `systemd`, runtime Node e camada de backup estiverem claramente reconciliados
+* o path do vhost da API, o path real do runtime e o diretório real dos dumps estiverem fixados
+* a linha real de agendamento do backup estiver explícita
+* o restore prático em base temporária estiver explícito
+* os artefatos operacionais locais do repositório estiverem claramente registrados
+* as superfícies de sessão/admin relevantes estiverem registradas
+* os itens pendentes estiverem resolvidos ou explicitamente mantidos como pendência consciente
+* ele puder ser usado como inventário confiável do contexto Lightsail sem depender do master legado
 
 ---
 
 ## Última revisão
 
-- Status: ativo
-- Classificação: canônico
-- Contexto: infraestrutura AWS Lightsail / references and inventory
-- Última revisão: 2026-03-18
+* Status: ativo
+* Classificação: canônico
+* Contexto: infraestrutura AWS Lightsail / references and inventory
+* Última revisão: 2026-03-19
+
