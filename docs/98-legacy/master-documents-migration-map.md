@@ -122,7 +122,7 @@ Documentos centrais de substituição:
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 ---
 
@@ -155,7 +155,7 @@ Documentos centrais de substituição:
 - `docs/02-game-panel/mariadb-runtime.md`
 - `docs/02-game-panel/operational-runbooks.md`
 - `docs/02-game-panel/observability-troubleshooting.md`
-- `docs/02-game-panel/references-inventory.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 ---
 
@@ -190,7 +190,7 @@ Documentos centrais de substituição:
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
 - `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 ---
 
@@ -226,7 +226,7 @@ Documentos centrais de substituição:
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 ---
 

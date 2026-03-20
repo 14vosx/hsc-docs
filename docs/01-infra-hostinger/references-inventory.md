@@ -149,8 +149,8 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
-- `docs/02-game-panel/references-inventory.md`
+- `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.

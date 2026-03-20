@@ -95,7 +95,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 
 Este documento descreve a camada de rede, DNS e TLS da Auth API no Lightsail.  

@@ -73,7 +73,7 @@ Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
 - `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
 - `docs/db-migrations-policy.md`

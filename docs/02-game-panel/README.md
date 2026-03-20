@@ -30,7 +30,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Plugins Installed](./plugins-installed.md)
 - [Operational Runbooks](./operational-runbooks.md)
 - [Observability and Troubleshooting](./observability-troubleshooting.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./game-panel-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
@@ -310,7 +310,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/02-game-panel/mariadb-runtime.md`
 - `docs/02-game-panel/operational-runbooks.md`
 - `docs/02-game-panel/observability-troubleshooting.md`
-- `docs/02-game-panel/references-inventory.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 

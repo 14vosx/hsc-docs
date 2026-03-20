@@ -124,11 +124,11 @@ Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 Este documento descreve a automação do host.  
 Ele não substitui os documentos do pipeline ETL, dos runbooks da v2 ou do inventário do portal.

@@ -28,7 +28,7 @@ Este documento existe para:
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Admin API Contracts](./admin-api-contracts.md)
 - [Operational Runbooks](./operational-runbooks.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./backoffice-admin-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
@@ -192,7 +192,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/operational-runbooks.md`
-- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 
@@ -208,7 +208,7 @@ A ordem recomendada de leitura é:
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
 6. `docs/05-backoffice-admin/operational-runbooks.md`
-7. `docs/05-backoffice-admin/references-inventory.md`
+7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 

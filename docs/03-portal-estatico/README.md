@@ -32,7 +32,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
 - [Operational Runbooks](./operational-runbooks.md)
 - [Observability and Troubleshooting](./observability-troubleshooting.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./portal-estatico-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
@@ -236,7 +236,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
 - `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 

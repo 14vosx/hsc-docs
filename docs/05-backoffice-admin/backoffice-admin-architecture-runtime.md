@@ -93,7 +93,7 @@ Este arquivo é complementar a:
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/operational-runbooks.md`
-- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 Este documento descreve a topologia e os fluxos do runtime do Backoffice.
 Ele não substitui:

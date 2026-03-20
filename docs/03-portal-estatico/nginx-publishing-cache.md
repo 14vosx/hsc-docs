@@ -127,7 +127,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
 - `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 

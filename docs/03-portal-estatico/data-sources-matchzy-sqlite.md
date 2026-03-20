@@ -113,10 +113,10 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/matchzy.md`
-- `docs/02-game-panel/references-inventory.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 Este documento descreve a fonte SQLite do portal.  
 Ele não substitui os documentos de ETL, SQL, MatchZy ou inventário da instância.

@@ -30,7 +30,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Systemd Automation](./systemd-automation.md)
 - [Observability and Troubleshooting](./observability-troubleshooting.md)
 - [Certbot](./certbot.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./infra-hostinger-references-inventory.md)
 
 ### Relações com outros contextos
 - [Game Panel](../02-game-panel/README.md)
@@ -234,7 +234,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 

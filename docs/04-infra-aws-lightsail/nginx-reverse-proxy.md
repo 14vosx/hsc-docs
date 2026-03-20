@@ -115,7 +115,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este documento descreve a borda Nginx da Auth API no Lightsail.  
 Ele não substitui os documentos de runtime da aplicação, TLS, systemd ou troubleshooting aprofundado.

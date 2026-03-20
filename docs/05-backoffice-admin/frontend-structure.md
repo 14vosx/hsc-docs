@@ -38,7 +38,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Governança e suporte
 - [Documentation System](../00-governance/documentation-system.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./backoffice-admin-references-inventory.md)
 
 ---
 

@@ -36,7 +36,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Governança e suporte
 - [Documentation System](../00-governance/documentation-system.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./backoffice-admin-references-inventory.md)
 
 ---
 
@@ -83,7 +83,7 @@ Este arquivo deve ser lido junto com:
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/operational-runbooks.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 ---
 

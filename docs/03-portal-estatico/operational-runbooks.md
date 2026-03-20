@@ -98,9 +98,9 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 Este documento descreve procedimentos recorrentes de operação da camada pública.  
 Ele não substitui os documentos de topologia, ETL, publicação, inventário ou troubleshooting aprofundado.

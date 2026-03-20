@@ -61,7 +61,7 @@ Este documento deve ser lido junto com:
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 ---
 

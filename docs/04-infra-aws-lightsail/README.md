@@ -31,7 +31,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Backup / Restore](./backup-restore.md)
 - [Operational Runbooks](./operational-runbooks.md)
 - [Observability and Troubleshooting](./observability-troubleshooting.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./infra-aws-lightsail-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
@@ -194,7 +194,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/04-infra-aws-lightsail/backup-restore.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 

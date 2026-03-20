@@ -142,7 +142,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este documento descreve o runtime da aplicação via `systemd`.  
 Ele não substitui os documentos de borda Nginx, rede, operações da API ou troubleshooting aprofundado.
