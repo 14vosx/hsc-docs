@@ -23,7 +23,7 @@ Este documento existe para:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Documentos deste contexto
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Frontend Structure](./frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Admin API Contracts](./admin-api-contracts.md)

@@ -14,6 +14,38 @@ Este contexto existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação rápida
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Governance](../00-governance/README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Documentos deste contexto
+- [AMP Instance Manager](./amp-instance-manager.md)
+- [Architecture Runtime](./game-panel-architecture-runtime.md)
+- [CS2 Server Configuration](./cs2-server-configuration.md)
+- [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
+- [MatchZy](./matchzy.md)
+- [Plugins Installed](./plugins-installed.md)
+- [Operational Runbooks](./operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [References and Inventory](./references-inventory.md)
+
+### Relações com outros contextos
+- [Infra Hostinger](../01-infra-hostinger/README.md)
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+
+### Trilhas operacionais relevantes
+- [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
+- [SQL Queries and Views](../03-portal-estatico/sql-queries-and-views.md)
+- [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [Static API v2](../03-portal-estatico/static-api-v2.md)
+- [Docker Host](../01-infra-hostinger/docker-host.md)
+
+---
+
 ## Escopo
 
 Este contexto cobre exclusivamente a camada operacional do servidor CS2 sobre a base Hostinger.

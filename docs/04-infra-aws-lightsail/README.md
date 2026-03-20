@@ -22,7 +22,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Documentos deste contexto
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
 - [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
 - [Node Systemd](./node-systemd.md)
 - [MariaDB Local](./mariadb-local.md)

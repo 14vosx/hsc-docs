@@ -24,7 +24,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
 - [Auth API Operations](./auth-api-operations.md)
 - [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)

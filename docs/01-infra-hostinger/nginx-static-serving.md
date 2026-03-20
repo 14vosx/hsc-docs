@@ -23,7 +23,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Network, DNS and TLS](./network-dns-tls.md)
 - [Systemd Automation](./systemd-automation.md)
 - [Certbot](./certbot.md)

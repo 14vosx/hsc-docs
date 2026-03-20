@@ -22,7 +22,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Documentos deste contexto
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
 - [Network, DNS and TLS](./network-dns-tls.md)

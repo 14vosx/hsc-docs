@@ -23,7 +23,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
 - [Nginx Static Serving](./nginx-static-serving.md)

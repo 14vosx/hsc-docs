@@ -23,7 +23,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Contexto administrativo imediato
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Frontend Structure](./frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Operational Runbooks](./operational-runbooks.md)
