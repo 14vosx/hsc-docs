@@ -145,7 +145,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.

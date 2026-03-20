@@ -36,7 +36,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Operação e suporte
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
-- [Network, DNS and TLS](./network-dns-tls.md)
+- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---

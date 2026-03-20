@@ -24,7 +24,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Infraestrutura imediata
 - [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
-- [Network, DNS and TLS](./network-dns-tls.md)
+- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
 - [Systemd Automation](./systemd-automation.md)
 - [Certbot](./certbot.md)
 
@@ -111,7 +111,7 @@ Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/./infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`

@@ -32,7 +32,7 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Infraestrutura de entrega
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
-- [Network, DNS and TLS](../01-infra-hostinger/network-dns-tls.md)
+- [Network, DNS and TLS](../01-infra-hostinger/infra-hostinger-network-dns-tls.md)
 
 ### Operação e suporte
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
@@ -129,7 +129,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
 Este documento descreve a publicação pública e a estratégia de cache da camada portal/v2.  
 Ele não substitui os documentos de topologia geral, ETL, frontend ou troubleshooting aprofundado.

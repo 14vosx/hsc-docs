@@ -31,7 +31,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 ### Infraestrutura base
 - [Infra Hostinger](./01-infra-hostinger/README.md)
 - [Architecture Runtime — Hostinger](./01-infra-hostinger/infra-hostinger-architecture-runtime.md)
-- [Network, DNS and TLS](./01-infra-hostinger/network-dns-tls.md)
+- [Network, DNS and TLS](./01-infra-hostinger/infra-hostinger-network-dns-tls.md)
 - [Nginx Static Serving](./01-infra-hostinger/nginx-static-serving.md)
 - [Systemd Automation](./01-infra-hostinger/systemd-automation.md)
 

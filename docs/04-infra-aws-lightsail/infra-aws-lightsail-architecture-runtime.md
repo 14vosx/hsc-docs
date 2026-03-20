@@ -77,7 +77,7 @@ Os caminhos, nomes de serviço e relações entre componentes descritos aqui for
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`

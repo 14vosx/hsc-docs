@@ -115,7 +115,7 @@ Documentos centrais de substituição:
 
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/docker-host.md`
 - `docs/01-infra-hostinger/certbot.md`
@@ -222,7 +222,7 @@ Documentos centrais de substituição:
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`

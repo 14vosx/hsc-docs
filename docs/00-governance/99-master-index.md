@@ -96,7 +96,7 @@ Função:
 Arquivos principais:
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`

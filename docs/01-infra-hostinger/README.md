@@ -25,7 +25,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
-- [Network, DNS and TLS](./network-dns-tls.md)
+- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
 - [Nginx Static Serving](./nginx-static-serving.md)
 - [Systemd Automation](./systemd-automation.md)
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
@@ -227,7 +227,7 @@ Os documentos canônicos previstos para este contexto são:
 
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/./infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/docker-host.md`
 - `docs/01-infra-hostinger/certbot.md`
