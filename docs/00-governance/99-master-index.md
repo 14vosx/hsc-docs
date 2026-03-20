@@ -138,7 +138,7 @@ Arquivos principais:
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 ---
@@ -183,7 +183,7 @@ Arquivos principais:
 - `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
@@ -469,7 +469,7 @@ A ordem de leitura recomendada do sistema, neste checkpoint, é:
 3. `docs/05-backoffice-admin/frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
-6. `docs/05-backoffice-admin/operational-runbooks.md`
+6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---

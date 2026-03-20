@@ -153,7 +153,7 @@ Documentos centrais de substituição:
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/mariadb-runtime.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks`
 - `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/02-game-panel/game-panel-references-inventory.md`
 
@@ -188,7 +188,7 @@ Documentos centrais de substituição:
 - `docs/03-portal-estatico/json-contracts.md`
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 

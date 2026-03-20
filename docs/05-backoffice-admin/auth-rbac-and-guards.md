@@ -27,7 +27,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Frontend Structure](./frontend-structure.md)
 - [Admin API Contracts](./admin-api-contracts.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
 ### Backend e operação da autenticação
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)

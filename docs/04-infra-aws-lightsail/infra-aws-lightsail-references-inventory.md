@@ -163,7 +163,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
 
 Leitura canônica:

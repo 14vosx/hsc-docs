@@ -96,7 +96,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`

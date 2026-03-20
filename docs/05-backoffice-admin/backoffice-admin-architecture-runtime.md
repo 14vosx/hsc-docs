@@ -71,7 +71,7 @@ As principais evidências deste documento, nesta fase, são:
 - `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - impl-log do checkpoint de auth admin magic link e cutover de migrations
 
 O desenho do Backoffice já não é apenas alvo abstrato.
@@ -92,7 +92,7 @@ Este arquivo é complementar a:
 - `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 Este documento descreve a topologia e os fluxos do runtime do Backoffice.

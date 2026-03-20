@@ -40,7 +40,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Frontend Structure](../05-backoffice-admin/frontend-structure.md)
 
 ### Operação e suporte
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
 - [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 

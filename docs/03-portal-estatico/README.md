@@ -30,7 +30,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [JSON Contracts](./json-contracts.md)
 - [Frontend Structure](./frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 - [References and Inventory](./portal-estatico-references-inventory.md)
 
@@ -234,7 +234,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/03-portal-estatico/json-contracts.md`
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 

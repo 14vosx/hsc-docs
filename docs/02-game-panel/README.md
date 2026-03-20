@@ -28,7 +28,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
 - [MatchZy](./matchzy.md)
 - [Plugins Installed](./plugins-installed.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./game-panel-operational-runbooks.md)
 - [Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 - [References and Inventory](./game-panel-references-inventory.md)
 
@@ -308,7 +308,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/mariadb-runtime.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
 - `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/02-game-panel/game-panel-references-inventory.md`
 

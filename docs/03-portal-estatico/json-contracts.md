@@ -31,7 +31,7 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Consumo e publicação
 - [Frontend Structure](./frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 
 ### Infraestrutura e suporte
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
@@ -106,7 +106,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/frontend-structure.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve os contratos públicos da v2 em nível canônico.  

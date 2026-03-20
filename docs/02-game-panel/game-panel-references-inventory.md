@@ -130,7 +130,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
 - `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 
 Este documento não substitui nenhum dos arquivos acima.  

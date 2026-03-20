@@ -90,7 +90,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/json-contracts.md`
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 

@@ -35,7 +35,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Frontend Structure](../03-portal-estatico/frontend-structure.md)
 
 ### Operação e suporte
-- [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
+- [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 

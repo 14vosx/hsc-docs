@@ -32,7 +32,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
-- [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
+- [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
 
 ### Operação e suporte
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
@@ -127,7 +127,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 - `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 Este documento descreve a automação do host.  

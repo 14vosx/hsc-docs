@@ -29,7 +29,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Auth API Operations](./auth-api-operations.md)
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)
 - [Backup / Restore](./backup-restore.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
 - [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [References and Inventory](./infra-aws-lightsail-references-inventory.md)
 

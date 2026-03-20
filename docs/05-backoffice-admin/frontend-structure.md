@@ -28,7 +28,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Admin API Contracts](./admin-api-contracts.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
 ### Backend e runtime consumido
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)

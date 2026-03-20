@@ -26,7 +26,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [CS2 Server Configuration](./cs2-server-configuration.md)
 - [Plugins Installed](./plugins-installed.md)
 - [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./game-panel-operational-runbooks.md)
 
 ### Integração com dados e portal
 - [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
@@ -111,7 +111,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
 - `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/static-api-v2.md`

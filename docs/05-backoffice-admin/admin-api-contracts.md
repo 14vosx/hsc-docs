@@ -26,7 +26,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Frontend Structure](./frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
 ### Backend e operação da API
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
@@ -81,7 +81,7 @@ O estado reconciliado inclui:
 Este arquivo deve ser lido junto com:
 
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 

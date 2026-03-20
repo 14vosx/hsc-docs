@@ -37,7 +37,7 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Operação e runtime
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
 ---
@@ -128,7 +128,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
