@@ -32,7 +32,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Portal Estático](../03-portal-estatico/README.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
-- [Frontend Structure](../03-portal-estatico/frontend-structure.md)
+- [Frontend Structure](../03-portal-estatico/portal-estatico-frontend-structure.md)
 
 ### Operação e suporte
 - [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)

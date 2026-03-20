@@ -180,7 +180,7 @@ Função:
 Arquivos principais:
 - `docs/05-backoffice-admin/README.md`
 - `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
@@ -466,7 +466,7 @@ A ordem de leitura recomendada do sistema, neste checkpoint, é:
 
 1. `docs/05-backoffice-admin/README.md`
 2. `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
-3. `docs/05-backoffice-admin/frontend-structure.md`
+3. `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
 6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`

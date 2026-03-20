@@ -31,7 +31,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
 - [Static API v2](./static-api-v2.md)
 - [JSON Contracts](./json-contracts.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 
 ### Infraestrutura e suporte
 - [Docker Host](../01-infra-hostinger/docker-host.md)

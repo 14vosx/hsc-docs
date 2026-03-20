@@ -28,7 +28,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
 - [SQL Queries and Views](./sql-queries-and-views.md)
 - [JSON Contracts](./json-contracts.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
@@ -232,7 +232,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`

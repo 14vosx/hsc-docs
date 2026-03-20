@@ -29,7 +29,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Static API v2](./static-api-v2.md)
 
 ### Consumo e publicação
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 
@@ -105,7 +105,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 

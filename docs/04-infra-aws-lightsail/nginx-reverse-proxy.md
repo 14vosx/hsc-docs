@@ -32,7 +32,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Backoffice Admin](../05-backoffice-admin/README.md)
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
-- [Frontend Structure](../05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 
 ### Operação e suporte
 - [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)

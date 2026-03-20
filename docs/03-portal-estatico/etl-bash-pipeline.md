@@ -32,7 +32,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Static API v2](./static-api-v2.md)
 - [JSON Contracts](./json-contracts.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 
 ### Operação e runtime
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)

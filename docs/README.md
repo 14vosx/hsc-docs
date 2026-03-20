@@ -49,7 +49,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
 - [Data Sources — MatchZy SQLite](./03-portal-estatico/data-sources-matchzy-sqlite.md)
 - [JSON Contracts](./03-portal-estatico/json-contracts.md)
-- [Frontend Structure](./03-portal-estatico/frontend-structure.md)
+- [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
 - [Nginx Publishing and Cache](./03-portal-estatico/nginx-publishing-cache.md)
 
 ### Auth API / camada dinâmica
@@ -64,10 +64,10 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 ### Backoffice administrativo
 - [Backoffice Admin](./05-backoffice-admin/README.md)
 - [Architecture Runtime — Backoffice](./05-backoffice-admin/backoffice-admin-architecture-runtime.md)
-- [Frontend Structure — Backoffice](./05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure — Backoffice](./05-backoffice-admin/backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./05-backoffice-admin/auth-rbac-and-guards.md)
 - [Admin API Contracts](./05-backoffice-admin/admin-api-contracts.md)
-- [Operational Runbooks — Backoffice](./05-backoffice-admin/operational-runbooks.md)
+- [Operational Runbooks — Backoffice](./05-backoffice-admin/backoffice-admin-operational-runbooks.md)
 
 ---
 
@@ -91,7 +91,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [SQL Queries and Views](./03-portal-estatico/sql-queries-and-views.md)
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
 - [Static API v2](./03-portal-estatico/static-api-v2.md)
-- [Frontend Structure](./03-portal-estatico/frontend-structure.md)
+- [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
 
 ### Fluxo admin → auth → backoffice
 - [Backoffice Admin](./05-backoffice-admin/README.md)

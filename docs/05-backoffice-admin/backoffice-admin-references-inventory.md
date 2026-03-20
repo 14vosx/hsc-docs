@@ -94,7 +94,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 
 - `docs/05-backoffice-admin/README.md`
 - `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`

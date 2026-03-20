@@ -186,7 +186,7 @@ Documentos centrais de substituição:
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`

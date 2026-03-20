@@ -106,7 +106,7 @@ Este impl-log deve ser reconciliado principalmente com:
 - `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 
 Este documento complementa o canônico; não o substitui.
 

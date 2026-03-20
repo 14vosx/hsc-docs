@@ -41,7 +41,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Trilhas operacionais relevantes
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
-- [Frontend Structure — Backoffice](../05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure — Backoffice](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Documentation System](../00-governance/documentation-system.md)
 

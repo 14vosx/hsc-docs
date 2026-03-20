@@ -68,7 +68,7 @@ As principais evidências deste documento, nesta fase, são:
 - `docs/00-governance/documentation-system.md`
 - `docs/00-governance/99-master-index.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
@@ -89,7 +89,7 @@ Ele nasce da reconciliação entre:
 Este arquivo é complementar a:
 
 - `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`

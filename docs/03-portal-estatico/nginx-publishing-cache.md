@@ -27,7 +27,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
 - [Static API v2](./static-api-v2.md)
 - [JSON Contracts](./json-contracts.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 
 ### Infraestrutura de entrega
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
@@ -124,7 +124,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/README.md`
 - `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`

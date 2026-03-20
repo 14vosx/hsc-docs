@@ -24,7 +24,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Contexto administrativo imediato
 - [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
