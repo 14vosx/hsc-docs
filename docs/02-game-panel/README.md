@@ -27,6 +27,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [CS2 Server Configuration](./cs2-server-configuration.md)
 - [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
 - [MatchZy](./matchzy.md)
+- [MariaDB Runtime](./mariadb-runtime.md)
 - [Plugins Installed](./plugins-installed.md)
 - [Operational Runbooks](./game-panel-operational-runbooks.md)
 - [Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
@@ -43,6 +44,28 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Docker Host](../01-infra-hostinger/docker-host.md)
+
+---
+
+---
+
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Contexto operacional imediato
+- [CS2 Server Configuration](./cs2-server-configuration.md)
+- [Plugins Installed](./plugins-installed.md)
+- [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
+- [Game Panel Operational Runbooks](./game-panel-operational-runbooks.md)
+
+### Infraestrutura e suporte
+- [Docker Host](../01-infra-hostinger/docker-host.md)
+- [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
+- [Game Panel Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 
 ---
 
@@ -308,7 +331,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/mariadb-runtime.md`
-- `docs/02-game-panel/game-panel-operational-runbooks.md`
+- `docs/02-game-panel/operational-runbooks.md`
 - `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/02-game-panel/game-panel-references-inventory.md`
 
