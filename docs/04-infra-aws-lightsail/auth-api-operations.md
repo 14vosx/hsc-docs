@@ -2,18 +2,20 @@
 
 ## Objetivo
 
-Documentar a operação funcional da Auth API no contexto AWS Lightsail, registrando as superfícies relevantes, os invariantes operacionais e os fluxos essenciais de validação do backend dinâmico do ecossistema HSC.
+Documentar a operação funcional da Auth API no contexto AWS Lightsail, registrando as superfícies reais de autenticação administrativa, os invariantes do fluxo de magic link, a política de CORS, o papel do backend dinâmico no ecossistema HSC e os smoke tests mínimos que sustentam o Backoffice Admin publicado.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- o papel operacional da Auth API no ecossistema
-- as superfícies públicas e administrativas mais relevantes
-- o modelo administrativo session-first com caminho break-glass
-- o contrato operacional de introspecção de sessão administrativa
-- os princípios de CORS e consumers autorizados
-- a obrigatoriedade de auditoria administrativa
-- os smoke tests mínimos de operação
-- as dependências cruzadas do runtime
+- o papel operacional da Auth API como backend dinâmico central do HSC
+- as superfícies públicas e administrativas realmente publicadas
+- o modelo administrativo session-first publicado
+- o fluxo real de magic link administrativo
+- o contrato operacional de `GET /auth/session`
+- a relação entre sessão, cookie, callback e dashboard
+- a política explícita de CORS para o Backoffice Admin
+- o caminho break-glass administrativo e seus limites
+- os invariantes operacionais do login administrativo
+- os smoke tests mínimos após release e deploy
 
 ---
 
@@ -22,26 +24,25 @@ Este documento existe para registrar, de forma estável e auditável:
 Este documento cobre:
 
 - o papel operacional da Auth API
-- endpoints públicos operacionais
-- endpoints administrativos operacionais
-- autenticação administrativa baseada em sessão
-- contrato operacional de `GET /auth/session`
+- superfícies públicas operacionais
+- superfícies administrativas reais
+- autenticação administrativa baseada em sessão e magic link
+- contratos de `POST /auth/magic-link/request`, `GET /auth/magic-link/consume` e `GET /auth/session`
 - bootstrap local controlado de sessão admin
 - caminho break-glass administrativo
-- regras operacionais de CORS
-- auditoria administrativa
-- invariantes de operação
-- smoke tests e operações recorrentes
+- política de CORS e consumers autorizados
+- dependências de SMTP transacional
+- invariantes operacionais do fluxo session-first
+- smoke tests de operação recorrente
 
 Este documento não cobre em profundidade:
 
 - configuração detalhada do Nginx
-- unit file do serviço
-- fluxo completo de deploy e rollback
-- backup e restore
-- modelagem completa de domínio
-- login final de produção para operadores
-- backlog funcional futuro
+- unit file completo do systemd
+- backup e restore do banco
+- modelagem funcional profunda de `news`, `seasons` ou `events`
+- operação detalhada do Backoffice frontend
+- troubleshooting profundo de host/DNS/TLS
 
 Esses assuntos vivem em documentos próprios do contexto.
 
@@ -51,22 +52,23 @@ Esses assuntos vivem em documentos próprios do contexto.
 
 A Auth API opera como backend dinâmico central do HSC no contexto AWS Lightsail.
 
-O estado operacional conhecido desta camada inclui:
+O estado operacional reconciliado desta camada inclui:
 
 - execução em Node.js via systemd
 - exposição pública por Nginx com TLS e reverse proxy
 - persistência em MariaDB local
-- superfícies públicas de conteúdo
-- superfícies administrativas protegidas
-- modelo administrativo session-first
-- caminho break-glass por chave administrativa
-- trilha de auditoria para mutações administrativas relevantes
-- política de CORS orientada por allowlist explícita de origens
-- base estrutural de sessão administrativa já materializada no código local
+- superfícies públicas de conteúdo (`health`, `content/news`, `content/seasons`)
+- superfícies administrativas protegidas (`admin/schema`, mutações de `news` e `seasons`)
+- autenticação administrativa session-first publicada
+- emissão real de magic link administrativo por SMTP Hostinger
 - introspecção administrativa por `GET /auth/session`
-- bootstrap local controlado de sessão admin para desenvolvimento
+- callback administrativo do Backoffice publicado em subdomínio próprio
+- política de CORS por allowlist explícita de origens
+- cookie administrativo cross-subdomain com política compatível com produção
+- `schema.js` tratado como compatibilidade legada e não como mecanismo principal de evolução do banco
+- migrations SQL explícitas executadas no deploy antes do restart do serviço
 
-A Auth API sustenta a metade dinâmica do ecossistema HSC, enquanto a Hostinger sustenta jogo, ETL e portal estático.
+A Auth API sustenta a metade dinâmica do ecossistema HSC, enquanto o host Hostinger continua sustentando jogo, ETL e portal público estático.
 
 ---
 
@@ -74,17 +76,14 @@ A Auth API sustenta a metade dinâmica do ecossistema HSC, enquanto a Hostinger 
 
 As principais evidências deste documento, nesta fase, são:
 
-- documentação canônica do contexto `04-infra-aws-lightsail`
-- runtime reconciliado do Lightsail
-- workflow real do repositório da Auth API em `ops/`
-- implementação local validada do fluxo de sessão administrativa
-- contrato local validado de:
-  - `POST /auth/dev/bootstrap-session`
-  - `GET /auth/session`
-- release ativa reconciliada no Lightsail
-- impl-logs e ajustes locais realizados para suportar o Backoffice Admin
-
-Enquanto a migração canônica não estiver concluída em todos os detalhes, essas fontes seguem sendo usadas para reconciliação do estado operacional real.
+- release line reconciliada da Auth API até `v0.4.7`
+- deploy real em Lightsail com `npm run db:migrate` antes do restart
+- tabelas `sessions`, `magic_links` e `schema_migrations` já reconciliadas em produção
+- login administrativo fim a fim publicado e validado
+- Backoffice publicado em `backoffice.haxixesmokeclub.com`
+- SMTP Hostinger ativo para `no-reply@haxixesmokeclub.com`
+- impl-log `2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
+- runbooks e contratos reconciliados dos contextos `04` e `05`
 
 ---
 
@@ -101,692 +100,439 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/references-inventory.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
+- `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
 
-Este documento descreve a operação funcional da Auth API.  
-Ele não substitui a documentação de runtime do host, banco, edge ou deploy.
+Este documento descreve a operação funcional real da Auth API publicada. Ele não substitui a documentação do host, do banco ou do frontend administrativo.
 
 ---
 
 ## Papel operacional da Auth API
 
-Do ponto de vista do ecossistema, a Auth API é o backend central das superfícies que não pertencem ao portal puramente estático.
+Do ponto de vista do ecossistema HSC, a Auth API não é apenas uma API de conteúdo.
 
 A camada responde por:
 
 - conteúdo dinâmico público relevante ao ecossistema
 - superfícies administrativas protegidas
 - autenticação e identidade administrativa
+- emissão e consumo de magic links administrativos
+- resolução da sessão administrativa atual
 - validação de autorização em mutações sensíveis
 - trilha administrativa persistida
-- suporte operacional ao Backoffice Admin
+- suporte dinâmico ao Backoffice Admin
 
 Regra importante:
 
-- a Auth API não deve ser tratada apenas como “API de conteúdo”
-- ela também é a autoridade dinâmica de autenticação, autorização e write admin
+- a Auth API é a autoridade final de autenticação e autorização administrativa
+- o Backoffice não deve assumir estado autenticado sem confirmação do backend
 
 ---
 
-## Endpoints públicos operacionais
+## Consumers autorizados
 
-As superfícies públicas operacionais conhecidas incluem:
+Os consumers operacionais relevantes desta Auth API, no estado atual, são:
 
-### Health
+- portal e inspeções operacionais via o próprio host Lightsail
+- operadores humanos via `curl`/browser para smoke e troubleshooting
+- `backoffice.haxixesmokeclub.com` como consumidor legítimo da sessão administrativa publicada
+- ambiente local do Backoffice via proxy (`localhost`) durante desenvolvimento
 
-- `/health`
+Consumer administrativo publicado explicitamente autorizado:
 
-Função:
-- validar disponibilidade do runtime
-- expor resposta básica de saúde da aplicação
-- ajudar a separar falhas entre edge, app e banco
+- `https://backoffice.haxixesmokeclub.com`
 
-Observação operacional:
-- o contexto também admite health local via `127.0.0.1:3000/health`
+Consumers locais explicitamente autorizados:
 
----
-
-### Conteúdo News
-
-Superfícies públicas relevantes:
-
-- `/content/news`
-- `/content/news/:slug`
-
-Função:
-- expor conteúdo público gerenciado na camada dinâmica
-- servir como origem para consumo externo e, em alguns fluxos, para espelhamento no lado Hostinger
+- `http://localhost:5173`
+- variações locais controladas do fluxo de desenvolvimento quando configuradas no allowlist
 
 ---
 
-### Conteúdo Seasons
+## Política de CORS
 
-Superfícies públicas relevantes:
+A Auth API utiliza allowlist explícita de origens.
 
-- `/content/seasons`
-- `/content/seasons/active`
-- `/content/seasons/:slug`
+Estado reconciliado do modelo:
 
-Função:
-- expor catálogo ou estado ativo de temporadas
-- sustentar consumo público ou integração com outras camadas do ecossistema
+- não existe política aberta por wildcard para superfícies administrativas
+- o Backoffice publicado é origem explicitamente permitida
+- o ambiente local pode ser permitido de forma controlada para desenvolvimento
+- requests com credenciais exigem compatibilidade entre origem permitida e política de cookie
 
----
+Invariantes operacionais:
 
-### Estruturas futuras ou incrementais
-
-O backend já prevê base estrutural para outras superfícies dinâmicas, como Events, mas este documento não deve assumir maturidade funcional completa sem validação real da release ativa.
-
-Regra editorial:
-- documentar apenas o que já está presente no estado operacional reconciliado
+- requests administrativos cross-origin devem ser servidos com allowlist explícita
+- o fluxo published Backoffice ↔ Auth API depende de `credentials: true` no backend e `withCredentials: true` no frontend
+- mudanças em CORS devem ser tratadas como mudança operacional relevante, nunca como ajuste cosmético
 
 ---
 
-## Endpoints administrativos operacionais
+## Session-first publicado
 
-As superfícies administrativas conhecidas da Auth API incluem operações ligadas a:
-
-- conteúdo News
-- conteúdo Seasons
-- autenticação administrativa
-- introspecção de sessão administrativa
-- inspeções técnicas ou administrativas restritas
-
-Superfícies relevantes do estado atual:
-
-- `/admin/schema`
-- `/admin/news`
-- mutações administrativas de `news`
-- mutações administrativas de `seasons`
-- `/auth/session`
-
-Pontos operacionais importantes:
-
-- superfícies administrativas não são parte do portal estático
-- mutações administrativas devem respeitar autenticação e auditoria
-- uma rota administrativa disponível não implica que ela possa ser usada sem sessão ou sem trilha adequada
-
----
-
-## Session-first + break-glass
-
-O modelo administrativo atual é session-first com caminho break-glass.
-
-### Session-first
-
-O modelo prioritário de operação administrativa é baseado em sessão persistida.
+O modelo administrativo publicado é session-first.
 
 Isso significa:
 
-- o fluxo normal administrativo deve privilegiar autenticação por sessão
-- a aplicação deve reconhecer contexto autenticado persistido
-- superfícies administrativas devem operar sob identidade autenticada rastreável
-- o uso administrativo normal não deve depender exclusivamente de cabeçalho estático
+- o fluxo normal de operação admin não depende de segredo bruto por request
+- a identidade administrativa é resolvida por sessão persistida
+- o estado autenticado do operador é introspectado por `GET /auth/session`
+- o Backoffice só considera o operador autenticado após confirmação explícita do backend
 
-Esse modelo favorece:
+### Componentes desse modelo
 
-- melhor rastreabilidade
-- menor dependência de segredo bruto por request
-- maior aderência a operação administrativa real
+- tabela `sessions` com `token_hash`, `expires_at`, `revoked_at`, `created_at`, `updated_at`
+- cookie `hsc_admin_session`
+- `GET /auth/session` como contrato real de introspecção
+- `POST /auth/magic-link/request` como pedido de login
+- `GET /auth/magic-link/consume` como consolidação da sessão
+- callback do Backoffice em `/auth/callback`
 
-### Estado atual do session-first
+### Caminho break-glass
 
-A base do modelo session-first já está materializada localmente com:
+O contexto mantém caminho break-glass administrativo para contingência e operação técnica controlada.
 
-- coluna `role` em `users`
-- tabela `sessions`
-- resolução de sessão administrativa por cookie
-- introspecção administrativa via `GET /auth/session`
+Estado atual reconciliado:
 
-O comportamento operacional esperado é:
-
-- com sessão admin válida:
-  - `GET /auth/session` retorna `200`
-  - `authenticated: true`
-  - `user`
-  - `role`
-- sem sessão válida:
-  - `GET /auth/session` retorna `401`
-  - `authenticated: false`
+- `X-Admin-Key` continua relevante para superfícies técnicas e smoke controlado
+- `admin/schema` continua útil para validação operacional e troubleshooting
+- o uso administrativo normal do Backoffice não deve depender desse caminho
 
 Regra importante:
 
-- `GET /auth/session` deve refletir sessão real
-- ele não deve usar `x-admin-key` como substituto semântico de sessão atual
+- session-first é o caminho normal de operação
+- break-glass existe para contingência, inspeção técnica e operação controlada
 
 ---
 
-### Break-glass administrativo
+## Superfícies públicas operacionais
 
-O contexto mantém um caminho break-glass baseado em chave administrativa para contingência e operação controlada.
+As superfícies públicas operacionais conhecidas incluem:
 
-Características esperadas:
+### `GET /health`
 
-- uso excepcional, não rotina
-- escopo administrativo restrito
-- necessidade de cuidado operacional
-- relevância alta para troubleshooting, acesso de emergência e operações de continuidade
+Função:
 
-Regra operacional:
-
-- break-glass existe como fallback controlado
-- não deve substituir o fluxo normal session-first
-
-No estado atual, isso significa:
-
-- rotas administrativas ainda aceitam `x-admin-key`
-- a camada de auth admin tenta primeiro sessão válida
-- na ausência de sessão, pode cair para `x-admin-key`
-- o Backoffice não deve modelar `x-admin-key` como jornada normal de login
-
----
-
-## Contrato operacional de introspecção de sessão
-
-A superfície operacional canônica para introspecção da sessão administrativa atual é:
-
-- `GET /auth/session`
-
-### Resposta esperada com sessão válida
-
-```json
-{
-  "authenticated": true,
-  "user": {
-    "id": "1",
-    "email": "admin@local.hsc",
-    "name": "HSC Local Admin"
-  },
-  "role": "admin"
-}
-```
-
-### Resposta esperada com sessão válida
-
-- `401 Unauthorized`
-
-```json
-{
-  "authenticated": false
-}
-```
-
-### Função operacional
-
-Essa rota existe para:
-
-- sustentar bootstrap de shell administrativo
-- permitir guards e UI session-first no Backoffice
-- evitar que o frontend precise inferir sessão por tentativa cega de mutação
-- centralizar a leitura da identidade administrativa atual
-
-Regra importante:
-
-- a rota de introspecção deve ser legível, pequena e estável
-- o frontend administrativo deve consumi-la como source of truth da sessão atual
-
----
-
-### Bootstrap local controlado de sessão
-
-Para desenvolvimento local, o contexto agora admite uma rota controlada de bootstrap:
-
-- `POST /auth/dev/bootstrap-session`
-
-### Papel operacional
-
-Essa rota existe para:
-
-- criar ou garantir um usuário admin local
-- criar uma sessão local válida em `sessions`
-- devolver `Set-Cookie` com a sessão admin
-- destravar desenvolvimento local do Backoffice sem depender de fluxo final de login
-
-### Regras operacionais
-
-- a rota é somente para desenvolvimento local
-- ela depende de flag explícita no ambiente
-- ela não deve ficar habilitada em produção
-- ela não substitui o fluxo final de autenticação administrativa
-
-### Controle esperado
-
-O comportamento deve ser condicionado por:
-
-- `AUTH_DEV_BOOTSTRAP_ENABLED=true`
-
-Variáveis auxiliares esperadas:
-
-- `AUTH_DEV_ADMIN_EMAIL`
-- `AUTH_DEV_ADMIN_NAME`
-- `ADMIN_SESSION_COOKIE`
-- `ADMIN_SESSION_TTL_HOURS`
-
-### Resultado esperado
-
-Com a flag ativa, a rota deve:
-
-- responder `200`
-- garantir usuário admin local
-- criar sessão válida
-- devolver cookie `HttpOnly`
-
-Sem a flag ativa, a rota deve:
-
-- responder `404` ou equivalente de indisponibilidade intencional
-
----
-
-### Fluxos de autenticação administrativa
-
-Os fluxos conhecidos do contexto incluem:
-
-- leitura de sessão administrativa atual
-- resolução de identidade administrativa corrente
-- proteção de rotas administrativas
-- fallback break-glass para contingência controlada
-- bootstrap local controlado para desenvolvimento
-
-O fluxo local validado neste estágio é:
-
-1. `POST /auth/dev/bootstrap-session`
-2. API cria ou garante usuário admin local
-3. API cria sessão persistida
-4. API devolve cookie admin
-5. `GET /auth/session` passa a responder `authenticated: true`
-6. rotas admin passam a reconhecer identidade via sessão
-7. fallback por x-admin-key continua disponível
-
-Regra importante:
-
-- o fluxo local de bootstrap não deve ser confundido com o fluxo final de produção
-- ele existe para destravar desenvolvimento e validação do Backoffice
-
----
-
-### CORS e consumers autorizados
-
-A política operacional conhecida de CORS da Auth API é orientada por allowlist explícita.
-
-Implicações:
-
-- nem toda origem deve consumir a API
-- consumers legítimos precisam estar explicitamente autorizados
-- a resposta operacional da aplicação pode refletir as origens permitidas
-- o controle de CORS pertence prioritariamente ao runtime da aplicação, e não apenas ao edge
-
-Consumers autorizados podem incluir:
-
-- superfícies oficiais do ecossistema HSC
-- portal e domínios/subdomínios operacionais aprovados
-- interfaces administrativas autorizadas
-- camadas futuras de backoffice ou account, quando formalizadas
-
-Regra operacional:
-
-- alteração de CORS é mudança relevante
-- mudanças de allowlist devem ser registradas de forma rastreável
-
-### Observação local
-
-Durante desenvolvimento do Backoffice local, o uso de proxy no frontend é estratégia válida para evitar dependência prematura de ajuste fino de CORS e cookies cross-origin.
-
----
-
-### Auditoria administrativa
-
-A auditoria administrativa é componente central do contexto.
-
-O estado operacional conhecido já indica:
-
-- existência de trilha administrativa persistida
-- tabela operacional `admin_audit_log`
-- endurecimento do princípio de auditoria em mutações sensíveis
-
-Princípio operacional:
-
-**mutações administrativas relevantes devem gerar rastreabilidade adequada**
-
-Essa trilha é importante para:
-
-- investigação
-- conformidade interna
-- reconstrução de ações
-- análise de incidentes
-- validação de comportamento administrativo
-
-### Relação com `req.admin`
-
-A camada administrativa deve preencher contexto suficiente para auditoria, incluindo quando possível:
-
-- `userId`
-- `via`
-- papel efetivo
-- identidade resolvida
-
-No estado atual, a via administrativa pode ser:
-
-- `session`
-- `admin-key`
-
----
-
-### Invariante fail-closed para mutações
-
-O contexto já evoluiu para postura fail-closed em mutações administrativas sensíveis.
+- validar disponibilidade do runtime
+- expor estado básico da aplicação
+- refletir prontidão do banco por `db.ready`
+- expor metadados mínimos de CORS úteis para troubleshooting
 
 Interpretação operacional:
 
-- não basta a rota estar exposta
-- não basta haver autenticação parcial
-- não basta haver intenção de escrita
+- `ok: true` + `db.ready: true` significa backend pronto para servir tráfego dinâmico relevante
+- `ok: true` + `db.ready: false` significa processo web de pé, mas backend ainda não pronto para tráfego que depende do banco
 
-Se a mutação administrativa não puder cumprir os pré-requisitos de segurança e rastreabilidade esperados, o comportamento saudável do sistema é negar a operação.
+### `GET /content/news`
+### `GET /content/news/:slug`
 
-Em termos práticos, isso significa:
+Função:
 
-- autenticação, autorização e auditoria precisam estar coerentes
-- o backend não deve aceitar mutações críticas em estado operacional ambíguo
-- operação “sem audit, sem write” é a referência de endurecimento conhecida deste contexto
+- expor conteúdo público de `news`
+- servir o ecossistema dinâmico do HSC
 
----
+### `GET /content/seasons`
+### `GET /content/seasons/active`
+### `GET /content/seasons/:slug`
 
-### Invariantes operacionais
+Função:
 
-Os invariantes operacionais conhecidos da Auth API incluem:
-
-1. A aplicação deve responder health local e público
-
-A validação mínima inclui:
-
-- `http://127.0.0.1:3000/health`
-- `https://auth-api.haxixesmokeclub.com/health`
-
-2. O banco precisa estar pronto para conteúdo e auth
-
-Isso inclui:
-
-- `schema_meta` coerente
-- `users` coerente
-- `sessions` coerente
-- tabelas de domínio operacionais
-- readiness de banco antes do boot funcional da app
-
-3. O fluxo admin normal deve preferir sessão
-
-A operação administrativa moderna deve priorizar:
-
-- introspecção de sessão
-- identidade resolvida
-- trilha rastreável
-
-4. O fallback por chave deve continuar controlado
-
-`x-admin-key` existe como contingência operacional, não como modelo principal de produto.
-
-5. Rotas dev-only não podem vazar para produção
-
-Em especial:
-
-- `POST /auth/dev/bootstrap-session` não deve ficar habilitada no runtime público
+- expor catálogo e season ativa
+- sustentar integração com outras camadas do ecossistema
 
 ---
 
-### Schema mínimo relevante ao modelo admin atual
+## Superfícies administrativas reais
 
-Sem virar documento completo de banco, o estado operacional atual já exige reconhecer estas estruturas como relevantes:
+Superfícies administrativas relevantes no estado atual:
 
-- `users`
-- `profiles`
-- `news`
-- `seasons`
-- `sessions`
-- `schema_meta`
+- `GET /admin/schema`
+- endpoints administrativos de `news`
+- endpoints administrativos de `seasons`
+- `GET /auth/session`
+- `POST /auth/magic-link/request`
+- `GET /auth/magic-link/consume`
+- `POST /auth/dev/bootstrap-session` (somente dev/local)
 
-#### Campos relevantes adicionados ao modelo admin
+Regra importante:
 
-`users`:
+- superfícies administrativas não pertencem ao portal público
+- toda mutação administrativa deve ser tratada como operação autenticada e auditável
 
+---
+
+## Contrato operacional de `POST /auth/magic-link/request`
+
+### Papel
+
+Solicitar um magic link administrativo para um email elegível.
+
+### Consumo esperado
+
+- o Backoffice publicado chama esta rota a partir de `/login`
+- o frontend envia `withCredentials: true`
+- o backend responde com mensagem genérica para evitar enumeração de usuários
+
+### Resposta funcional esperada
+
+Mesmo quando o operador vê `200 OK`, isso não significa que o email foi necessariamente entregue para qualquer endereço arbitrário.
+
+A resposta é propositalmente genérica.
+
+Comportamento esperado:
+
+- se o email é elegível e o delivery está funcional, o email é enviado
+- se o email não é elegível, a resposta continua genérica
+- em caso de falha interna de delivery, a resposta do fluxo administrativo deve ser tratada por logs e troubleshooting, sem abrir enumeração do diretório de usuários
+
+### Dependências
+
+- usuário admin elegível existente no banco
+- `magicLinkDelivery.js` funcional
+- SMTP Hostinger configurado no `.env` de produção
+- `AUTH_API_PUBLIC_URL`, `BACKOFFICE_URL` e `MAGIC_LINK_CALLBACK_PATH` corretos
+
+---
+
+## Contrato operacional de `GET /auth/magic-link/consume`
+
+### Papel
+
+Consumir um token one-time de magic link, criar a sessão administrativa e redirecionar o operador para o callback do Backoffice.
+
+### Comportamento esperado
+
+- o token é one-time use
+- o backend valida expiração e uso prévio
+- quando válido, cria a sessão administrativa
+- emite `Set-Cookie` para `hsc_admin_session`
+- redireciona para `https://backoffice.haxixesmokeclub.com/auth/callback?status=ok`
+
+### Falhas esperadas
+
+Quando o consumo não pode prosseguir, o backend redireciona para callback com erro explícito.
+
+Erros observados/operacionais relevantes:
+
+- `missing_token`
+- `invalid_or_expired_link`
+- `forbidden`
+- `consume_failed`
+
+### Invariantes
+
+- o token não pode ser reutilizado após consumo bem-sucedido
+- a criação da sessão depende de schema reconciliado de `sessions`
+- o fluxo publicado depende de cookie compatível com cross-subdomain
+
+---
+
+## Contrato operacional de `GET /auth/session`
+
+### Papel
+
+Resolver a sessão administrativa atual do operador.
+
+### Comportamento esperado
+
+Com sessão válida:
+
+- `200 OK`
+- `authenticated: true`
+- `user`
 - `role`
 
-`sessions`:
+Sem sessão válida:
 
-- `id`
-- `user_id`
-- `token_hash`
-- `expires_at`
-- `revoked_at`
-- `created_at`
-- `updated_at`
+- `401 Unauthorized`
+- `authenticated: false`
+
+### Papel no ecossistema
+
+- é o contrato session-first real do Backoffice
+- guards, shell, callback e refresh dependem dele
+- o frontend não deve sintetizar esse estado sem introspecção real
+
+### Dependências operacionais
+
+- cookie `hsc_admin_session` presente e reaproveitado pelo navegador
+- `withCredentials: true` no frontend
+- política de cookie compatível com ambiente HTTPS cross-subdomain
+
+---
+
+## Cookie administrativo publicado
+
+O cookie administrativo publicado foi reconciliado para suportar o fluxo entre subdomínios.
+
+Em produção HTTPS, o comportamento esperado é compatível com:
+
+- `HttpOnly`
+- `Secure`
+- `SameSite=None`
+- `Path=/`
+- `Max-Age` alinhado ao TTL da sessão
+
+Em desenvolvimento HTTP local, a política pode ser mais permissiva para evitar quebra do fluxo local.
 
 Regra importante:
 
-- esse documento não substitui uma documentação detalhada de schema
-- mas deve registrar as estruturas que já impactam a operação funcional
+- o cookie administrativo não é um detalhe de frontend
+- ele é parte crítica do contrato publicado entre Auth API e Backoffice
 
 ---
 
-### Smoke tests mínimos
+## SMTP transacional administrativo
 
-#### Smoke 1 — health local
+O delivery real do magic link administrativo utiliza SMTP Hostinger.
+
+Dependência operacional reconciliada:
+
+- caixa `no-reply@haxixesmokeclub.com`
+- `SMTP_HOST=smtp.hostinger.com`
+- `SMTP_PORT=465`
+- `SMTP_SECURE=true`
+- `SMTP_USER=no-reply@haxixesmokeclub.com`
+- `SMTP_PASS` via `.env` do servidor
+- `MAGIC_LINK_FROM_EMAIL=no-reply@haxixesmokeclub.com`
+
+Invariantes:
+
+- restart do serviço é necessário após alteração de `.env`
+- runtime não deve capturar valores SMTP cedo demais; leitura em tempo de uso foi reconciliada
+- falha de SMTP deve ser observável via logs do serviço
+
+---
+
+## Invariantes operacionais do magic link
+
+O fluxo real de magic link administrativo depende dos seguintes invariantes:
+
+1. o email admin precisa existir e estar elegível no banco
+2. o delivery SMTP precisa estar configurado e funcional
+3. `AUTH_API_PUBLIC_URL` precisa apontar para a Auth API publicada
+4. `BACKOFFICE_URL` precisa apontar para o Backoffice publicado
+5. o token precisa ser one-time use
+6. a tabela `sessions` precisa ter shape reconciliado
+7. o cookie precisa ser emitido com política compatível com produção
+8. o callback do Backoffice precisa revalidar a sessão
+9. o frontend precisa aceitar um pequeno retry curto após `status=ok`
+
+Se qualquer um desses pontos falhar, o sintoma pode aparecer como:
+
+- email não chega
+- `invalid_or_expired_link`
+- `consume_failed`
+- callback com “sessão não pôde ser validada”
+
+---
+
+## Fluxo operacional publicado do login admin
+
+Fluxo funcional publicado validado:
+
+1. operador abre `https://backoffice.haxixesmokeclub.com/login`
+2. informa o email administrativo elegível
+3. Backoffice chama `POST /auth/magic-link/request`
+4. Auth API entrega email real via SMTP Hostinger
+5. operador abre o email e clica no link
+6. navegador consome `GET /auth/magic-link/consume?token=...`
+7. Auth API cria sessão e emite cookie
+8. backend redireciona para `/auth/callback?status=ok`
+9. callback reexecuta `GET /auth/session`
+10. Backoffice navega automaticamente para `/dashboard`
+
+Esse fluxo já foi validado fim a fim em produção.
+
+---
+
+## Smoke tests mínimos de operação
+
+### Health
+
 ```bash
-curl -i http://127.0.0.1:3000/health
+curl -i https://auth-api.haxixesmokeclub.com/health
 ```
 
-#### Smoke 2 — conteúdo público
+Esperado:
+
+- `200 OK`
+- `"ok":true`
+- `"db":{"ready":true` ... `}`
+
+### Conteúdo dinâmico
+
 ```bash
-curl -i http://127.0.0.1:3000/content/news
-curl -i http://127.0.0.1:3000/content/seasons
+curl -i https://auth-api.haxixesmokeclub.com/content/news
+curl -i https://auth-api.haxixesmokeclub.com/content/seasons
+curl -i https://auth-api.haxixesmokeclub.com/content/seasons/active
 ```
 
-#### Smoke 3 — admin break-glass
+### Superfície técnica protegida
+
 ```bash
-curl -i -H "x-admin-key: ..." http://127.0.0.1:3000/admin/news
-curl -i -H "x-admin-key: ..." http://127.0.0.1:3000/admin/schema
+curl -i -H "X-Admin-Key: <ADMIN_KEY>" https://auth-api.haxixesmokeclub.com/admin/schema
 ```
 
-#### Smoke 4 — bootstrap local de sessão
+### Sessão não autenticada
+
 ```bash
-curl -i -c /tmp/hsc-auth-cookie.txt -X POST http://127.0.0.1:3000/auth/dev/bootstrap-session
+curl -i https://auth-api.haxixesmokeclub.com/auth/session
 ```
 
-#### Smoke 5 — introspecção da sessão com cookie
-```bash
-curl -i -b /tmp/hsc-auth-cookie.txt http://127.0.0.1:3000/auth/session
-```
+Esperado sem cookie válido:
 
-#### Smoke 6 — introspecção sem sessão
-```bash
-curl -i http://127.0.0.1:3000/auth/session
-```
-
-#### Smoke 7 — workflow local com scripts
-```bash
-ENV_FILE=.env.local ./ops/dev.sh
-./ops/smoke-local.sh
-```
-
-Regra importante:
-
-- smoke local deve permanecer verde antes de release
-- sessão local e fallback break-glass devem ser validados explicitamente quando a mudança tocar auth admin
+- `401 Unauthorized`
+- `{"authenticated":false}`
 
 ---
 
-### Operação local do repositório
+## Troubleshooting operacional resumido
 
-O repositório local da Auth API possui workflow real em `ops/`.
+### Sintoma: `POST /auth/magic-link/request` retorna 200 mas email não chega
 
-Pontos operacionais importantes:
+Verificar:
 
-- `./ops/dev.sh`
+- usuário admin elegível existe no banco
+- envs SMTP estão carregados no processo atual
+- serviço foi reiniciado após alteração do `.env`
+- logs mostram `delivered to=...` ou falha SMTP específica
 
-  - sobe dependências locais
-  - aguarda MariaDB ficar pronto
-  - instala deps
-  - sobe a API com `.env.local`
+### Sintoma: `consume_failed`
 
-  <br>
+Verificar:
 
-- `./ops/stop.sh`
+- shape real da tabela `sessions`
+- reconciliação de schema e migrations aplicadas
+- logs do serviço durante o clique no link
 
-  - para ambiente local
-  - pode remover volumes
-  - pode remover imagens
+### Sintoma: callback recebe `status=ok` mas sessão não valida
 
-  <br>
+Verificar:
 
-- `./ops/smoke-local.sh`
+- `Set-Cookie` presente no consume
+- política de cookie cross-subdomain
+- request subsequente para `/auth/session` enviando cookie
+- retry curto no callback do Backoffice
 
-  - valida baseline local do runtime
+### Sintoma: erro de CORS no Backoffice
 
-  <br>
+Verificar:
 
-- `./ops/release.sh <tag>`
-
-  - só deve ser executado a partir de `main`
-  - exige árvore limpa
-  - exige sync com `origin/main`
-  - roda `smoke-local.sh` antes da TAG
-
-Regra importante:
-
-- release de produção continua disciplinada por tag
-- bootstrap local de sessão não muda o workflow de release do repo
+- allowlist real no `.env`
+- `credentials: true` no backend
+- `withCredentials: true` no frontend
+- origem publicada correta do Backoffice
 
 ---
 
-### Problemas comuns
+## Critério de pronto deste documento
 
-#### 1. Health responde, mas rotas de conteúdo falham
+Este documento pode ser considerado reconciliado quando:
 
-Causas comuns:
+- os contratos reais de `request`, `consume` e `session` estiverem refletidos aqui
+- o papel do Backoffice publicado estiver explícito
+- a política de CORS estiver atualizada
+- os invariantes do magic link estiverem listados
+- o modelo session-first publicado estiver descrito sem ambiguidade
 
-- falha de banco
-- regressão de release
-- schema incompatível
-- erro específico do módulo de conteúdo
-
-Impacto:
-
-- contexto aparentemente vivo, mas funcionalmente degradado
-
----
-
-#### 2. Sessão administrativa não persiste
-
-Causas comuns:
-
-- cookie ausente ou inválido
-- sessão expirada ou revogada
-- tabela `sessions` incompatível
-- regressão em resolução de sessão
-- schema antigo local
-
-Impacto:
-
-- fluxo normal administrativo falha
-- Backoffice cai em `/login`
-- introspecção responde `401`
-
----
-
-#### 3. Break-glass funciona, mas fluxo normal falha
-
-Causas comuns:
-
-- problema em `sessions`
-- cookie não sendo lido
-- `GET /auth/session` com regressão
-- problema em resolução de identidade admin
-
-Impacto:
-
-- operação administrativa degradada
-- contingência ainda disponível
-
----
-
-#### 4. Mutações administrativas são negadas indevidamente
-
-Causas comuns:
-
-- regra fail-closed atuando sobre contexto inconsistente
-- auditoria indisponível
-- identidade administrativa não reconhecida
-- erro de autorização
-
-Impacto:
-
-- proteção ativa, mas necessidade de investigação operacional
-
----
-
-#### 5. MariaDB sobe, mas a API falha logo no boot local
-
-Causas comuns:
-
-- banco ainda não pronto no primeiro boot
-- readiness insuficiente em script local
-- schema local incompatível
-- volume antigo preservando tabela obsoleta
-
-Impacto:
-
-- falso negativo de runtime
-- troubleshooting local ruidoso
-- necessidade de reset controlado do volume
-
----
-
-#### 6. Bootstrap local de sessão falha
-
-Causas comuns:
-
-- `AUTH_DEV_BOOTSTRAP_ENABLED` ausente ou falso
-- tabela `sessions` incompatível
-- inconsistência em `users.role`
-- regressão no helper de criação de sessão
-
-Impacto:
-
-- impossível destravar fluxo local do Backoffice
-- `/auth/session `permanece só em `401`
-
----
-
-### Limites deste documento
-
-Este documento não detalha:
-
-- todos os contratos HTTP campo a campo
-- configuração completa do Nginx
-- fluxo detalhado de deploy
-- estrutura completa do banco
-- backup e restore
-- design completo de domínio de News, Seasons ou Events
-- login final de produção para operadores administrativos
-
-Esses detalhes devem viver em documentos específicos ou impl-logs próprios.
-
----
-
-### Critério de pronto deste documento
-
-Este documento pode ser considerado maduro quando:
-- as superfícies públicas e administrativas mais relevantes estiverem reconciliadas com a release ativa
-- o modelo session-first + break-glass estiver formalizado sem ambiguidade
-- `GET /auth/session` estiver tratado como contrato operacional real
-- o bootstrap local controlado estiver claramente delimitado como dev-only
-- a exigência de auditoria administrativa estiver clara
-- a política de CORS estiver descrita em nível operacional
-- os smoke tests cobrirem corretamente o núcleo funcional da Auth API
-- ele puder ser usado como referência de operação funcional sem depender do master legado
-
----
-
-### Última revisão
-
-- Status: ativo
-- Classificação: canônico
-- Contexto: infraestrutura AWS Lightsail / operação funcional da Auth API
-- Última revisão: 2026-03-19
+Neste checkpoint, esse critério está atendido.
