@@ -37,7 +37,7 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Infraestrutura adjacente
 - [Docker Host](../01-infra-hostinger/docker-host.md)
 - [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 
 ---
 
@@ -112,7 +112,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 

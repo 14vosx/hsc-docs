@@ -35,7 +35,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
 
 ### Operação e suporte
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
 - [Network, DNS and TLS](./network-dns-tls.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
@@ -125,7 +125,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/README.md`
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
 - `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`

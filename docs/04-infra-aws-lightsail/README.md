@@ -30,7 +30,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)
 - [Backup / Restore](./backup-restore.md)
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [References and Inventory](./infra-aws-lightsail-references-inventory.md)
 
 ### Relações com outros contextos
@@ -193,7 +193,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
 - `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.

@@ -131,7 +131,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.

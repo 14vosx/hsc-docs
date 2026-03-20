@@ -97,7 +97,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`

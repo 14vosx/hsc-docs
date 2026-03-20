@@ -100,7 +100,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/certbot.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 

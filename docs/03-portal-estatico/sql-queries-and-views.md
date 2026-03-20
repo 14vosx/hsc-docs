@@ -37,7 +37,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Docker Host](../01-infra-hostinger/docker-host.md)
 - [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
 ---
 
@@ -111,7 +111,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve a camada SQL da geração da v2.  
 Ele não substitui os documentos de ETL, contratos, fonte de dados ou troubleshooting.

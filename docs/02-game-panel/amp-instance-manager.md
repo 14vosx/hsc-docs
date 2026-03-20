@@ -82,7 +82,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/01-infra-hostinger/docker-host.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 

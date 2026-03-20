@@ -86,7 +86,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve a topologia e os fluxos do runtime do portal.  
 Ele não substitui os documentos especializados do contexto.

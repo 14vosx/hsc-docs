@@ -36,7 +36,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Operação e suporte
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -114,7 +114,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
 - `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este documento descreve a borda Nginx da Auth API no Lightsail.  

@@ -89,7 +89,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/mariadb-runtime.md`
 - `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/02-game-panel/game-panel-references-inventory.md`
 
 Este documento descreve o inventário real e o papel da camada de plugins.  

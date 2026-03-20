@@ -83,7 +83,7 @@ Este arquivo é complementar a:
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
 
 Este documento descreve a topologia do runtime.  
 Ele não substitui os documentos especializados acima.

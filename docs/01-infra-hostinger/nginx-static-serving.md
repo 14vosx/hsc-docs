@@ -36,7 +36,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Operação e suporte
 - [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -114,7 +114,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/network-dns-tls.md`
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 
 Este documento descreve o serving estático do lado Hostinger.  

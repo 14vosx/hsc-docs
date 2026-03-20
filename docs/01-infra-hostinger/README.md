@@ -28,7 +28,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Network, DNS and TLS](./network-dns-tls.md)
 - [Nginx Static Serving](./nginx-static-serving.md)
 - [Systemd Automation](./systemd-automation.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
 - [Certbot](./certbot.md)
 - [References and Inventory](./infra-hostinger-references-inventory.md)
 
@@ -233,7 +233,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.

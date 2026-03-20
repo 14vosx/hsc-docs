@@ -78,7 +78,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 
 Este documento descreve a camada de certificados do lado Hostinger.  
 Ele não substitui os documentos de DNS/TLS, serving estático ou troubleshooting geral da infraestrutura.

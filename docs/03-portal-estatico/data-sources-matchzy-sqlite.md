@@ -38,7 +38,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Docker Host](../01-infra-hostinger/docker-host.md)
 - [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
 ---
 

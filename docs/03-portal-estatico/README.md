@@ -31,7 +31,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Frontend Structure](./frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 - [References and Inventory](./portal-estatico-references-inventory.md)
 
 ### Relações com outros contextos
@@ -235,7 +235,7 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.

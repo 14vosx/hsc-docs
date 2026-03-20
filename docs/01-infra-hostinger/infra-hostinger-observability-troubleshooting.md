@@ -94,8 +94,8 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve triagem, observabilidade e troubleshooting da camada-base Hostinger.  
 Ele não substitui os documentos especializados dos workloads sustentados por essa infraestrutura.

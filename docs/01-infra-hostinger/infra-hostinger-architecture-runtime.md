@@ -93,7 +93,7 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/02-game-panel/README.md`
 - `docs/03-portal-estatico/README.md`
 

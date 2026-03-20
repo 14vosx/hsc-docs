@@ -36,7 +36,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Operação e suporte
 - [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -126,7 +126,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/frontend-structure.md`
 - `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`

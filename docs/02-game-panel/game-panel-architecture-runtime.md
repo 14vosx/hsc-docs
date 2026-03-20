@@ -86,7 +86,7 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/mariadb-runtime.md`
 - `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 
 Este documento descreve a topologia do runtime do lado jogo.  
