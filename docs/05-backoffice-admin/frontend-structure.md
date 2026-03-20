@@ -2,23 +2,15 @@
 
 ## Objetivo
 
-Documentar a estrutura frontend canônica do Backoffice Admin do HSC, assumindo explicitamente a stack:
-
-- Angular 20
-- TypeScript
-- standalone-first
-- Angular Router
-- HttpClient via providers
-- Signals como estratégia primária de estado local e derivado
-- RxJS como ferramenta complementar para fluxos assíncronos, integração HTTP e interoperabilidade
+Documentar a estrutura frontend canônica do Backoffice Admin do HSC.
 
 Este documento existe para registrar, de forma estável e auditável:
 
 - a topologia lógica da SPA administrativa
 - a organização por camadas e por domínio
 - a estrutura recomendada de bootstrap, configuração e rotas
-- os padrões mínimos para páginas administrativas
-- a relação entre UI, sessão, RBAC e contratos backend
+- a relação entre UI, sessão, guards e contratos backend
+- a jornada real de autenticação administrativa publicada
 - os princípios de evolução incremental da SPA
 
 ---
@@ -28,49 +20,74 @@ Este documento existe para registrar, de forma estável e auditável:
 Este documento cobre:
 
 - a estrutura lógica da SPA administrativa
-- a abordagem Angular 20 standalone-first
+- a abordagem Angular standalone-first
 - a divisão entre `core`, `shared` e `features`
 - a organização por domínio administrativo
 - o shell de navegação do Backoffice
 - o padrão de rotas iniciais
-- o padrão de listagens, formulários e ações
+- o fluxo real de login admin por magic link
+- o papel de `/auth/callback`
 - o tratamento de loading, erro, vazio e acesso negado
 - a postura recomendada para estado com Signals
 - a convivência entre Signals e RxJS
+- o papel do proxy local no desenvolvimento
+- a diferença entre integração local e integração publicada
 
 Este documento não cobre em profundidade:
 
-- contrato detalhado endpoint a endpoint
+- contrato endpoint a endpoint
 - regras completas de RBAC
-- runbooks operacionais
-- detalhes visuais finais de design system
-- infraestrutura de deploy
-- Nginx, hostnames ou build pipeline
-- persistência backend
+- detalhes completos de infraestrutura e deploy
+- modelagem visual final do design system
+- runbooks operacionais detalhados
+- troubleshooting exaustivo de produção
 
-Esses tópicos vivem em outros documentos do contexto ou em contextos canônicos adjacentes.
+Esses tópicos vivem em documentos adjacentes do contexto `05-backoffice-admin` e em documentos do contexto `04-infra-aws-lightsail`.
 
 ---
 
 ## Estado atual
 
-O estado esperado da estrutura frontend, nesta fase, é:
+O estado atual esperado do Backoffice Admin é:
 
-- o Backoffice nasce como SPA administrativa separada do Portal público
-- a stack alvo do frontend é Angular 20 + TypeScript + Signals
-- a aplicação deve nascer em modo standalone-first
-- a estrutura deve priorizar MVP, legibilidade e baixo acoplamento
-- a organização precisa refletir domínios administrativos reais
+- o Backoffice existe como SPA administrativa separada do Portal público
+- a aplicação adota Angular standalone-first
+- a organização prioriza MVP, legibilidade e baixo acoplamento
 - a Auth API é a autoridade final de autenticação e autorização
-- o frontend deve refletir permissão e estado, não inventá-los
-- `seasons`, `news` e `events` são os domínios iniciais
-- o shell administrativo deve nascer primeiro
-- o front deve evitar overengineering de state management no início
+- o frontend reflete sessão e permissão, não as inventa
+- o login administrativo real publicado usa magic link
+- a jornada publicada é `login -> request magic link -> callback -> dashboard`
+- a SPA já opera com sessão real e cookies cross-subdomain
+- o shell administrativo já é superfície real do produto
+- `dashboard`, `seasons`, `news` e `events` continuam sendo os domínios iniciais
 
 Regra importante:
 
 - a SPA do Backoffice não deve nascer como coleção desordenada de telas CRUD
 - ela deve nascer como produto administrativo com estrutura clara, previsível e escalável por domínio
+
+---
+
+## Source of truth
+
+Este documento é canônico para:
+
+- estrutura frontend do Backoffice
+- topologia de diretórios e camadas da SPA
+- superfícies reais de auth do lado frontend
+- princípios de organização do admin shell
+- relação entre sessão, guards e domínio
+
+Documentos adjacentes:
+
+- `admin-api-contracts.md`
+- `auth-rbac-and-guards.md`
+- `operational-runbooks.md`
+
+Relações com outros contextos:
+
+- a Auth API publicada e seus contratos operacionais vivem em `04-infra-aws-lightsail`
+- este documento descreve como o frontend administrativo se organiza para consumir essa infraestrutura
 
 ---
 
@@ -81,14 +98,14 @@ A estrutura frontend do Backoffice deve obedecer aos seguintes princípios:
 - standalone-first
 - organização por domínio administrativo
 - separação clara entre camadas transversais e features
-- rotas protegidas por guard
 - shell administrativo único e estável
+- rotas protegidas por guards assíncronos
+- backend como autoridade final de sessão e permissão
 - baixo acoplamento entre features
-- contratos explícitos com o backend
 - reaproveitamento controlado via `shared`
-- lógica transversal concentrada em `core`
+- infraestrutura transversal concentrada em `core`
 - Signals como estratégia primária de estado local e derivado
-- RxJS como complemento, não como centro arquitetural da UI
+- RxJS como ferramenta complementar para HTTP e interoperabilidade
 - simplicidade antes de sofisticação
 - clareza operacional antes de abstração excessiva
 
@@ -98,40 +115,45 @@ Princípio importante:
 
 ---
 
-## Decisões tecnológicas do contexto
+## Stack e postura tecnológica
 
 O Backoffice Admin adota explicitamente:
 
-- Angular 20
+- Angular
 - TypeScript
 - componentes standalone
 - bootstrap por `bootstrapApplication`
 - providers globais em `app.config.ts`
 - roteamento central em `app.routes.ts`
 - Signals para estado local e derivado
-- `computed()` para valores derivados
+- `computed()` para estado derivado
 - `effect()` apenas para side effects reais
 - RxJS para HTTP, streams externos e interoperabilidade
+- shell administrativo com áreas autenticadas protegidas
+- proxy local como ergonomia de desenvolvimento
 
 O Backoffice Admin não adota, no MVP:
 
 - arquitetura centrada em `NgModule`
-- biblioteca global de state management
+- state management global pesado
 - meta-framework interno de CRUD
 - engine genérica de formulários
-- abstrações excessivas de store
+- abstrações prematuras de store
 
 ---
 
 ## Bootstrap e configuração da aplicação
 
-A estrutura de entrada da aplicação deve seguir o modelo moderno do Angular:
+A estrutura de entrada da aplicação segue o modelo moderno do Angular:
 
 ```text
 src/
   main.ts
+
   app/
     app.component.ts
+    app.component.html
+    app.component.scss
     app.config.ts
     app.routes.ts
 ```
@@ -140,35 +162,67 @@ src/
 
 Responsável por:
 
-- inicializar a aplicação
-- executar `bootstrapApplication`
-- bootstrapar o componente raiz standalone
+* inicializar a aplicação
+* executar `bootstrapApplication`
+* bootstrapar o componente raiz standalone
 
 ### `app.config.ts`
 
 Responsável por:
 
-- registrar providers globais
-- configurar Router
-- configurar HttpClient
-- configurar interceptors
-- registrar providers transversais da aplicação
+* registrar providers globais
+* configurar Router
+* configurar HttpClient
+* configurar interceptors
+* registrar providers transversais da aplicação
 
 ### `app.routes.ts`
 
 Responsável por:
 
-- centralizar a árvore principal de rotas
-- declarar áreas protegidas
-- delegar lazy loading de features quando necessário
+* centralizar a árvore principal de rotas
+* declarar áreas públicas e protegidas
+* delegar lazy loading de features quando necessário
 
-### `app.component.ts`
+### `app.component.*`
 
 Responsável por:
 
-- componente raiz standalone
-- conter o `router-outlet` raiz
-- iniciar a moldura mínima da aplicação
+* componente raiz standalone
+* conter o `router-outlet` raiz
+* iniciar a moldura mínima da aplicação
+
+---
+
+## Proxy local e integração publicada
+
+No desenvolvimento local, a SPA usa proxy para conversar com a Auth API local.
+
+Artefato esperado:
+
+* `proxy.conf.json`
+
+Objetivo:
+
+* encaminhar chamadas a `/auth`, `/admin`, `/content` e `/health`
+* reduzir fricção prematura com CORS e cookies no navegador
+* permitir fluxo local previsível com sessão real
+
+Regra importante:
+
+* o proxy local é parte da ergonomia de desenvolvimento
+* ele não é parte da arquitetura publicada
+
+Em produção:
+
+* o frontend usa a base publicada da Auth API
+* a integração real ocorre com `https://auth-api.haxixesmokeclub.com`
+* o Backoffice publicado é `https://backoffice.haxixesmokeclub.com`
+
+Resumo:
+
+* **local:** proxy
+* **publicado:** base URL explícita da Auth API
 
 ---
 
@@ -179,29 +233,34 @@ A estrutura lógica recomendada para a SPA é:
 ```text
 src/
   main.ts
+
   app/
     app.component.ts
+    app.component.html
+    app.component.scss
     app.config.ts
     app.routes.ts
 
     core/
     shared/
     features/
+      auth/
       dashboard/
       seasons/
       news/
       events/
+      error-pages/
 ```
 
 Leitura dessa topologia:
 
-- `main.ts` define o bootstrap moderno
-- `app.config.ts` centraliza providers globais
-- `app.routes.ts` define a navegação principal
-- `core` concentra infraestrutura transversal da aplicação
-- `shared` concentra componentes e utilidades reaproveitáveis
-- `features` concentra os slices de domínio
-- cada domínio administrativo deve ter fronteira própria
+* `main.ts` define o bootstrap moderno
+* `app.config.ts` centraliza providers globais
+* `app.routes.ts` define a navegação principal
+* `core` concentra infraestrutura transversal
+* `shared` concentra reaproveitamento controlado
+* `features` concentra os slices de domínio
+* cada domínio administrativo deve ter fronteira própria
 
 ---
 
@@ -215,14 +274,30 @@ src/
 
   app/
     app.component.ts
+    app.component.html
+    app.component.scss
     app.config.ts
     app.routes.ts
 
     core/
       auth/
+        auth-api.service.ts
+        auth-session.store.ts
+        models/
+          auth.model.ts
+          role.model.ts
       guards/
+        auth.guard.ts
+        admin-access.guard.ts
+        role.guard.ts
       interceptors/
+        auth.interceptor.ts
+        auth-error.interceptor.ts
       layout/
+        admin-shell/
+        sidebar/
+        header/
+        page-container/
       config/
       services/
       models/
@@ -236,9 +311,13 @@ src/
       types/
 
     features/
+      auth/
+        pages/
+          login-page/
+          auth-callback-page/
       dashboard/
         pages/
-        components/
+          dashboard-page/
       seasons/
         pages/
         components/
@@ -257,9 +336,10 @@ src/
         services/
         store/
         models/
+      error-pages/
+        forbidden-page/
+        not-found-page/
 ```
-
-Essa estrutura deve ser lida assim:
 
 ### `core/`
 
@@ -267,30 +347,12 @@ Camada de infraestrutura transversal da SPA.
 
 Deve concentrar:
 
-- autenticação
-- sessão do usuário atual
-- guards
-- interceptors HTTP
-- configuração global
-- serviços transversais
-- layout administrativo
-- modelos compartilhados estritamente centrais
-
-O que entra em `core`:
-
-- tudo que a aplicação inteira depende para funcionar
-- tudo que não pertence a um único domínio de negócio
-- tudo que governa navegação, acesso e integração transversal
-
-O que não deve entrar em `core`:
-
-- lógica específica de `seasons`
-- lógica específica de `news`
-- lógica específica de `events`
-- componentes de tela de feature
-- stores específicas de domínio
-
----
+* auth administrativa
+* estado de sessão
+* guards
+* interceptors
+* layout principal do shell
+* configuração global da aplicação
 
 ### `shared/`
 
@@ -298,101 +360,53 @@ Camada de reaproveitamento controlado.
 
 Deve concentrar:
 
-- componentes visuais simples e reutilizáveis
-- blocos genéricos de tabela
-- blocos genéricos de formulário
-- feedback visual
-- estados vazios
-- loaders
-- helpers utilitários
-- types compartilhados realmente neutros
-
-O objetivo de `shared` não é virar um “cemitério de tudo que sobrou”.
-
-Regra importante:
-
-- só deve ir para `shared` aquilo que é realmente transversal e reutilizável sem contaminar o domínio
-
----
+* componentes verdadeiramente genéricos
+* helpers de UI
+* blocos de feedback
+* utilitários sem acoplamento de domínio
 
 ### `features/`
 
-Camada de domínios administrativos.
+Camada de domínio administrativo.
 
-Cada domínio deve ter seu próprio slice.
+Deve concentrar:
 
-Os slices iniciais são:
-
-- `dashboard`
-- `seasons`
-- `news`
-- `events`
-
-Cada feature deve conter, no mínimo:
-
-- `pages/`
-- `components/`
-- `services/`
-- `store/`
-- `models/`
-
-Leitura dessa convenção:
-
-- `pages/` contém superfícies de rota
-- `components/` contém blocos locais da feature
-- `services/` contém integração e orquestração da feature
-- `store/` contém estado local com Signals
-- `models/` contém tipos e mapeamentos próprios do domínio
-
----
-
-## Abordagem Angular 20: standalone-first
-
-O Backoffice deve nascer explicitamente em modo standalone-first.
-
-Isso significa:
-
-- componentes de página standalone
-- componentes compartilhados standalone
-- sem dependência estrutural de `NgModule` para código novo
-- imports declarados por componente ou por rota
-- providers globais centralizados em `app.config.ts`
-- lazy loading preferencial por rotas/features
+* páginas
+* componentes específicos
+* serviços por domínio
+* stores por domínio
+* models por domínio
 
 Regra importante:
 
-- se algum legado exigir integração com módulos antigos, isso deve ser tratado como adaptação pontual
-- o desenho canônico do Backoffice não deve ser module-first
+* regra de domínio não deve morar em `shared`
+* regra de domínio não deve contaminar `core`
 
 ---
 
 ## Shell administrativo
 
-O Backoffice deve nascer com um shell administrativo explícito.
+O Backoffice nasce com um shell administrativo explícito.
 
 O shell é a moldura estável da aplicação e deve conter:
 
-- sidebar de navegação
-- header simples
-- área principal de conteúdo
-- estado de carregamento inicial
-- área de feedback global
-- tratamento de acesso negado
-- tratamento de erro de navegação
+* sidebar de navegação
+* header simples
+* área principal de conteúdo
+* estado de carregamento inicial
+* área de feedback global
+* tratamento de acesso negado
+* tratamento de erro de navegação
 
 O shell deve existir antes dos domínios administrativos completos.
 
 Objetivo:
 
-- padronizar a experiência de administração
-- evitar que cada tela resolva layout por conta própria
-- sustentar evolução incremental de features
+* padronizar a experiência de administração
+* evitar que cada tela resolva layout por conta própria
+* sustentar evolução incremental de features
 
----
-
-## Estrutura sugerida do layout
-
-A estrutura lógica do layout pode ser lida assim:
+### Estrutura sugerida do layout
 
 ```text
 core/layout/
@@ -404,69 +418,102 @@ core/layout/
 
 Responsabilidades esperadas:
 
-### `admin-shell/`
+#### `admin-shell/`
 
-- componente raiz do layout autenticado
-- estrutura fixa da área administrativa
-- encaixe do `router-outlet` protegido
+* componente raiz do layout autenticado
+* estrutura fixa da área administrativa
+* encaixe do `router-outlet` protegido
 
-### `sidebar/`
+#### `sidebar/`
 
-- navegação por domínio
-- destaque de rota ativa
-- ocultação de entradas não autorizadas, quando aplicável
+* navegação por domínio
+* destaque de rota ativa
+* ocultação de entradas não autorizadas, quando aplicável
 
-### `header/`
+#### `header/`
 
-- contexto de tela
-- identidade do operador autenticado, se disponível
-- ações globais mínimas
+* contexto de tela
+* identidade do operador autenticado, quando disponível
+* status da sessão
+* papel atual do operador
 
-### `page-container/`
+#### `page-container/`
 
-- consistência de espaçamento e composição visual
-- título, subtítulo e área principal da página
-- uso padronizado em listagens e formulários
+* consistência de espaçamento e composição visual
+* título, subtítulo e área principal da página
+* uso padronizado em listagens e formulários
 
 ---
 
 ## Rotas iniciais recomendadas
 
-A navegação inicial da SPA deve ser simples e explícita.
+A navegação inicial da SPA deve ser simples, explícita e coerente com o runtime publicado.
 
-Rotas sugeridas:
+Rotas reais ou esperadas:
 
 ```text
 /login
+/auth/callback
 /dashboard
-
+/403
+/404
 /seasons
+/news
+/events
+```
+
+Evolução natural por domínio:
+
+```text
 /seasons/new
 /seasons/:slug/edit
 
-/news
 /news/new
 /news/:id/edit
 
-/events
 /events/new
 /events/:id/edit
-
-/403
-/404
 ```
 
 Leitura dessas rotas:
 
-- `/login` representa o ponto de entrada administrativo
-- `/dashboard` representa o shell técnico inicial
-- cada domínio tem sua rota de listagem e suas rotas de formulário
-- `/403` e `/404` devem existir como superfícies reais do produto
+* `/login` representa o ponto de entrada administrativo
+* `/auth/callback` representa a superfície real do consumo do magic link do ponto de vista da SPA
+* `/dashboard` representa a área autenticada inicial
+* cada domínio terá sua rota de listagem e suas rotas de formulário
+* `/403` e `/404` existem como superfícies reais do produto
 
 Regra importante:
 
-- não criar profundidade de rotas desnecessária no MVP
-- começar com superfícies claras e previsíveis
+* não criar profundidade de rotas desnecessária no MVP
+* começar com superfícies claras e previsíveis
+
+---
+
+## Jornada canônica de autenticação administrativa
+
+A jornada administrativa real publicada é:
+
+1. operador acessa `/login`
+2. informa email administrativo
+3. frontend chama `POST /auth/magic-link/request`
+4. usuário recebe email com o magic link
+5. link aponta para `GET /auth/magic-link/consume?token=...`
+6. backend consome o token, cria a sessão e redireciona para `/auth/callback?status=ok`
+7. a SPA resolve a sessão
+8. navega para `/dashboard`
+
+Em caso de falha no callback, a SPA precisa tratar códigos como:
+
+* `invalid_or_expired_link`
+* `consume_failed`
+* `missing_token`
+* `forbidden`
+
+Regra importante:
+
+* a autoridade da sessão está no backend
+* a SPA deve reagir ao estado real, não adivinhar sucesso de login
 
 ---
 
@@ -474,642 +521,354 @@ Regra importante:
 
 A proteção de rotas deve seguir uma hierarquia simples:
 
-1. validação de sessão
+1. resolução assíncrona da sessão
 2. validação de acesso administrativo
 3. validação de permissão por rota, quando necessário
 
-A estrutura de guardas deve morar em:
+A estrutura de guards deve morar em:
 
 ```text
 core/guards/
 ```
 
-Exemplos de responsabilidades:
+### `auth.guard`
 
-- guard de autenticação
-- guard de acesso administrativo
-- guard de papel mínimo por área sensível
+* aguardar resolução da sessão
+* permitir área protegida apenas com sessão válida
+* redirecionar para `/login` quando não autenticado
 
-Princípio importante:
+### `admin-access.guard`
 
-- o guard controla entrada na rota
-- a Auth API continua controlando autorização real da mutação
+* distinguir `unauthenticated` de `forbidden`
+* encaminhar para `/403` quando houver autenticação sem acesso suficiente
 
----
+### `role.guard`
 
-## Padrão de páginas por domínio
-
-Cada domínio administrativo deve nascer com dois tipos centrais de página:
-
-### Página de listagem
-
-Responsável por:
-
-- listar entidades
-- exibir loading
-- exibir erro
-- exibir empty state
-- oferecer ação principal de criação
-- oferecer ações por item
-
-### Página de formulário
-
-Responsável por:
-
-- criação
-- edição
-- carregamento do dado inicial quando aplicável
-- validação básica
-- submit
-- feedback de sucesso ou erro
-- navegação de retorno
+* proteger ações ou rotas mais sensíveis por papel
+* ser introduzido conforme os domínios exigirem
 
 Regra importante:
 
-- create e edit podem compartilhar a mesma página/componente de formulário
-- isso reduz duplicação e acelera o MVP
+* guards do admin devem ser assíncronos quando dependem de sessão real
+* `unknown` não deve ser tratado como “sem sessão” antes da resolução
 
 ---
 
-## Estrutura de estado com Signals
+## Auth, sessão e contratos backend
 
-A estratégia primária de estado do Backoffice deve ser baseada em Signals.
+A SPA administrativa já conversa com contrato real de sessão.
 
-Cada domínio deve concentrar seu estado em uma store local da feature, por exemplo:
+Superfícies centrais:
 
-```text
-features/seasons/
-  services/
-    seasons-api.service.ts
-  store/
-    seasons.store.ts
-```
+* `GET /auth/session`
+* `POST /auth/magic-link/request`
+* `GET /auth/magic-link/consume`
 
-Responsabilidades esperadas da store da feature:
+Papel no frontend:
 
-- manter estado de listagem
-- manter estado de detalhe/edição quando necessário
-- expor loading flags
-- expor erros de tela
-- expor filtros simples
-- expor dados derivados com `computed`
-- orquestrar chamadas ao serviço HTTP do domínio
+* bootstrap do estado auth
+* sustentação dos guards
+* persistência de sessão após refresh
+* jornada real de login admin
+* base para UI por papel
 
-A store da feature não deve:
+Superfície auxiliar de desenvolvimento:
 
-- virar mini-framework genérico
-- centralizar lógica de outros domínios
-- esconder invariantes importantes do domínio
+* `POST /auth/dev/bootstrap-session`
+
+Papel no frontend local:
+
+* criar sessão local controlada
+* destravar desenvolvimento do admin
+* não representar login final de produção
 
 ---
 
-## Regras de uso de Signals
+## Sessão real, cookies e integração cross-subdomain
 
-### Use `signal()` para estado mutável local
+A sessão administrativa publicada é baseada em cookie emitido pela Auth API.
 
-Exemplos naturais:
+Implicações para o frontend:
 
-- lista carregada
-- item selecionado
-- loading
-- submitting
-- filtro atual
-- mensagem local de erro
+* chamadas de sessão precisam usar credenciais
+* a SPA depende do backend para saber se a sessão é válida
+* a transição `consume -> callback -> /auth/session` precisa ser tratada como fluxo real de rede
+* o estado de auth deve sobreviver a refresh
 
-### Use `computed()` para estado derivado
+No ambiente publicado:
 
-Exemplos naturais:
-
-- lista filtrada
-- total de itens visíveis
-- flags derivadas do estado atual
-- permissões derivadas já resolvidas na camada de tela
-- título de página derivado do modo create/edit
-
-### Use `effect()` apenas para side effects reais
-
-Exemplos aceitáveis:
-
-- persistir algo em storage local
-- logging
-- sincronização com API imperativa
-- integração com componente externo não reativo
-- telemetria
-
-### Não use `effect()` para propagação de estado
-
-Evitar:
-
-- copiar signal para outro signal sem necessidade
-- encadear mutações de estado derivado
-- substituir `computed()` por `effect()`
-- criar fluxo de negócio centrado em side effects
+* `backoffice.haxixesmokeclub.com` consome `auth-api.haxixesmokeclub.com`
+* a sessão é cookie-based
+* a SPA precisa usar `withCredentials` nas chamadas relevantes de auth
 
 Regra importante:
 
-- estado derivado deve nascer de `computed`
-- `effect` deve ser a exceção, não a regra
+* cookie, sessão e autorização são responsabilidade do backend
+* o frontend não deve implementar “atalhos” paralelos de auth
 
 ---
 
-## Convivência entre Signals e RxJS
+## Estratégia de estado com Signals
 
-Signals e RxJS não competem; eles cumprem papéis diferentes.
+A estratégia primária de estado local e derivado do Backoffice é baseada em Signals.
 
-No Backoffice HSC:
+Aplicações recomendadas:
 
-### Signals
+* estado da sessão administrativa
+* flags de loading
+* derived state de permissão
+* estado de página
+* estado de formulários locais
+* estado leve por feature
 
-Devem governar:
+### Uso recomendado
 
-- estado de tela
-- estado local por feature
-- derivação de estado
-- feedback visual
-- composição da UI
-
-### RxJS
-
-Deve governar:
-
-- chamadas HTTP
-- streams assíncronos
-- composição com APIs observáveis
-- integração com libs ou fluxos externos
-- cenários onde Observable é a forma natural da fonte
-
-Regra de convivência:
-
-- HTTP continua natural em serviços Angular
-- a feature pode consumir o resultado do serviço e consolidar o estado em Signals
-- a UI não precisa virar uma árvore inteira baseada em `async` pipe para tudo
-
----
-
-## Padrão de composição por feature
-
-A estrutura recomendada de uma feature deve seguir algo nessa linha:
-
-```text
-features/seasons/
-  pages/
-    seasons-list-page/
-    season-form-page/
-  components/
-    season-form/
-    season-actions/
-    season-status-badge/
-  services/
-    seasons-api.service.ts
-  store/
-    seasons.store.ts
-  models/
-    season.model.ts
-    season-form.model.ts
-```
-
-Leitura recomendada:
-
-### `pages/`
-
-Superfícies roteáveis da feature.
-
-Devem ser leves e orquestrar:
-
-- carregamento da página
-- integração com shell e container
-- delegação para componentes locais
-- ligação entre rota e store da feature
-
-### `components/`
-
-Blocos internos da feature.
-
-Devem conter:
-
-- formulário do domínio
-- ações contextuais
-- badges ou blocos específicos do domínio
-- partes reaproveitáveis apenas dentro daquela feature
-
-### `services/`
-
-Responsáveis por:
-
-- integração HTTP
-- chamadas à Auth API
-- mapeamentos de payload quando necessário
-
-### `store/`
-
-Responsável por:
-
-- consolidar estado da feature
-- expor signals e computed signals
-- orquestrar ciclo de loading/erro/sucesso
-- manter a lógica de tela perto do domínio
-
-### `models/`
-
-Deve conter:
-
-- tipos de leitura
-- tipos de formulário
-- mapeamentos simples
-- enums específicos do domínio
-
----
-
-## Estratégia de integração HTTP
-
-A integração com a Auth API deve seguir estes princípios:
-
-- uma feature não deve chamar HTTP diretamente em múltiplos componentes dispersos
-- chamadas devem ser centralizadas em serviços da feature
-- mapeamento entre payload e modelo de tela deve ser explícito
-- tratamento de erro deve ser consistente
-
-Estrutura sugerida:
-
-- `app.config.ts` para `provideHttpClient(...)`
-- `core/interceptors/` para comportamento transversal
-- `features/<dominio>/services/` para endpoints e fluxos do domínio
-
-O que deve ficar em interceptor:
-
-- headers globais
-- tratamento base de erro
-- reação transversal a 401, quando apropriado
-
-O que não deve ficar em interceptor:
-
-- regras específicas de `seasons`
-- regras específicas de `news`
-- regras específicas de `events`
-
----
-
-## Tratamento de 401, 403 e erros funcionais
-
-O Backoffice deve tratar esses estados como parte do produto.
-
-### 401
-
-Deve significar:
-
-- sessão ausente
-- sessão expirada
-- autenticação inválida
-
-Comportamento esperado:
-
-- interromper fluxo protegido
-- redirecionar de forma consistente
-- informar o operador de forma clara, quando aplicável
-
-### 403
-
-Deve significar:
-
-- usuário autenticado sem permissão suficiente
-
-Comportamento esperado:
-
-- mostrar tela ou estado explícito de acesso negado
-- não mascarar esse estado como erro genérico
-
-### Erros de domínio
-
-Exemplos:
-
-- season já ativa
-- slug inválido
-- publicação não permitida
-- recurso não encontrado para edição
-
-Comportamento esperado:
-
-- mensagem útil
-- feedback localizado ou contextual
-- sem tratar tudo como “erro inesperado”
-
----
-
-## Padrão de feedback visual
-
-O Backoffice deve oferecer uma linguagem consistente de feedback.
-
-Estados mínimos por página:
-
-- loading inicial
-- erro de carregamento
-- empty state
-- sucesso de mutação
-- erro de mutação
-- ação em progresso
-
-Componentes reutilizáveis recomendados em `shared/feedback/`:
-
-- loader de página
-- bloco de erro
-- estado vazio
-- confirmação de ação destrutiva
-- mensagem de sucesso simples
+* `signal()` para estado mutável local
+* `computed()` para estado derivado
+* `effect()` apenas quando houver side effect real
+* RxJS para HTTP e integração externa
 
 Regra importante:
 
-- ações destrutivas não devem usar feedback ambíguo
-- ações sensíveis não devem depender de atualização otimista no MVP
+* a store de sessão é transversal
+* stores de domínio devem existir por feature quando necessário
+* não introduzir state management global extra cedo demais
 
 ---
 
-## Padrão de tabelas
+## Store de sessão e reload explícito
 
-As listagens administrativas devem seguir um padrão estável.
+A store de sessão do admin é uma peça central do runtime.
 
-Características mínimas:
+Ela deve sustentar, no mínimo:
 
-- coluna principal identificadora
-- colunas de estado relevantes
-- ação primária de criar
-- ações por linha
-- loading
-- erro
-- vazio
+* estado `unknown`
+* estado `authenticated`
+* estado `unauthenticated`
+* estado de erro quando aplicável
+* dados do operador autenticado
+* papel efetivo resolvido pelo backend
 
-No MVP, evitar:
+A store depende de:
 
-- grid excessivamente sofisticado
-- filtros complexos demais
-- customização profunda por usuário
-- paginação avançada antes da necessidade real
+* `GET /auth/session`
+* `reloadSession()`
 
-A tabela deve servir ao domínio, não dominar a arquitetura.
+Papel de `reloadSession()`:
 
----
-
-## Padrão de formulários
-
-Os formulários administrativos devem ser pragmáticos.
-
-Características mínimas:
-
-- modelo de formulário explícito
-- validação básica local
-- mensagens claras
-- submit bloqueado durante envio
-- botão de salvar
-- navegação de retorno
-- hidratação inicial no modo edição
-
-Ações destrutivas devem ficar fora do corpo principal do formulário quando possível.
+* resolver sessão após refresh
+* resolver sessão após callback
+* sustentar guards e header
+* permitir rechecagem explícita em telas técnicas quando necessário
 
 Regra importante:
 
-- o formulário deve refletir o domínio
-- ele não deve virar componente genérico abstrato cedo demais
+* o frontend não deve assumir autenticação só porque o callback retornou `status=ok`
+* ele deve sempre confirmar a sessão no backend
 
 ---
 
-## Organização inicial por domínio
+## Callback com retry curto
 
-### Dashboard
+A superfície `/auth/callback` existe para fechar a jornada real do magic link.
 
-Objetivo:
+Responsabilidades dessa página:
 
-- servir como entrada autenticada inicial
-- validar shell, sessão e navegação
-- expor estado técnico mínimo do admin
+* ler `status` ou `error` da query string
+* tentar resolver a sessão
+* em caso de `status=ok`, reconsultar o backend
+* tolerar um pequeno race condition entre emissão de cookie e primeira consulta de sessão
+* navegar para `/dashboard` quando a sessão for validada
+* mostrar mensagem clara e botão de retorno ao login quando a validação falhar
 
-Não precisa nascer como dashboard analítico sofisticado.
+Regra importante:
 
----
-
-### Seasons
-
-Deve ser o primeiro domínio relevante.
-
-Motivos:
-
-- invariantes mais claras
-- lifecycle explícito
-- ótima feature para validar listagem, formulário e ações sensíveis
-
-Estrutura mínima esperada:
-
-- listagem
-- create/edit
-- activate
-- close
+* o callback não é uma tela “decorativa”
+* ele é uma parte real da infraestrutura de login do admin
 
 ---
 
-### News
+## Experiência local de auth
 
-Deve vir logo depois de `seasons`.
+A UX local do Backoffice pode admitir:
 
-Motivos:
+* exibição de status da sessão na `/login`
+* botão para criar sessão local de desenvolvimento
+* botão para resolver sessão atual
+* dashboard técnico com recarga explícita de sessão
+* header com `status`, `role` e identidade do operador
 
-- superfície administrativa já mais madura no ecossistema
-- bom domínio para validar workflow editorial mínimo
+Esses elementos não são ruído.
 
-Estrutura mínima esperada:
-
-- listagem
-- create/edit
-- publish
-- unpublish
-- delete
+Eles são parte da ergonomia saudável da linha session-first durante desenvolvimento local.
 
 ---
 
-### Events
+## Organização por domínio
 
-Deve vir depois de `news`.
+A aplicação deve crescer por domínio administrativo real.
 
-Motivos:
+Domínios iniciais do contexto:
 
-- ainda pede reconciliação de produto mais aberta
-- especialmente na separação entre gestão administrativa e interação pública
-
-Estrutura mínima esperada:
-
-- listagem
-- create/edit
-- delete ou cancelamento
-
----
-
-## Convenções de nomenclatura
-
-A estrutura deve seguir nomes previsíveis.
-
-Recomendação:
-
-- pasta por domínio em minúsculas
-- componentes com nomes explícitos
-- páginas com sufixo `page`
-- stores com sufixo `store`
-- serviços de integração com sufixo `api.service`
-- evitar nomes genéricos como `manager`, `handler`, `helper` sem contexto
-
-Exemplos bons:
-
-- `season-form-page`
-- `seasons-list-page`
-- `seasons-api.service.ts`
-- `seasons.store.ts`
-- `season-status-badge`
-
-Exemplos ruins:
-
-- `crud-page`
-- `general-form`
-- `admin-helper`
-- `manager-service`
-
----
-
-## Limites de abstração no MVP
-
-Para o MVP, evitar:
-
-- meta-framework interno de CRUD
-- fábrica genérica de telas administrativas
-- engine genérica de formulários baseada só em schema
-- store global pesada
-- design system complexo demais
-- excesso de wrappers abstratos
-
-Motivo:
-
-- isso aumenta custo cognitivo cedo demais
-- esconde o domínio
-- dificulta troubleshooting
-- atrasa entrega real
-
-O Backoffice deve crescer a partir de repetição observada, não de abstração antecipada.
-
----
-
-## Estrutura mínima para o primeiro release funcional
-
-A estrutura mínima do primeiro release funcional pode ser lida assim:
-
-```text
-src/
-  main.ts
-  app/
-    app.component.ts
-    app.config.ts
-    app.routes.ts
-
-    core/
-      auth/
-      guards/
-      interceptors/
-      layout/
-
-    shared/
-      feedback/
-      ui/
-
-    features/
-      dashboard/
-      seasons/
-```
+* `dashboard`
+* `seasons`
+* `news`
+* `events`
 
 Leitura prática:
 
-- não é necessário implementar todos os domínios no primeiro corte
-- o shell e `seasons` já podem validar quase toda a espinha dorsal da SPA
-- `news` e `events` entram em seguida sem exigir reescrita estrutural
+* não é necessário implementar todos no primeiro corte
+* o shell e o fluxo de auth já validam a espinha dorsal
+* `seasons` continua sendo o melhor primeiro domínio forte
+* `news` tende a entrar logo depois
+* `events` ainda exige maturação contratual adicional
 
 ---
 
-## Riscos estruturais a evitar
+## Estrutura mínima por feature
 
-Os principais riscos desta camada são:
+A estrutura mínima por feature pode ser lida assim:
 
-### Risco 1 — misturar tudo em `shared`
+```text
+features/<dominio>/
+  pages/
+  components/
+  services/
+  store/
+  models/
+```
 
-Efeito:
-- perda de fronteira de domínio
-- reutilização ilusória
-- acoplamento escondido
+### `pages/`
 
-### Risco 2 — colocar regra de domínio em `core`
+* superfícies de rota
+* composição principal da feature
 
-Efeito:
-- camada transversal contaminada
-- dificuldade de manutenção
-- erosão da estrutura
+### `components/`
 
-### Risco 3 — abstrair CRUD cedo demais
+* blocos específicos do domínio
+* não genéricos por padrão
 
-Efeito:
-- código difícil de entender
-- telas parecidas por fora, frágeis por dentro
-- dificuldade de adaptar invariantes reais de cada domínio
+### `services/`
 
-### Risco 4 — depender do frontend para autorização
+* integração HTTP do domínio
+* adaptação de payload
+* helpers de API específicos do slice
 
-Efeito:
-- falsa sensação de segurança
-- inconsistência entre UI e backend
+### `store/`
 
-### Risco 5 — acoplar Backoffice ao Portal
+* estado local do domínio
+* filtros, seleção, carregamento e derived state
 
-Efeito:
-- erosão da separação de camadas
-- confusão entre produto público e produto administrativo
+### `models/`
 
-### Risco 6 — usar `effect()` como motor principal de estado
-
-Efeito:
-- loops desnecessários
-- propagação opaca de estado
-- troubleshooting mais difícil
-- distorção da modelagem correta com `computed()`
+* tipos e contratos específicos do domínio
+* shapes de leitura e escrita
 
 ---
 
-## Ordem de implementação recomendada
+## Artefatos que devem nascer cedo
 
-A ordem recomendada para materializar esta estrutura é:
+Os artefatos que mais cedo devem existir na implementação são:
 
-1. `main.ts`, `app.config.ts` e `app.routes.ts`
-2. `core/layout`
-3. `core/auth`, `core/guards` e `core/interceptors`
-4. `features/dashboard`
-5. `features/seasons`
-6. `shared/feedback`, `shared/forms`, `shared/table`
-7. `features/news`
-8. `features/events`
+### Estruturais
 
-Essa ordem valida:
+* `main.ts`
+* `app.config.ts`
+* `app.routes.ts`
+* shell administrativo
 
-- bootstrap moderno
-- shell
-- acesso
-- primeiro domínio forte
-- reutilização real
-- expansão controlada
+### Acesso
+
+* `auth-session.store.ts`
+* `auth-api.service.ts`
+* guards
+* interceptors básicos
+* `login-page`
+* `auth-callback-page`
+
+### Primeiro domínio
+
+* `features/seasons/`
+* listagem
+* formulário
+* ações de lifecycle
+
+Motivo:
+
+* esses artefatos validam a espinha dorsal do Backoffice
 
 ---
 
-## Resumo executivo
+## Artefatos que podem esperar um pouco mais
 
-A estrutura frontend do Backoffice Admin do HSC deve nascer como SPA administrativa em Angular 20, organizada por domínio, com bootstrap moderno, componentes standalone, shell único e stores locais por feature baseadas em Signals.
+Os artefatos que podem nascer em fase seguinte são:
 
-A regra central é:
+* componentes shared mais sofisticados
+* dashboard mais rico
+* refinamentos avançados de tabela
+* filtros e paginação avançados
+* telemetria frontend mais elaborada
+* evolução de `events` além do CRUD básico
+* abstrações adicionais de store ou UI
 
-- `main.ts` para bootstrap
-- `app.config.ts` para providers globais
-- `app.routes.ts` para navegação
-- `core` para infraestrutura transversal
-- `shared` para reaproveitamento real
-- `features` para domínios administrativos
-- `store/` por domínio para estado local com Signals
+Motivo:
 
-O MVP deve começar simples, por slices claros, evitando abstração excessiva e preservando a separação entre Backoffice, Portal e backend dinâmico.
+* não são necessários para validar a estrutura canônica do admin
+
+---
+
+## Regras de fronteira entre documentos
+
+Este documento não substitui:
+
+* `admin-api-contracts.md`
+* `auth-rbac-and-guards.md`
+* `operational-runbooks.md`
+
+Leitura correta:
+
+* este documento define **estrutura**
+* `admin-api-contracts.md` define **contratos**
+* `auth-rbac-and-guards.md` define **semântica de auth e acesso**
+* `operational-runbooks.md` define **procedimentos repetíveis**
+
+---
+
+## Limites atuais
+
+Este documento assume como verdade operacional:
+
+* existência de sessão real publicada
+* fluxo de magic link funcional
+* callback administrativo funcional
+* dashboard acessível após autenticação
+* Auth API como backend dinâmico central do admin
+
+Este documento não afirma, por si só:
+
+* que todos os domínios administrativos já estão completos
+* que o design system está estabilizado
+* que todos os guards por papel já estão implementados
+* que toda a observabilidade frontend já existe
+
+---
+
+## Critério de pronto
+
+Este documento está suficientemente pronto quando:
+
+* a estrutura `core/shared/features` estiver refletida no repo
+* o shell administrativo estiver materializado
+* `/login` e `/auth/callback` existirem como superfícies reais
+* a store de sessão sustentar guards e callback
+* a SPA publicada consumir corretamente a Auth API publicada
+* os domínios administrativos puderem crescer sem colapsar a organização da app
+
+---
+
+## Última revisão
+
+* Revisado após a materialização do fluxo real de magic link admin publicado
+* Revisado após a consolidação do callback `/auth/callback`
+* Revisado após a estabilização da sessão cookie-based cross-subdomain
+* Revisado após a consolidação da Auth API como autoridade final de sessão e permissão

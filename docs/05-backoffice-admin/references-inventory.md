@@ -1,18 +1,17 @@
-# References and Inventory
+# References Inventory
 
 ## Objetivo
 
-Consolidar o inventário de referências, evidências, artefatos, componentes, paths e pendências do contexto `05-backoffice-admin`.
+Documentar o inventário de referências, dependências, artefatos, integrações e gaps do contexto `05-backoffice-admin` do ecossistema HSC.
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- quais documentos alimentam este contexto
-- quais artefatos reais do Backoffice já existem
-- quais contratos administrativos já são reais
-- quais componentes e paths estruturam a SPA administrativa
-- quais dependências externas sustentam o Backoffice
-- quais itens ainda estão pendentes de reconciliação
-- quais são os limites documentais do contexto
+- as referências canônicas que governam o Backoffice Admin
+- os contextos e documentos dos quais este contexto depende
+- os artefatos técnicos previstos e já materializados para a SPA administrativa
+- as integrações centrais do Backoffice com o restante do ecossistema
+- os recursos e superfícies que já foram reconciliados com o runtime real
+- os gaps conhecidos, pendências e zonas de atenção do contexto
 
 ---
 
@@ -20,128 +19,78 @@ Este documento existe para registrar, de forma estável e auditável:
 
 Este documento cobre:
 
-- documentos de origem do contexto
-- artefatos reais do Backoffice Admin
-- componentes estruturais do frontend
-- contratos administrativos relevantes já materializados
-- fluxo local de autenticação administrativa
-- paths e arquivos críticos da SPA
-- dependências externas do contexto
-- comandos úteis de validação local
-- pendências ainda abertas
-- limites documentais do contexto
+- referências documentais do Backoffice Admin
+- dependências arquiteturais do contexto
+- inventário lógico de artefatos da SPA administrativa
+- integrações com Auth API e contextos adjacentes
+- inventário inicial de domínios administrativos
+- pontos de reconciliação com runtime real
+- gaps conhecidos de contrato, runtime e operação
 
 Este documento não cobre em profundidade:
 
-- detalhes completos de runtime da Auth API
-- deploy final do frontend administrativo
-- hostnames definitivos de publicação do Backoffice
-- runbooks completos de domínio
-- modelagem detalhada de `news`, `seasons` e `events`
-- detalhes completos de banco e Nginx
-- histórico completo de mudanças
+- conteúdo completo dos demais documentos
+- contratos detalhados endpoint a endpoint
+- runbooks operacionais completos
+- configuração detalhada de deploy
+- detalhes de infraestrutura de host
+- implementação exata de banco e backend
 
-Esses tópicos vivem em documentos especializados dos contextos `04` e `05`, além de impl-logs e material legado.
-
----
-
-## Estado atual
-
-O contexto `05-backoffice-admin` já possui base real suficiente para ser tratado como contexto administrativo vivo do ecossistema HSC.
-
-Neste estágio, já existe confirmação suficiente para fixar sem ambiguidade:
-
-- aplicação administrativa própria em Angular 21
-- arquitetura standalone-first
-- uso de TypeScript
-- uso de Signals para estado de sessão
-- shell administrativo funcional
-- header, sidebar e page container materializados
-- `/login`, `/dashboard`, `/403` e `/404`
-- guards assíncronos protegendo a área administrativa
-- store de sessão administrativa já conectada a contrato real
-- integração real com `GET /auth/session`
-- bootstrap local controlado via `POST /auth/dev/bootstrap-session`
-- proxy local para a Auth API durante desenvolvimento
-- fluxo local validado:
-  - criar sessão local
-  - entrar no dashboard
-  - dar refresh em rota protegida
-  - manter sessão válida
-
-Também já existe clareza suficiente para registrar:
-
-- o Backoffice continua separado do Portal público
-- a Auth API continua sendo a autoridade final de autenticação e autorização
-- o fluxo administrativo normal do produto é session-first
-- `x-admin-key` continua sendo contingência backend, não jornada normal do frontend
-- `seasons` continua sendo o primeiro domínio forte recomendado para evolução do admin
+Esses tópicos vivem em documentos próprios.
 
 ---
 
-## Source of truth / evidências
+## Papel deste documento no contexto
 
-As evidências que sustentam este contexto se dividem em cinco grupos principais.
+Este arquivo deve funcionar como inventário rápido do contexto `05-backoffice-admin`.
 
-### 1. Documentação canônica do Backoffice
+Ele existe para responder perguntas como:
 
-Usada para:
+- quais documentos governam este contexto?
+- de quais outros contextos o Backoffice depende?
+- quais artefatos técnicos a SPA administrativa deve ter?
+- quais integrações o produto administrativo consome?
+- o que já está reconciliado e o que ainda está em aberto?
+- quais domínios já entram no MVP?
+- quais pontos ainda exigem confirmação no runtime real?
 
-- definir fronteira do contexto
-- registrar arquitetura administrativa
-- sustentar auth, guards, contratos e runbooks
-- posicionar o Backoffice dentro da estrutura HSC
+Regra importante:
 
-### 2. Documentação canônica da Auth API
-
-Usada para:
-
-- confirmar contratos administrativos reais
-- confirmar o modelo session-first
-- confirmar `GET /auth/session`
-- confirmar a existência e o papel do bootstrap local dev-only
-- confirmar a Auth API como autoridade final
-
-### 3. Implementação real do Backoffice local
-
-Usada para:
-
-- confirmar stack efetiva em Angular 21
-- confirmar estrutura de `core/`, `features/` e layout
-- confirmar store de sessão com Signals
-- confirmar guards assíncronos
-- confirmar proxy local e UX de auth local
-
-### 4. Implementação real local da Auth API
-
-Usada para:
-
-- confirmar `GET /auth/session`
-- confirmar `POST /auth/dev/bootstrap-session`
-- confirmar tabela `sessions`
-- confirmar `users.role`
-- confirmar fallback administrativo por `x-admin-key`
-
-### 5. Fluxo local validado ponta a ponta
-
-Usado para:
-
-- confirmar subida da Auth API local
-- confirmar subida do Backoffice local
-- confirmar bootstrap de sessão
-- confirmar `/dashboard` autenticado
-- confirmar refresh em rota protegida
-- confirmar recarga explícita de sessão
-
-Regra principal:
-
-- quando houver conflito entre expectativa documental e implementação validada, prevalece a implementação validada até reconciliação explícita
+- este documento não substitui o `README.md`
+- ele complementa o contexto com visão de inventário e reconciliação
 
 ---
 
-## Relações com outros documentos
+## Estado atual do contexto
 
-Este arquivo é complementar a:
+O estado atual conhecido do contexto é:
+
+- o contexto `05-backoffice-admin` já não está apenas em formalização inicial
+- o Backoffice Admin é uma SPA administrativa publicada separada do Portal público
+- a Auth API é a dependência dinâmica central do contexto
+- o desenho reconciliado do frontend assume Angular 21 + TypeScript + Signals
+- o modelo de auth do admin é session-first
+- a jornada publicada já inclui:
+  - `/login`
+  - `/auth/callback`
+  - `/dashboard`
+- o backend permanece autoridade final para autenticação, autorização e invariantes
+- `seasons`, `news` e `events` permanecem como domínios iniciais
+- parte importante da auth base já está reconciliada com runtime real
+- parte da expansão de domínio ainda depende de evolução incremental de contrato e implementação
+
+Regra importante:
+
+- este documento deve distinguir claramente:
+  - o que já é referência canônica consolidada
+  - o que é artefato efetivamente materializado
+  - o que ainda é gap ou pendência
+
+---
+
+## Referências canônicas diretas deste contexto
+
+Os documentos canônicos diretos de `05-backoffice-admin` são:
 
 - `docs/05-backoffice-admin/README.md`
 - `docs/05-backoffice-admin/architecture-runtime.md`
@@ -149,505 +98,759 @@ Este arquivo é complementar a:
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/operational-runbooks.md`
+- `docs/05-backoffice-admin/references-inventory.md`
+
+Leitura recomendada:
+
+- `README.md` define a fronteira do contexto
+- `architecture-runtime.md` define a topologia funcional do produto administrativo
+- `frontend-structure.md` define a estrutura da SPA
+- `auth-rbac-and-guards.md` define acesso e proteção
+- `admin-api-contracts.md` define contratos com a Auth API
+- `operational-runbooks.md` define validação e troubleshooting
+- este arquivo consolida o inventário de referência e dependência
+
+---
+
+## Referências canônicas adjacentes obrigatórias
+
+Este contexto depende diretamente dos seguintes documentos e contextos adjacentes.
+
+### Governança documental
+
+- `docs/00-governance/README.md`
+- `docs/00-governance/documentation-system.md`
+- `docs/00-governance/99-master-index.md`
+
+Papel dessas referências:
+
+- governar a existência do contexto
+- definir padrão documental
+- sustentar reconciliação com runtime real
+- garantir manutenção do contexto vivo
+
+---
+
+### Infraestrutura dinâmica / Auth API
+
+- `docs/04-infra-aws-lightsail/README.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
+- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
+- `docs/04-infra-aws-lightsail/references-inventory.md`
 
-Este documento não substitui nenhum dos arquivos acima.  
-Ele funciona como fechamento de inventário e referência do contexto administrativo.
+Papel dessas referências:
 
----
-
-## Documentos de origem
-
-Os documentos abaixo são as principais fontes de extração e reconciliação deste contexto.
-
-### Fontes primárias
-
-- documentação canônica do contexto `05-backoffice-admin`
-- documentação canônica da Auth API em `04-infra-aws-lightsail`
-- índice mestre e documentos de governança
-
-### Fontes secundárias
-
-- implementação real do Backoffice local
-- implementação real da Auth API local
-- runbooks locais validados
-- ajustes incrementais recentes do fluxo session-first
-
-### Fontes de apoio histórico
-
-- master antigo
-- blueprint legado
-- documentos anteriores do Backoffice ainda úteis como apoio histórico
-- referências antigas sobre separação entre Portal, Auth API e camadas administrativas
-
-Regra documental:
-
-- histórico ajuda a reconciliar
-- mas não governa o contexto sozinho
+- registrar o runtime dinâmico real consumido pelo Backoffice
+- sustentar o modelo session-first
+- registrar o fluxo real de magic link admin
+- sustentar callback, cookies e sessão real
+- registrar postura fail-closed em mutações sensíveis
 
 ---
 
-## Artefatos reais do Backoffice
+### Portal público
 
-Os artefatos reais já materializados neste contexto incluem:
+- `docs/03-portal-estatico/README.md`
+- demais documentos do contexto `03-portal-estatico`, quando relevantes
 
-### Aplicação Angular
+Papel dessas referências:
 
-- SPA administrativa própria
-- Angular 21
-- standalone-first
-- TypeScript
-- SCSS
-- routing ativo
+- preservar a separação entre público e administrativo
+- evitar confusão entre consumo público e gestão administrativa
+- manter clareza de fronteira entre Portal e Backoffice
 
-### Root files conhecidos
+---
+
+### Legado reconciliado
+
+- `docs/98-legacy/HSC_MASTER_DOCUMENTATION.md`
+- `docs/98-legacy/HSC_Master_Blueprint.md`
+
+Papel dessas referências:
+
+- sustentar reconciliação histórica
+- registrar roadmap e visão anterior de camadas
+- reaproveitar material de `news`, `seasons`, `events` e RBAC
+- servir como base de comparação, não como autoridade superior ao canônico atual
+
+---
+
+## Referências históricas e de apoio
+
+Além das referências canônicas obrigatórias, este contexto pode depender de materiais históricos ou de implantação que ajudem na reconciliação de runtime.
+
+Exemplos típicos:
+
+- docs de PR ou HSC_IMPL relevantes
+- notas de implantação que afetem contratos admin
+- documentos de MVP de domínio
+- backlog de features administrativas
+- registros de gaps encontrados durante implementação
+- impl-logs ligados ao checkpoint de auth admin magic link e cutover de migrations
+
+Regra importante:
+
+- documentos de apoio não substituem o contexto canônico
+- quando um documento de apoio alterar entendimento estrutural, o contexto 05 deve ser atualizado
+
+---
+
+## Inventário lógico da aplicação Backoffice
+
+A SPA administrativa prevista por este contexto deve conter, no mínimo, os seguintes artefatos lógicos.
+
+### Entrada e configuração
 
 - `src/main.ts`
 - `src/app/app.component.ts`
-- `src/app/app.component.html`
-- `src/app/app.component.scss`
 - `src/app/app.config.ts`
 - `src/app/app.routes.ts`
 
-### Configuração local de proxy
+Papel:
 
-- `proxy.conf.json`
-
-### Script local de start
-
-- `npm start`
-- com `ng serve --proxy-config proxy.conf.json`
-
-### Estrutura principal da aplicação
-
-- `src/app/core/`
-- `src/app/features/`
-- `src/app/shared/` quando aplicável
+- bootstrap Angular 21 standalone
+- providers globais
+- roteamento principal
+- root component da aplicação
 
 ---
 
-## Estrutura principal conhecida
+### Core
 
-A estrutura principal reconciliada do Backoffice já inclui, no mínimo:
+Estruturas previstas:
 
-```text id="n0h1h0"
-src/app/
-  core/
-    auth/
-      auth-api.service.ts
-      auth-session.store.ts
-      models/
-        auth.model.ts
-        role.model.ts
-    guards/
-      auth.guard.ts
-      admin-access.guard.ts
-    interceptors/
-    layout/
-      admin-shell/
-      header/
-      sidebar/
-      page-container/
+- `src/app/core/auth/`
+- `src/app/core/guards/`
+- `src/app/core/interceptors/`
+- `src/app/core/layout/`
+- `src/app/core/config/`
+- `src/app/core/services/`
+- `src/app/core/models/`
 
-  features/
-    auth/
-      pages/
-        login-page/
-    dashboard/
-      pages/
-        dashboard-page/
-    error-pages/
-      forbidden-page/
-      not-found-page/
-```
+Papel:
 
-Essa estrutura já é suficiente para:
-
-* boot do app
-* navegação protegida
-* resolução de sessão
-* shell administrativo
-* UX local de desenvolvimento do admin
+- infraestrutura transversal
+- auth administrativa
+- estado de sessão
+- guards
+- interceptors
+- layout principal do shell
+- configuração global da aplicação
 
 ---
 
-## Componentes estruturais relevantes
+### Shared
 
-Os componentes mais importantes já reconciliados neste contexto são:
+Estruturas previstas:
 
-### `AuthApiService`
-
-Papel:
-
-* encapsular contratos administrativos de auth
-* consumir `GET /auth/session`
-* consumir `POST /auth/dev/bootstrap-session` em desenvolvimento local
-
-### `AuthSessionStore`
+- `src/app/shared/ui/`
+- `src/app/shared/table/`
+- `src/app/shared/forms/`
+- `src/app/shared/feedback/`
+- `src/app/shared/utils/`
+- `src/app/shared/types/`
 
 Papel:
 
-* manter estado de sessão
-* expor Signals e `computed()`
-* resolver sessão real
-* recarregar sessão explicitamente
-* sustentar guards e UI
-
-### `auth.guard`
-
-Papel:
-
-* bloquear rota protegida sem sessão válida
-* aguardar resolução assíncrona da sessão antes de decidir
-
-### `admin-access.guard`
-
-Papel:
-
-* distinguir `unauthenticated` de `forbidden`
-* controlar acesso administrativo mínimo
-
-### `admin-shell`
-
-Papel:
-
-* moldura protegida da área administrativa
-* organizar sidebar, header e conteúdo sob sessão válida
-
-### `login-page`
-
-Papel:
-
-* superfície inicial do admin local
-* bootstrap local de sessão
-* resolução explícita de sessão atual
-* exibição de erro e status técnico de auth
-
-### `dashboard-page`
-
-Papel:
-
-* superfície técnica inicial do PR-1
-* refletir store, status, operador e role
-* ajudar na validação do fluxo session-first
+- reaproveitamento controlado
+- componentes transversais
+- tabela e formulário base
+- feedback visual
+- helpers utilitários
+- tipos neutros
 
 ---
 
-## Contratos administrativos reais já consumidos
+### Features
 
-Os contratos já materializados e relevantes para o Backoffice incluem:
+Slices iniciais previstos:
 
-### Sessão administrativa atual
+- `src/app/features/auth/`
+- `src/app/features/dashboard/`
+- `src/app/features/seasons/`
+- `src/app/features/news/`
+- `src/app/features/events/`
 
-* `GET /auth/session`
+Estrutura mínima por feature:
 
-Estado:
+- `pages/`
+- `components/`
+- `services/`
+- `store/`
+- `models/`
 
-* real
-* já consumido pela store de auth
-* já usado por guards assíncronos
+Papel:
 
-### Bootstrap local de sessão
-
-* `POST /auth/dev/bootstrap-session`
-
-Estado:
-
-* real
-* auxiliar de desenvolvimento
-* não é contrato normal de produto
-
-### Superfícies administrativas de News
-
-Estado:
-
-* reais
-* já existentes na Auth API
-* prontas para futura integração de domínio no Backoffice
-
-### Superfícies administrativas de Seasons
-
-Estado:
-
-* reais para escrita e lifecycle
-* prontas para evolução futura do primeiro domínio forte do admin
+- organizar o admin por domínio
+- manter baixo acoplamento
+- preservar fronteiras claras entre features
 
 ---
 
-## Fluxo local real já validado
+## Inventário funcional de domínios administrativos
 
-O fluxo local reconciliado deste contexto já inclui:
+## Auth
 
-1. subir a Auth API local
-2. subir o Backoffice local com proxy
-3. abrir `/login`
-4. criar sessão local de desenvolvimento
-5. navegar para `/dashboard`
-6. recarregar sessão pela UI quando necessário
-7. atualizar a página em `/dashboard`
-8. manter sessão válida após refresh
+Papel esperado:
 
-Esse fluxo já é parte do inventário do contexto porque foi validado ponta a ponta.
+- sustentar a jornada real de login do Backoffice
+- materializar `/login`
+- materializar `/auth/callback`
+- revalidar sessão e entregar `/dashboard`
+
+Superfícies administrativas reais ou esperadas:
+
+- login por magic link
+- callback com revalidação de sessão
+- transição para dashboard autenticado
+
+Status do domínio no contexto:
+
+- auth base já reconciliada com runtime real
+- ainda pode evoluir em ergonomia e refinamento
 
 ---
 
-## Paths críticos do contexto
+## Dashboard
 
-Os paths mais importantes do Backoffice, nesta fase, incluem:
+Papel esperado:
 
-### Root do projeto
+- entrada autenticada do Backoffice
+- validação de shell, sessão e navegação
+- superfície técnica inicial
+- não precisa nascer como dashboard analítico sofisticado
 
-* repositório local do Backoffice
-* diretório base da SPA administrativa
+Status do domínio no contexto:
 
-### Arquivos de bootstrap
+- domínio estrutural do produto
+- prioridade alta para o shell inicial
+- superfície já real no runtime publicado
 
-* `src/main.ts`
-* `src/app/app.config.ts`
-* `src/app/app.routes.ts`
+---
 
-### Auth local
+## Seasons
 
-* `src/app/core/auth/auth-api.service.ts`
-* `src/app/core/auth/auth-session.store.ts`
-* `src/app/core/auth/models/auth.model.ts`
-* `src/app/core/auth/models/role.model.ts`
+Papel esperado:
+
+- domínio administrativo prioritário do MVP
+- validar listagem, create/edit e lifecycle sensível
+- exercitar activate/close com invariantes de domínio
+
+Superfícies administrativas esperadas:
+
+- listagem admin
+- detail/edit admin
+- create
+- activate
+- close
+
+Status do domínio no contexto:
+
+- mais maduro
+- bom primeiro domínio para implementação
+- ainda pede consolidação fina de leitura admin canônica
+
+---
+
+## News
+
+Papel esperado:
+
+- domínio editorial administrativo
+- validar listagem, draft/edit e ações sensíveis
+- sustentar publish/unpublish/delete
+
+Superfícies administrativas esperadas:
+
+- listagem admin
+- create/edit
+- publish
+- unpublish
+- delete
+
+Status do domínio no contexto:
+
+- maduro
+- forte candidato para segunda feature principal após `seasons`
+
+---
+
+## Events
+
+Papel esperado:
+
+- domínio de agenda administrativa
+- criar, editar e remover/cancelar eventos
+- separar gestão admin de interação pública de presença
+
+Superfícies administrativas esperadas:
+
+- listagem admin
+- detail/edit admin
+- create
+- delete ou cancelamento
+
+Status do domínio no contexto:
+
+- previsto
+- importante para MVP ampliado
+- ainda pede reconciliação maior de contrato e fronteira com fluxos públicos
+
+---
+
+## Inventário de auth e acesso
+
+A camada de acesso prevista para o Backoffice deve conter, no mínimo:
+
+### Auth store transversal
+
+Artefato esperado:
+
+- `src/app/core/auth/auth-session.store.ts`
+
+Papel:
+
+- resolver sessão
+- manter identidade atual
+- expor papel atual
+- alimentar guards e UI derivada
+- oferecer `reloadSession()` para bootstrap, callback e rechecagem explícita
+
+---
+
+### Serviço de integração auth
+
+Artefato esperado:
+
+- `src/app/core/auth/auth-api.service.ts`
+
+Papel:
+
+- chamadas de sessão
+- request de magic link
+- apoio a callback e revalidação
+- ponte entre frontend e contrato de auth
+
+---
 
 ### Guards
 
-* `src/app/core/guards/auth.guard.ts`
-* `src/app/core/guards/admin-access.guard.ts`
+Artefatos esperados:
 
-### Layout
-
-* `src/app/core/layout/admin-shell/`
-* `src/app/core/layout/header/`
-* `src/app/core/layout/sidebar/`
-* `src/app/core/layout/page-container/`
-
-### Páginas iniciais
-
-* `src/app/features/auth/pages/login-page/`
-* `src/app/features/dashboard/pages/dashboard-page/`
-* `src/app/features/error-pages/forbidden-page/`
-* `src/app/features/error-pages/not-found-page/`
-
-### Operação local
-
-* `proxy.conf.json`
-* `package.json`
-
-Regra prática:
-
-* qualquer mudança relevante nesses arquivos ou paths deve ser refletida nos docs canônicos do contexto
-
----
-
-## Dependências externas relevantes
-
-As dependências externas mais importantes do contexto são:
-
-### Auth API
-
-Dependência central do Backoffice.
+- `src/app/core/guards/auth.guard.ts`
+- `src/app/core/guards/admin-access.guard.ts`
+- `src/app/core/guards/role.guard.ts`
 
 Papel:
 
-* autenticação administrativa
-* introspecção de sessão
-* autorização final
-* backend de mutações administrativas
+- proteger rotas
+- separar autenticação de autorização mínima
+- suportar rotas sensíveis por papel
 
-### Browser com cookie de sessão
+---
+
+### Interceptors
+
+Artefatos esperados:
+
+- `src/app/core/interceptors/auth.interceptor.ts`
+- `src/app/core/interceptors/auth-error.interceptor.ts`
 
 Papel:
 
-* manter sessão administrativa no ambiente local e, futuramente, publicado
-
-### Proxy local do Angular
-
-Papel:
-
-* encaminhar `/auth`, `/admin`, `/content` e `/health`
-* evitar fricção prematura com CORS/cookie no desenvolvimento
-
-### Ambiente Node/npm local
-
-Papel:
-
-* subida do Angular
-* validação da SPA
-* iteração de desenvolvimento
+- comportamento transversal de requests
+- tratamento consistente de 401, quando apropriado
+- alinhamento entre resposta HTTP e estado da sessão
 
 ---
 
-## Comandos de validação rápida
+## Inventário de integração com a Auth API
 
-Os comandos abaixo ajudam a validar rapidamente o contexto.
+A integração principal do Backoffice é com a Auth API.
 
-### Subir o Backoffice local
+Classes de integração previstas:
 
-```bash id="9pdjmj"
-cd ~/work/hsc/hsc-backoffice-admin
-npm start
-```
+### Sessão e identidade
 
-### Validar a Auth API local
+Objetivo:
 
-```bash id="lqjofg"
-curl -i http://127.0.0.1:3000/health
-```
+- descobrir se há sessão
+- resolver operador atual
+- obter papel efetivo
 
-### Testar bootstrap de sessão pela Auth API
+Status:
 
-```bash id="5mab45"
-curl -i -c /tmp/hsc-auth-cookie.txt -X POST http://127.0.0.1:3000/auth/dev/bootstrap-session
-```
-
-### Testar introspecção da sessão
-
-```bash id="jssqni"
-curl -i -b /tmp/hsc-auth-cookie.txt http://127.0.0.1:3000/auth/session
-curl -i http://127.0.0.1:3000/auth/session
-```
-
-### Validar UX do Backoffice
-
-Checklist manual mínimo:
-
-* abrir `/login`
-* clicar em `Criar sessão local de desenvolvimento`
-* entrar em `/dashboard`
-* dar refresh em `/dashboard`
-* usar `Resolver sessão atual`
-* usar `Recarregar sessão`
+- já reconciliado em runtime real
+- `GET /auth/session` já é contrato real do produto administrativo
 
 ---
 
-## Itens pendentes / zonas de atenção
+### Login admin por magic link
 
-Os itens abaixo ainda merecem atenção posterior.
+Objetivo:
 
-### 1. Hostname final do Backoffice publicado
+- iniciar acesso administrativo real
+- solicitar link mágico
+- consumir callback publicado
+- validar sessão após o callback
 
-Estado:
+Status:
 
-* ainda não consolidado neste contexto
-
-Impacto:
-
-* afeta deploy final do frontend
-* afeta reconciliação final de cookie/CORS em produção
-
-### 2. Fluxo final de login administrativo de produção
-
-Estado:
-
-* bootstrap local existe
-* login final de produção ainda não está fechado
-
-Impacto:
-
-* não bloqueia desenvolvimento local
-* bloqueia o fechamento definitivo da jornada publicada
-
-### 3. Política final de cookie/CORS no Backoffice publicado
-
-Estado:
-
-* local usa proxy
-* produção ainda depende de reconciliação explícita
-
-Impacto:
-
-* afeta publicação final e refresh autenticado fora do ambiente local
-
-### 4. Domínio `seasons` ainda não está materializado na SPA
-
-Estado:
-
-* backend já possui base real relevante
-* frontend ainda não abriu PR-2 do domínio
-
-Impacto:
-
-* PR-1 está pronto como espinha dorsal
-* valor de domínio ainda depende da próxima fase
-
-### 5. Domínio `events` ainda não está reconciliado
-
-Estado:
-
-* ainda não maduro como contrato admin completo
-
-Impacto:
-
-* não deve ser tratado como pronto no frontend
+- já reconciliado em runtime real
+- depende de email real e callback publicado
 
 ---
 
-## Itens explicitamente fora deste inventário
+### Leitura administrativa
 
-Os itens abaixo não pertencem ao inventário canônico do Backoffice Admin:
+Objetivo:
 
-* portal público estático
-* ETL Bash da v2
-* servidor CS2
-* AMP / Game Panel
-* Nginx e systemd do Lightsail em profundidade
-* detalhes completos de MariaDB
-* credenciais ou secrets
-* material legado não reconciliado
+- popular listagens
+- carregar formulários
+- obter estados de domínio
 
-Esses assuntos pertencem a outros contextos ou devem permanecer fora do fluxo normal deste contexto.
+Status:
+
+- `news` e parte de `seasons` têm base mais madura
+- leituras admin completas ainda podem exigir confirmação por release
 
 ---
 
-## Limites documentais do contexto
+### Mutação administrativa
 
-Os limites documentais deste contexto são:
+Objetivo:
 
-* ele documenta a SPA administrativa do HSC
-* ele não documenta sozinho a Auth API
-* ele não substitui governança nem índice mestre
-* ele depende de reconciliação periódica com a implementação real para permanecer confiável
-* ele deve separar claramente o que é fluxo local auxiliar do que é contrato normal de produto
+- criar
+- editar
+- publicar
+- ativar
+- fechar
+- excluir
+- cancelar
 
----
+Status:
 
-## Critério de manutenção
-
-Este documento deve ser atualizado quando houver:
-
-* mudança de stack principal do frontend
-* mudança relevante de estrutura da aplicação
-* mudança de paths críticos
-* mudança de contrato real de auth consumido pelo admin
-* mudança do fluxo local de bootstrap ou resolução de sessão
-* mudança relevante em guards, store ou shell
-* criação de novo domínio admin materializado
-* resolução de item pendente listado aqui
-* mudança relevante do proxy local ou da ergonomia de operação local
+- núcleo do valor do Backoffice
+- writes sensíveis devem respeitar fail-closed e auditoria
 
 ---
 
-## Critério de pronto
+## Inventário de respostas e erros relevantes
 
-Este documento pode ser considerado maduro quando:
+O Backoffice deve estar preparado para lidar com estas classes de resposta:
 
-* a stack real do Backoffice estiver explícita sem ambiguidade
-* a estrutura principal do app estiver claramente posicionada
-* os contratos de auth relevantes estiverem classificados corretamente como reais ou auxiliares
-* o fluxo local validado estiver registrado de forma reproduzível
-* os paths críticos e dependências externas estiverem claros
-* as pendências restantes estiverem explícitas
-* ele puder servir como inventário confiável do contexto sem depender de memória informal
+- `200` / `201` / sucesso equivalente
+- `401` não autenticado
+- `403` sem permissão
+- `404` recurso ausente
+- `409` conflito de domínio/invariante
+- `422` ou equivalente de validação
+- `5xx` falha sistêmica/backend
+
+Além disso, no fluxo de callback de auth, o frontend deve reconhecer explicitamente:
+
+- `status=ok`
+- `invalid_or_expired_link`
+- `consume_failed`
+- `missing_token`
+- `forbidden`
+
+Papel deste inventário:
+
+- orientar stores, guards e UI
+- garantir que o produto trate estados reais
+- evitar que erro de domínio seja tratado como erro genérico
 
 ---
 
-## Última revisão
+## Inventário de artefatos de UI esperados
 
-* Status: ativo
-* Classificação: canônico
-* Contexto: backoffice admin / references and inventory
-* Última revisão: 2026-03-19
+Componentes e estruturas transversais que o Backoffice deve prever:
+
+### Shell
+
+- `admin-shell`
+- `sidebar`
+- `header`
+- `page-container`
+
+### Feedback
+
+- loader de página
+- bloco de erro
+- empty state
+- confirmação de ação destrutiva
+- feedback simples de sucesso
+
+### Tabelas
+
+- tabela administrativa base
+- ações por linha
+- suporte a loading, vazio e erro
+
+### Formulários
+
+- formulários por domínio
+- validação básica
+- submit controlado
+- hidratação de edição
+
+Regra importante:
+
+- esses artefatos devem nascer para suportar domínios reais
+- não como abstrações genéricas prematuras
+
+---
+
+## Inventário de estados críticos do frontend
+
+O Backoffice deve tratar, no mínimo, estes estados críticos.
+
+### Estado de aplicação
+
+- boot da aplicação
+- shell carregado
+- erro fatal de bootstrap
+
+### Estado de sessão
+
+- unknown
+- authenticated
+- unauthenticated
+- error
+
+### Estado de callback
+
+- callback carregando
+- callback validado
+- callback inválido ou expirado
+- callback com falha técnica
+
+### Estado de listagem
+
+- loading
+- success
+- empty
+- error
+
+### Estado de formulário
+
+- idle
+- loading initial data
+- dirty
+- submitting
+- success
+- error
+
+### Estado de ação sensível
+
+- disponível
+- indisponível por papel
+- em confirmação
+- executando
+- sucesso
+- rejeitada por permissão
+- rejeitada por invariante
+- falha sistêmica
+
+---
+
+## Inventário de dependências técnicas da stack
+
+A stack técnica alvo do Backoffice, neste contexto, é:
+
+- Angular 21
+- TypeScript
+- standalone components
+- Angular Router
+- HttpClient
+- Signals
+- RxJS
+
+Leitura dessa stack:
+
+- Angular 21 é a base da SPA
+- TypeScript é a linguagem de implementação
+- standalone é a estratégia estrutural
+- Signals é a estratégia primária de estado local e derivado
+- RxJS permanece complementar para HTTP e fluxos assíncronos
+
+---
+
+## Inventário de princípios técnicos a preservar
+
+Este contexto depende da preservação dos seguintes princípios:
+
+- separação entre Backoffice e Portal
+- backend como autoridade final
+- session-first
+- break-glass só como contingência
+- fail-closed para writes sensíveis
+- UI organizada por domínio
+- stores locais por feature
+- abstração moderada no MVP
+- documentação viva e reconciliada com runtime
+
+---
+
+## Inventário de superfícies conhecidas e superfícies-alvo
+
+Este contexto deve separar explicitamente:
+
+### Superfícies conhecidas
+
+Superfícies já reconciliadas com maior clareza no runtime atual.
+
+Exemplos:
+
+- `/login`
+- `/auth/callback`
+- `/dashboard`
+- `GET /auth/session`
+- `POST /auth/magic-link/request`
+- trilha administrativa de `news`
+- mutações principais de `seasons`
+
+### Superfícies-alvo
+
+Superfícies necessárias para o Backoffice operar bem, mas ainda sujeitas a reconciliação fina por release.
+
+Exemplos:
+
+- leitura admin canônica de `seasons`
+- leitura admin canônica de `events`
+- lifecycle final de `events` no admin
+- refinamento final da fronteira entre staff flow e user flow em `events`
+
+Regra importante:
+
+- o documento deve evitar tratar superfície-alvo como superfície já materializada
+
+---
+
+## Inventário de gaps conhecidos
+
+Os principais gaps atuais do contexto são:
+
+- leituras admin completas de `seasons` ainda pedem consolidação contratual fina
+- leituras admin completas de `events` ainda pedem consolidação contratual fina
+- `events` ainda exige reconciliação melhor entre fluxo administrativo e fluxo público
+- troubleshooting de frontend ainda depende fortemente de console/network + logs da Auth API
+- o contexto ainda pode amadurecer em observabilidade funcional e consistência de domínio
+
+---
+
+## Inventário de riscos de erosão arquitetural
+
+Os principais riscos de erosão do contexto são:
+
+- Backoffice começar a depender do Portal para mutações
+- `shared/` virar repositório genérico sem fronteira
+- `core/` absorver lógica de domínio
+- `events` nascer misturando staff flow e user flow
+- a UI assumir permissão acima do backend
+- ações sensíveis usarem optimistic update ingênuo
+- docs de contexto ficarem atrás do runtime real
+
+---
+
+## Artefatos que devem nascer cedo
+
+Os artefatos que mais cedo devem existir na implementação são:
+
+### Estruturais
+
+- `main.ts`
+- `app.config.ts`
+- `app.routes.ts`
+- shell administrativo
+
+### Acesso
+
+- `auth-session.store.ts`
+- `auth-api.service.ts`
+- guards
+- interceptors básicos
+- `login-page`
+- `auth-callback-page`
+
+### Primeiro domínio
+
+- `features/seasons/`
+- listagem
+- formulário
+- ações de lifecycle
+
+Motivo:
+
+- esses artefatos validam a espinha dorsal do Backoffice
+
+---
+
+## Artefatos que podem esperar um pouco mais
+
+Os artefatos que podem nascer em fase seguinte são:
+
+- componentes shared mais sofisticados
+- dashboard mais rico
+- refinamentos avançados de tabela
+- filtros e paginação avançados
+- telemetria frontend mais elaborada
+- evolução de `events` além do CRUD básico
+- abstrações adicionais de store ou UI
+
+Motivo:
+
+- não são necessários para validar o núcleo do MVP
+
+---
+
+## Inventário de critérios de prontidão do contexto
+
+O contexto `05-backoffice-admin` pode ser considerado minimamente pronto quando:
+
+- sua fronteira documental estiver estável
+- os contratos principais estiverem registrados
+- a estrutura Angular 21 estiver fixada
+- a estratégia de auth/RBAC estiver explícita
+- os runbooks mínimos estiverem definidos
+- os gaps estiverem visíveis e não escondidos
+- a auth base publicada já estiver operacional
+
+A implementação do produto pode continuar evoluindo com gaps abertos, desde que:
+
+- os gaps estejam nomeados
+- seu impacto esteja entendido
+- a ordem de implementação respeite o grau de maturidade de cada domínio
+
+---
+
+## Ordem recomendada de consulta deste inventário
+
+Este documento deve ser consultado:
+
+1. ao abrir o contexto pela primeira vez
+2. antes de começar implementação de uma feature admin
+3. ao reconciliar contrato com a Auth API
+4. ao revisar dependências entre contextos
+5. ao identificar gaps de runtime ou documentação
+6. ao preparar backlog ou PR incremental
+
+---
+
+## Resumo executivo
+
+O `references-inventory.md` do contexto `05-backoffice-admin` existe para manter uma visão consolidada de:
+
+- referências canônicas
+- dependências arquiteturais
+- artefatos previstos e materializados da SPA
+- integrações com a Auth API
+- domínios administrativos do MVP
+- gaps e riscos ainda abertos
+
+Ele deve ser lido como o mapa de inventário do Backoffice Admin do HSC:
+
+- amplo o suficiente para orientar o contexto
+- estável o suficiente para não virar impl-log disfarçado
+- específico o suficiente para reduzir drift documental
