@@ -25,7 +25,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
-- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
+- [Network, DNS and TLS](./infra-hostinger-network-dns-tls.md)
 - [Nginx Static Serving](./nginx-static-serving.md)
 - [Systemd Automation](./systemd-automation.md)
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
