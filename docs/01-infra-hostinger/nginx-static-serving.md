@@ -15,6 +15,32 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Infraestrutura imediata
+- [Architecture Runtime](./architecture-runtime.md)
+- [Network, DNS and TLS](./network-dns-tls.md)
+- [Systemd Automation](./systemd-automation.md)
+- [Certbot](./certbot.md)
+
+### Publicação e consumo
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Static API v2](../03-portal-estatico/static-api-v2.md)
+- [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
+- [Frontend Structure](../03-portal-estatico/frontend-structure.md)
+
+### Operação e suporte
+- [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Documentation System](../00-governance/documentation-system.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:

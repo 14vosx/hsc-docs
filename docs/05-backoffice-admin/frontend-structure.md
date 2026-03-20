@@ -15,6 +15,33 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ---
 
+---
+
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Backoffice Admin](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Contexto administrativo imediato
+- [Architecture Runtime](./architecture-runtime.md)
+- [Admin API Contracts](./admin-api-contracts.md)
+- [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
+- [Operational Runbooks](./operational-runbooks.md)
+
+### Backend e runtime consumido
+- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
+- [Nginx Reverse Proxy](../04-infra-aws-lightsail/nginx-reverse-proxy.md)
+- [Node Systemd](../04-infra-aws-lightsail/node-systemd.md)
+- [Deploy / Release / Rollback](../04-infra-aws-lightsail/deploy-release-rollback.md)
+
+### Governança e suporte
+- [Documentation System](../00-governance/documentation-system.md)
+- [References and Inventory](./references-inventory.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:

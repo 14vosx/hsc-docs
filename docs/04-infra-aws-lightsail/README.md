@@ -14,6 +14,39 @@ Este contexto existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação rápida
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Governance](../00-governance/README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Documentos deste contexto
+- [Architecture Runtime](./architecture-runtime.md)
+- [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
+- [Node Systemd](./node-systemd.md)
+- [MariaDB Local](./mariadb-local.md)
+- [Auth API Operations](./auth-api-operations.md)
+- [Deploy / Release / Rollback](./deploy-release-rollback.md)
+- [Backup / Restore](./backup-restore.md)
+- [Operational Runbooks](./operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [References and Inventory](./references-inventory.md)
+
+### Relações com outros contextos
+- [Infra Hostinger](../01-infra-hostinger/README.md)
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Backoffice Admin](../05-backoffice-admin/README.md)
+
+### Trilhas operacionais relevantes
+- [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
+- [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
+- [Frontend Structure — Backoffice](../05-backoffice-admin/frontend-structure.md)
+- [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [Documentation System](../00-governance/documentation-system.md)
+
+---
+
 ## Escopo
 
 Este contexto cobre exclusivamente a camada AWS Lightsail ligada à Auth API.

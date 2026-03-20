@@ -15,6 +15,32 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Contexto operacional imediato
+- [CS2 Server Configuration](./cs2-server-configuration.md)
+- [Plugins Installed](./plugins-installed.md)
+- [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
+- [Operational Runbooks](./operational-runbooks.md)
+
+### Integração com dados e portal
+- [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
+- [SQL Queries and Views](../03-portal-estatico/sql-queries-and-views.md)
+- [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [Static API v2](../03-portal-estatico/static-api-v2.md)
+
+### Infraestrutura adjacente
+- [Docker Host](../01-infra-hostinger/docker-host.md)
+- [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:

@@ -14,6 +14,37 @@ Este contexto existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação rápida
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Governance](../00-governance/README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Documentos deste contexto
+- [Architecture Runtime](./architecture-runtime.md)
+- [Docker Host](./docker-host.md)
+- [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
+- [Network, DNS and TLS](./network-dns-tls.md)
+- [Nginx Static Serving](./nginx-static-serving.md)
+- [Systemd Automation](./systemd-automation.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Certbot](./certbot.md)
+- [References and Inventory](./references-inventory.md)
+
+### Relações com outros contextos
+- [Game Panel](../02-game-panel/README.md)
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+
+### Trilhas operacionais relevantes
+- [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
+- [Static API v2](../03-portal-estatico/static-api-v2.md)
+- [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
+
+---
+
 ## Escopo
 
 Este contexto cobre exclusivamente a camada-base da VPS Hostinger.

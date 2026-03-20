@@ -15,6 +15,34 @@ Este documento existe para:
 
 ---
 
+## Navegação rápida
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Governance](../00-governance/README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Documentos deste contexto
+- [Architecture Runtime](./architecture-runtime.md)
+- [Frontend Structure](./frontend-structure.md)
+- [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
+- [Admin API Contracts](./admin-api-contracts.md)
+- [Operational Runbooks](./operational-runbooks.md)
+- [References and Inventory](./references-inventory.md)
+
+### Relações com outros contextos
+- [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Infra Hostinger](../01-infra-hostinger/README.md)
+
+### Trilhas operacionais relevantes
+- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
+- [Nginx Reverse Proxy](../04-infra-aws-lightsail/nginx-reverse-proxy.md)
+- [Deploy / Release / Rollback](../04-infra-aws-lightsail/deploy-release-rollback.md)
+- [Documentation System](../00-governance/documentation-system.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:
