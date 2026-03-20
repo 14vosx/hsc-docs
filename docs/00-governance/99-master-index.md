@@ -19,6 +19,31 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 ---
 
+## Navegação rápida
+
+### Entrada global
+- [Home da documentação](../README.md)
+- [Governance](./README.md)
+- [Documentation System](./documentation-system.md)
+
+### Contextos canônicos
+- [01 — Infra Hostinger](../01-infra-hostinger/README.md)
+- [02 — Game Panel](../02-game-panel/README.md)
+- [03 — Portal Estático](../03-portal-estatico/README.md)
+- [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+- [05 — Backoffice Admin](../05-backoffice-admin/README.md)
+
+### Trilhas principais
+- [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
+- [Fluxo admin → auth → backoffice](../04-infra-aws-lightsail/auth-api-operations.md)
+
+### Histórico e auditoria
+- [Impl Log](../95-impl-log/2026-03-18-initial-canonical-context-migration.md)
+- [Audit — Open Items](../97-audit/2026-03-18-post-migration-open-items.md)
+- [Legacy](../98-legacy/README.md)
+
+---
+
 ## Estado atual do repositório
 
 A base documental canônica do HSC já está estruturada e utilizável.

@@ -1,0 +1,5 @@
+# Obsidian local settings
+docs/.obsidian/
+
+# Temporary local archive used during analysis
+documentacao_hsc.zip

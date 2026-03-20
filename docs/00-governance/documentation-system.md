@@ -95,6 +95,34 @@ docs/
 └── 98-legacy/
 ```
 
+--- 
+
+## Entrada global do repositório documental
+
+Além da organização por diretórios canônicos, o repositório documental do HSC possui uma entrada global em:
+
+- `docs/README.md`
+
+Função da Home global:
+
+- servir como ponto de entrada principal da documentação viva
+- orientar a navegação inicial no Vault e no repositório
+- apontar para os contextos canônicos ativos
+- oferecer trilhas de leitura por fluxo arquitetural relevante
+
+Regra importante:
+
+- `docs/README.md` não substitui a organização por contexto
+- `docs/README.md` não substitui `00-governance/README.md`
+- a Home global existe para facilitar entrada e navegação transversal
+- a verdade documental continua distribuída pelos contextos canônicos e seus documentos especializados
+
+Leitura canônica:
+
+- a raiz `docs/README.md` é a porta de entrada do sistema documental
+- `00-governance/` continua sendo o contexto responsável por governar regras, índice e manutenção do repositório
+- os `README.md` de cada contexto funcionam como hubs locais de navegação dentro da sua própria fronteira documental
+
 ---
 
 ## Papel de cada diretório
@@ -410,6 +438,52 @@ Cada documento deve, preferencialmente, conter:
 - limites do documento
 - critério de pronto
 - última revisão
+
+---
+
+## Convenções de navegação
+
+A documentação do HSC deve manter navegação explícita entre entrada global, contexto local e documentos tecnicamente relacionados.
+
+### Camadas de navegação
+
+A navegação oficial do repositório documental passa a operar em quatro níveis complementares:
+
+1. `docs/README.md` como entrada global
+2. `README.md` do contexto como hub local
+3. `00-governance/99-master-index.md` como índice transversal
+4. links contextuais entre documentos relacionados por fluxo técnico real
+
+### Regra operacional
+
+Sempre que fizer sentido, documentos canônicos e documentos estruturais centrais devem incluir navegação explícita para:
+
+- a Home global da documentação
+- o README do contexto ao qual pertencem
+- o Master Index
+- documentos adjacentes por dependência, entrada, saída, operação ou consumo
+
+### Regra de modelagem documental
+
+Links entre documentos não são apenas conveniência editorial.
+
+Eles devem refletir relações reais do sistema, como:
+
+- origem e transformação de dados
+- publicação e serving
+- runtime e operação
+- consumo por frontend ou backoffice
+- dependências entre infraestrutura, contratos e execução
+
+### Critério de qualidade da navegação
+
+Um documento importante não deve ficar isolado no sistema documental.
+
+Sempre que possível, sua navegação deve permitir:
+
+- entrada pelo contexto correto
+- leitura do fluxo técnico ao qual pertence
+- transição para documentos anteriores e posteriores da mesma cadeia operacional
 
 ---
 

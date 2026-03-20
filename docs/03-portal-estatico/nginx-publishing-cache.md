@@ -16,6 +16,31 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Portal Estático](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Origem e artefatos publicados
+- [ETL Bash Pipeline](./etl-bash-pipeline.md)
+- [Static API v2](./static-api-v2.md)
+- [JSON Contracts](./json-contracts.md)
+- [Frontend Structure](./frontend-structure.md)
+
+### Infraestrutura de entrega
+- [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [Network, DNS and TLS](../01-infra-hostinger/network-dns-tls.md)
+
+### Operação e suporte
+- [Operational Runbooks](./operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Documentation System](../00-governance/documentation-system.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:

@@ -14,6 +14,40 @@ Este contexto existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação rápida
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Governance](../00-governance/README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Documentos deste contexto
+- [Architecture Runtime](./architecture-runtime.md)
+- [Static API v2](./static-api-v2.md)
+- [ETL Bash Pipeline](./etl-bash-pipeline.md)
+- [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
+- [SQL Queries and Views](./sql-queries-and-views.md)
+- [JSON Contracts](./json-contracts.md)
+- [Frontend Structure](./frontend-structure.md)
+- [Nginx Publishing and Cache](./nginx-publishing-cache.md)
+- [Operational Runbooks](./operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [References and Inventory](./references-inventory.md)
+
+### Relações com outros contextos
+- [Infra Hostinger](../01-infra-hostinger/README.md)
+- [Game Panel](../02-game-panel/README.md)
+- [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+- [Backoffice Admin](../05-backoffice-admin/README.md)
+
+### Trilhas operacionais relevantes
+- [MatchZy](../02-game-panel/matchzy.md)
+- [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
+
+---
+
 ## Escopo
 
 Este contexto cobre exclusivamente a camada de portal público estático e de publicação da Static API v2.

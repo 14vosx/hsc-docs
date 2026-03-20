@@ -16,6 +16,32 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ---
 
+## Navegação
+
+### Entrada
+- [Home da documentação](../README.md)
+- [Portal Estático](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+### Dependências e origem dos dados
+- [MatchZy](../02-game-panel/matchzy.md)
+- [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
+- [SQL Queries and Views](./sql-queries-and-views.md)
+
+### Saídas e publicação
+- [Static API v2](./static-api-v2.md)
+- [JSON Contracts](./json-contracts.md)
+- [Nginx Publishing and Cache](./nginx-publishing-cache.md)
+- [Frontend Structure](./frontend-structure.md)
+
+### Operação e runtime
+- [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [Operational Runbooks](./operational-runbooks.md)
+- [Observability and Troubleshooting](./observability-troubleshooting.md)
+
+---
+
 ## Escopo
 
 Este documento cobre:
