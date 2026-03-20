@@ -54,7 +54,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 
 ### Auth API / camada dinâmica
 - [Infra AWS Lightsail](./04-infra-aws-lightsail/README.md)
-- [Architecture Runtime — Lightsail](./04-infra-aws-lightsail/architecture-runtime.md)
+- [Architecture Runtime — Lightsail](./04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md)
 - [Nginx Reverse Proxy](./04-infra-aws-lightsail/nginx-reverse-proxy.md)
 - [Node Systemd](./04-infra-aws-lightsail/node-systemd.md)
 - [MariaDB Local](./04-infra-aws-lightsail/mariadb-local.md)
@@ -63,7 +63,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 
 ### Backoffice administrativo
 - [Backoffice Admin](./05-backoffice-admin/README.md)
-- [Architecture Runtime — Backoffice](./05-backoffice-admin/architecture-runtime.md)
+- [Architecture Runtime — Backoffice](./05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Frontend Structure — Backoffice](./05-backoffice-admin/frontend-structure.md)
 - [Auth, RBAC and Guards](./05-backoffice-admin/auth-rbac-and-guards.md)
 - [Admin API Contracts](./05-backoffice-admin/admin-api-contracts.md)

@@ -301,7 +301,7 @@ Regra importante:
 Os documentos canônicos previstos para este contexto são:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`

@@ -87,7 +87,7 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/docker-host.md`

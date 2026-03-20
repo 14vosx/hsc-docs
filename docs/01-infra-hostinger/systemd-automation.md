@@ -123,7 +123,7 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/references-inventory.md`
 - `docs/01-infra-hostinger/observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`

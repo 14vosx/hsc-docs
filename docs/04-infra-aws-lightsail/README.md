@@ -185,7 +185,7 @@ Enquanto a migração do contexto não estiver concluída, os documentos antigos
 Os documentos canônicos previstos para este contexto são:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`

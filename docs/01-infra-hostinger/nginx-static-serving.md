@@ -110,7 +110,7 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`

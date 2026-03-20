@@ -114,7 +114,7 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/docker-host.md`
@@ -146,7 +146,7 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
@@ -180,7 +180,7 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
@@ -217,7 +217,7 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`

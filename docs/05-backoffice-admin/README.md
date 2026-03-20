@@ -187,7 +187,7 @@ O legado não governa este contexto, mas sustenta sua reconciliação histórica
 Os documentos canônicos diretos de `05-backoffice-admin` são:
 
 - `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/architecture-runtime.md`
+- `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
 - `docs/05-backoffice-admin/frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
@@ -203,7 +203,7 @@ Este `README.md` funciona como porta de entrada e índice local do contexto.
 A ordem recomendada de leitura é:
 
 1. `docs/05-backoffice-admin/README.md`
-2. `docs/05-backoffice-admin/architecture-runtime.md`
+2. `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
 3. `docs/05-backoffice-admin/frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`

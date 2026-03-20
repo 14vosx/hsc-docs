@@ -137,7 +137,7 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`

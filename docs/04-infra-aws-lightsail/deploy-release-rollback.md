@@ -84,7 +84,7 @@ As evidências principais deste fluxo são:
 
 Este arquivo é complementar a:
 
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`

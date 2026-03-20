@@ -100,7 +100,7 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`

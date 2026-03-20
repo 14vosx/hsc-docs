@@ -119,7 +119,7 @@ As principais evidências deste documento, nesta fase, são:
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`

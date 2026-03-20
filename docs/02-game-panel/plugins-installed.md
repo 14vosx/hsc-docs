@@ -83,7 +83,7 @@ Enquanto o runtime real permanecer neste formato, a saída do `css_plugins list`
 Este arquivo é complementar a:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
