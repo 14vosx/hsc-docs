@@ -6,12 +6,12 @@ Documentar a estratégia canônica de autenticação, autorização, RBAC e prot
 
 Este documento existe para registrar, de forma estável e auditável:
 
-- o modelo de autenticação administrativa do Backoffice
+- o modelo de autenticação administrativa publicado do Backoffice
 - a relação entre sessão, identidade e autorização
 - o papel do RBAC na camada administrativa
 - a função dos guards no frontend Angular
 - a relação entre UI administrativa e autoridade do backend
-- o comportamento esperado para `401`, `403` e contingências administrativas
+- o comportamento esperado para 401, 403 e contingências administrativas
 - os limites entre fluxo normal de sessão e fallback break-glass
 
 ---
@@ -27,7 +27,7 @@ Este documento cobre:
 - guards de rota no Angular 21
 - comportamento da UI diante de falta de sessão ou falta de permissão
 - relação entre autorização de frontend e autorização de backend
-- tratamento de contingência administrativa
+- callback com revalidação de sessão
 - padrões mínimos de ocultação e bloqueio de ações por papel
 
 Este documento não cobre em profundidade:
@@ -38,7 +38,6 @@ Este documento não cobre em profundidade:
 - runbooks operacionais completos
 - políticas de host, Nginx e deploy
 - detalhes de auditoria persistida no backend
-- fluxo final de login administrativo de produção
 
 Esses tópicos vivem em outros documentos do contexto ou em contextos canônicos adjacentes.
 
@@ -48,15 +47,16 @@ Esses tópicos vivem em outros documentos do contexto ou em contextos canônicos
 
 O estado arquitetural conhecido, nesta fase, é:
 
-- o Backoffice é uma SPA administrativa separada do Portal público
+- o Backoffice já é uma SPA administrativa publicada separada do Portal público
 - a Auth API é a autoridade final para autenticação e autorização
-- o modelo administrativo real já opera em session-first
-- a introspecção de sessão administrativa já existe via `GET /auth/session`
-- o fallback break-glass continua existindo como contingência controlada no backend
-- mutações administrativas sensíveis devem continuar fail-closed
+- o modelo administrativo publicado é session-first
+- o login administrativo real usa magic link
+- a sessão publicada é cookie-based e cross-subdomain
+- o callback do frontend já revalida sessão antes de liberar o dashboard
+- o fallback break-glass existe apenas como contingência controlada no backend
+- mutações administrativas sensíveis continuam fail-closed
 - o frontend deve refletir permissões, nunca defini-las sozinho
-- o Backoffice já usa guards assíncronos para resolver sessão antes de decidir navegação
-- o fluxo local de desenvolvimento já pode bootstrapar sessão admin de forma controlada
+- o fluxo principal do operador não depende de mecanismo emergencial
 
 Regra importante:
 
@@ -74,7 +74,7 @@ Os princípios centrais deste documento são:
 - frontend como refletor de estado e permissão
 - guards como mecanismo de controle de entrada em rotas
 - RBAC explícito por domínio e ação
-- `401` e `403` tratados como estados reais de produto
+- 401 e 403 tratados como estados reais de produto
 - break-glass apenas como contingência
 - fail-closed preservado para mutações sensíveis
 - UX administrativa clara, sem falsa sensação de permissão
@@ -91,59 +91,61 @@ Princípio importante:
 A autenticação do Backoffice segue o modelo:
 
 ```text
-sessão administrativa real
-  -> introspecção de sessão
-  -> guards protegendo shell e rotas
-  -> UI derivada do papel atual
+Operador autenticado
+  -> sessão válida
+    -> identidade carregada
+      -> papel/permissões resolvidas
+        -> acesso à navegação e às ações administrativas conforme autorização
 ```
 
-A leitura correta é:
+Leitura correta:
 
-* a sessão administrativa é resolvida no frontend por contrato explícito
-* a identidade atual vem do backend
-* o papel atual vem do backend
-* a UI reage ao papel, mas não o inventa
-* a autorização final continua sendo aplicada na Auth API
-
-### Superfície canônica de sessão
-
-A superfície canônica para introspecção da sessão atual é:
-
-* `GET /auth/session`
-
-Comportamento esperado:
-
-* `200` com `authenticated: true`, `user` e `role` quando houver sessão válida
-* `401` com `authenticated: false` quando não houver sessão válida
-
-Leitura importante:
-
-* esse endpoint já deve ser tratado como **superfície real**
-* o Backoffice não precisa mais operar com endpoint hipotético de sessão
-
----
-
-## Relação entre sessão real e bootstrap local
-
-O contexto administrativo agora distingue claramente dois fluxos:
-
-### Fluxo normal do produto
-
-* sessão administrativa real
-* introspecção via `GET /auth/session`
-* shell e guards liberados a partir desse contrato
-
-### Fluxo auxiliar de desenvolvimento local
-
-* `POST /auth/dev/bootstrap-session`
-* criação controlada de sessão admin local
-* uso somente em ambiente de desenvolvimento
-* não é contrato normal de produto
+- primeiro existe a sessão
+- depois existe a identidade do operador
+- depois existem os papéis e permissões derivados
+- só então a UI libera rotas e ações compatíveis
 
 Regra importante:
 
-* o Backoffice pode usar bootstrap local para destravar desenvolvimento
-* o Backoffice não deve modelar essa rota como login final de produção
+- a UI não deve tentar inferir autorização antes de resolver o estado de sessão/identidade
+
+---
+
+## Session-first como fluxo principal
+
+O fluxo principal do Backoffice é session-first.
+
+Isso significa:
+
+- o operador acessa o Backoffice sob sessão administrativa válida
+- a aplicação carrega a identidade atual
+- a aplicação resolve papel e permissões
+- a aplicação libera ou bloqueia navegação e mutações conforme esse estado
+
+O que session-first evita:
+
+- dependência de chaves ou mecanismos excepcionais como fluxo normal
+- UI aberta antes da validação real de acesso
+- ambiguidade sobre quem é o operador atual
+- acoplamento da UX administrativa a contingências operacionais
+
+---
+
+## Break-glass como contingência
+
+O mecanismo break-glass continua existindo apenas como contingência operacional controlada.
+
+Leitura correta do break-glass neste contexto:
+
+- não é fluxo principal do Backoffice
+- não deve ser tratado como jornada normal de login
+- não deve aparecer como centro da UX administrativa
+- deve permanecer restrito ao backend e aos runbooks operacionais apropriados
+- seu uso deve seguir controle, observabilidade e auditabilidade do lado dinâmico
+
+Regra importante:
+
+- o Backoffice deve ser desenhado para funcionar corretamente sem depender do break-glass em uso normal
 
 ---
 
@@ -151,20 +153,20 @@ Regra importante:
 
 A Auth API continua sendo a autoridade final para:
 
-* autenticação
-* resolução da identidade atual
-* validação de papel
-* validação de permissão
-* aplicação de invariantes de domínio
-* bloqueio de mutações indevidas
-* auditoria
+- autenticação
+- resolução da identidade atual
+- validação de papel
+- validação de permissão
+- aplicação de invariantes de domínio
+- bloqueio de mutações indevidas
+- auditoria
 
 Consequências para o frontend:
 
-* um botão visível não significa permissão garantida
-* um guard aprovado não significa mutação garantida
-* a UI deve tratar respostas do backend como decisão final
-* `403` real do backend deve prevalecer sobre qualquer expectativa da interface
+- um botão visível não significa permissão garantida
+- um guard aprovado não significa mutação garantida
+- a UI deve tratar respostas do backend como decisão final
+- 403 real do backend deve prevalecer sobre qualquer expectativa da interface
 
 ---
 
@@ -180,29 +182,29 @@ Via guards de autenticação e guards de autorização mínima.
 
 Exemplos:
 
-* esconder item de menu não aplicável
-* ocultar ação sensível não disponível
-* desabilitar controles quando a ação não faz sentido para aquele papel
+- esconder item de menu não aplicável
+- ocultar ação sensível não disponível
+- desabilitar controles quando a ação não faz sentido para aquele papel
 
 ### 3. Tratar rejeições reais do backend
 
 Exemplos:
 
-* exibir `403` de forma explícita
-* impedir confirmação ilusória de ações falhadas
-* manter consistência entre estado visual e decisão do servidor
+- exibir 403 de forma explícita
+- impedir confirmação ilusória de ações falhadas
+- manter consistência entre estado visual e decisão do servidor
 
 O frontend não deve:
 
-* assumir que o operador pode mutar porque a rota abriu
-* decidir sozinho a autorização final da ação
-* transformar erro de permissão em erro genérico e opaco
+- assumir que o operador pode mutar porque a rota abriu
+- decidir sozinho a autorização final da ação
+- transformar erro de permissão em erro genérico e opaco
 
 ---
 
 ## Modelo inicial de RBAC
 
-O Backoffice deve nascer pronto para RBAC explícito.
+O Backoffice nasce pronto para RBAC explícito.
 
 A hierarquia inicial mais coerente para o contexto administrativo é:
 
@@ -218,9 +220,9 @@ Papel de leitura administrativa.
 
 Capacidades esperadas:
 
-* acessar listagens administrativas permitidas
-* visualizar dados e estados
-* não realizar mutações sensíveis
+- acessar listagens administrativas permitidas
+- visualizar dados e estados
+- não realizar mutações sensíveis
 
 ### `editor`
 
@@ -228,9 +230,9 @@ Papel de edição controlada.
 
 Capacidades esperadas:
 
-* criar e editar entidades permitidas
-* operar fluxos editoriais ou administrativos não críticos
-* não executar lifecycle crítico ou ações destrutivas mais sensíveis, salvo decisão explícita de domínio
+- criar e editar entidades permitidas
+- operar fluxos editoriais ou administrativos não críticos
+- não executar lifecycle crítico ou ações destrutivas mais sensíveis, salvo decisão explícita de domínio
 
 ### `admin`
 
@@ -238,28 +240,28 @@ Papel administrativo sensível.
 
 Capacidades esperadas:
 
-* executar ações críticas
-* publicar e despublicar quando aplicável
-* ativar e fechar season
-* excluir e cancelar quando o domínio permitir
-* acessar superfícies administrativas mais restritas
+- executar ações críticas
+- publicar e despublicar quando aplicável
+- ativar e fechar season
+- excluir e cancelar quando o domínio permitir
+- acessar superfícies administrativas mais restritas
 
 ---
 
 ## Nota de reconciliação com legado
 
-O legado do HSC já aponta hierarquia próxima a `user < editor < admin`. 
+O legado do HSC já aponta hierarquia próxima a `user < editor < admin`.
 
 Para o Backoffice, a leitura recomendada é:
 
-* `user` não é papel natural de operação administrativa
-* no contexto da SPA administrativa, o papel prático de leitura pode ser modelado como `viewer`
-* a reconciliação final entre nomenclatura backend e nomenclatura de UX deve ser explícita em contrato
+- `user` não é papel natural de operação administrativa
+- no contexto da SPA administrativa, o papel prático de leitura pode ser modelado como `viewer`
+- a reconciliação final entre nomenclatura backend e nomenclatura de UX deve ser explícita em contrato
 
 Regra importante:
 
-* se o backend expuser `user`, `editor`, `admin`, o frontend pode mapear isso para uma semântica administrativa mais clara
-* esse mapeamento deve ser documentado e não pode gerar perda de segurança
+- se o backend expuser `user`, `editor`, `admin`, o frontend pode mapear isso para uma semântica administrativa mais clara
+- esse mapeamento deve ser documentado e não pode gerar perda de segurança
 
 ---
 
@@ -269,26 +271,26 @@ A matriz inicial recomendada é:
 
 ### News
 
-* `viewer`: listar e visualizar
-* `editor`: criar e editar draft
-* `admin`: publicar, despublicar e excluir
+- `viewer`: listar e visualizar
+- `editor`: criar e editar draft
+- `admin`: publicar, despublicar e excluir
 
 ### Seasons
 
-* `viewer`: listar e visualizar
-* `editor`: criar e editar metadados básicos
-* `admin`: ativar e fechar season
+- `viewer`: listar e visualizar
+- `editor`: criar e editar metadados básicos
+- `admin`: ativar e fechar season
 
 ### Events
 
-* `viewer`: listar e visualizar
-* `editor`: criar e editar evento
-* `admin`: excluir, cancelar ou executar ações mais sensíveis
+- `viewer`: listar e visualizar
+- `editor`: criar e editar evento
+- `admin`: excluir, cancelar ou executar ações mais sensíveis
 
 Regra importante:
 
-* a permissão visual do frontend deve ser coerente com a matriz
-* a validação definitiva continua no backend
+- a permissão visual do frontend deve ser coerente com a matriz
+- a validação definitiva continua no backend
 
 ---
 
@@ -298,12 +300,12 @@ O Backoffice adota Angular 21 standalone-first.
 
 Neste contexto, a estratégia recomendada é:
 
-* estado de sessão em Signals
-* guards funcionais assíncronos
-* providers globais em `app.config.ts`
-* interceptors HTTP para comportamento transversal
-* serviços de auth em `core/auth/`
-* guards em `core/guards/`
+- estado de sessão em Signals
+- guards funcionais e assíncronos quando dependem de sessão real
+- providers globais em `app.config.ts`
+- interceptors HTTP para comportamento transversal
+- serviços de auth em `core/auth/`
+- guards em `core/guards/`
 
 Estrutura sugerida:
 
@@ -313,9 +315,7 @@ src/app/
     auth/
       auth-session.store.ts
       auth-api.service.ts
-      models/
-        auth.model.ts
-        role.model.ts
+      auth.model.ts
     guards/
       auth.guard.ts
       admin-access.guard.ts
@@ -337,29 +337,39 @@ core/auth/auth-session.store.ts
 
 Responsabilidades dessa store:
 
-* resolver a sessão atual
-* manter status de sessão
-* expor operador atual
-* expor papel atual
-* expor flags de inicialização
-* expor flags de autenticado e não autenticado
-* expor flags de acesso administrativo
-* expor sinais derivados de permissão mínima
-* permitir recarga explícita da sessão quando necessário
+- carregar identidade atual
+- manter status de sessão
+- expor operador atual
+- expor papel atual
+- expor flags de inicialização
+- expor flags de autenticado / não autenticado
+- expor flags de acesso administrativo
+- expor sinais derivados de permissão mínima
+- oferecer `reloadSession()` como mecanismo explícito de revalidação
+
+Exemplos de estado que devem existir:
+
+- sessão ainda não resolvida (`unknown`)
+- autenticado
+- não autenticado
+- carregando identidade atual
+- identidade disponível
+- papel atual disponível
+- erro ao resolver sessão
 
 Exemplos de derivados úteis com `computed()`:
 
-* `isAuthenticated`
-* `isAdminAreaAllowed`
-* `currentRole`
-* `canEditNews`
-* `canPublishNews`
-* `canActivateSeason`
+- `isAuthenticated`
+- `isAdminAreaAllowed`
+- `currentRole`
+- `canEditNews`
+- `canPublishNews`
+- `canActivateSeason`
 
 Regra importante:
 
-* permissões derivadas da UI são conveniência de renderização
-* não substituem autorização real do backend
+- permissões derivadas da UI são conveniência de renderização
+- não substituem autorização real do backend
 
 ---
 
@@ -375,9 +385,10 @@ A aplicação ainda não sabe se há sessão válida.
 
 Uso:
 
-* boot da aplicação
-* refresh de página
-* primeiro carregamento do shell protegido
+- boot da aplicação
+- refresh de página
+- primeiro carregamento do shell protegido
+- transição inicial após callback
 
 ### `authenticated`
 
@@ -385,9 +396,9 @@ Sessão válida e identidade disponível.
 
 Uso:
 
-* liberar navegação protegida
-* resolver UI por papel
-* permitir tentativas de mutação conforme papel
+- liberar navegação protegida
+- resolver UI por papel
+- permitir tentativas de mutação conforme papel
 
 ### `unauthenticated`
 
@@ -395,9 +406,9 @@ Sem sessão válida.
 
 Uso:
 
-* bloquear shell protegido
-* redirecionar para login
-* limpar estado administrativo local
+- bloquear shell protegido
+- redirecionar para login
+- limpar estado administrativo local
 
 ### `error`
 
@@ -405,268 +416,194 @@ Falha relevante ao resolver o estado de sessão.
 
 Uso:
 
-* indicar problema real de contrato ou backend
-* manter o frontend em estado previsível
-* evitar falsa conclusão de autenticação
+- exibir erro explícito de autenticação/resolução
+- permitir recuperação quando cabível
+- evitar boot silencioso inconsistente
 
 ---
 
-## Guards do Backoffice
+## Callback e revalidação de sessão
 
-Os guards do Backoffice devem proteger a navegação em dois níveis:
+A superfície `/auth/callback` é parte real da jornada de login administrativo.
 
-### 1. Guard de autenticação
+Responsabilidades do callback:
 
-Responsável por:
-
-* garantir que a sessão já foi resolvida
-* permitir rota protegida só quando houver sessão válida
-* redirecionar para `/login` quando não houver autenticação
-
-Este guard deve operar de forma assíncrona, porque a decisão correta depende de introspecção real da sessão.
-
-### 2. Guard de autorização mínima
-
-Responsável por:
-
-* verificar se o operador autenticado pode acessar a área administrativa
-* separar `unauthenticated` de `forbidden`
-* redirecionar para `/403` quando houver autenticação sem permissão suficiente
-
-### 3. Guard por papel ou ação sensível
-
-Responsável por:
-
-* proteger rotas mais finas quando o produto exigir
-* operar por papel, domínio ou ação
-* impedir acesso indevido a superfícies mais sensíveis
-
----
-
-## Guards assíncronos e resolução de sessão
-
-Como `GET /auth/session` já é contrato real, os guards do Backoffice devem esperar a resolução da sessão antes de decidir.
-
-Leitura correta:
-
-* guard não deve assumir que `unknown` significa não autenticado
-* guard não deve depender de o shell já ter carregado a sessão
-* a decisão de navegação protegida deve acontecer após a store resolver a sessão
-
-Isso evita:
-
-* redirecionamento prematuro para `/login`
-* flicker de navegação
-* shell renderizando sob estado ambíguo
-
----
-
-## Comportamento esperado para `401`
-
-Quando o backend responder `401`, a leitura do frontend deve ser:
-
-* sessão ausente, inválida, expirada ou não reconhecida
-* store converge para `unauthenticated`
-* rota protegida deve ser bloqueada
-* o operador deve voltar para `/login`
-
-O frontend não deve:
-
-* transformar `401` em erro genérico opaco
-* manter aparência de sessão ativa
-* fingir autenticação parcial
-
----
-
-## Comportamento esperado para `403`
-
-Quando o backend responder `403`, a leitura do frontend deve ser:
-
-* operador autenticado
-* mas sem escopo suficiente para aquela superfície ou ação
-
-Resposta recomendada da UI:
-
-* exibir página ou estado explícito de acesso negado
-* não mascarar como `404` genérico
-* não transformar automaticamente em logout
-
----
-
-## Relação entre guards e shell
-
-O shell administrativo deve ser tratado como área protegida.
-
-Leitura correta:
-
-* o shell não deve ser a primeira camada a “descobrir” a sessão
-* o shell deve ser liberado depois que a sessão foi resolvida
-* header, sidebar e conteúdo já devem nascer sob estado auth consistente
-
-Na prática:
-
-* guards resolvem a entrada
-* store sustenta o estado
-* shell reflete o resultado
-
----
-
-## Login local de desenvolvimento
-
-No ambiente local, a página `/login` pode oferecer ações auxiliares para desenvolvimento, como:
-
-* criar sessão local de desenvolvimento
-* resolver sessão atual
-* exibir status técnico da store
-* exibir erro real de bootstrap de sessão
-
-Leitura correta:
-
-* isso é ergonomia de desenvolvimento
-* não representa o fluxo final de autenticação de produção
-* não altera os princípios de session-first e backend como autoridade
-
----
-
-## Relação com break-glass
-
-O fallback break-glass continua existindo no backend, mas o Backoffice não deve modelá-lo como UX principal.
-
-Consequências:
-
-* o operador normal não navega “logando com admin-key”
-* o frontend não expõe jornada baseada em segredo operacional
-* break-glass continua sendo assunto prioritariamente operacional da Auth API
+- ler `status` ou `error` da query string
+- tratar erros como `invalid_or_expired_link`, `consume_failed`, `missing_token` e `forbidden`
+- chamar `reloadSession()` quando `status=ok`
+- tolerar pequeno race condition entre emissão do cookie e primeira consulta de sessão
+- navegar para `/dashboard` apenas quando a sessão estiver validada
 
 Regra importante:
 
-* o backend pode manter `x-admin-key`
-* o frontend administrativo normal deve continuar session-first
+- `status=ok` não significa autenticação confirmada por si só
+- a autenticação só está concluída quando o backend confirmar a sessão
 
 ---
 
-## Riscos arquiteturais da camada
+## Guards funcionais
 
-Os principais riscos desta camada são:
+Os guards do Backoffice devem ser simples, explícitos e funcionais.
 
-### Risco 1 — tratar UI como autorização real
+Papéis centrais dos guards:
 
-Efeito:
+### `auth.guard`
 
-* falsa sensação de segurança
-* descolamento entre UX e backend
+Responsável por:
 
-### Risco 2 — decidir auth cedo demais
+- impedir acesso a rotas protegidas sem sessão válida
+- bloquear shell administrativo para usuário não autenticado
+- aguardar resolução de sessão quando o estado ainda estiver `unknown`
 
-Efeito:
+### `admin-access.guard`
 
-* redirecionamento incorreto
-* flicker
-* perda de sessão aparente
+Responsável por:
 
-### Risco 3 — misturar fluxo normal com contingência
+- exigir acesso administrativo mínimo
+- separar `unauthenticated` de `forbidden`
+- impedir entrada em áreas administrativas para identidade sem escopo admin
 
-Efeito:
+### `role.guard`
 
-* produto administrativo nasce poluído por mecanismo emergencial
-* aumenta risco operacional
+Responsável por:
 
-### Risco 4 — achatamento prematuro de papéis
+- exigir papel mínimo ou permissão mínima em rotas sensíveis
+- proteger superfícies específicas quando necessário
 
-Efeito:
+Regra importante:
 
-* perde nuance de RBAC
-* reduz escalabilidade da camada administrativa
-* dificulta evolução de domínios
-
-### Risco 5 — deixar a UI otimista demais em ação sensível
-
-Efeito:
-
-* inconsistência visual
-* falso positivo de sucesso
-* colisão com fail-closed do backend
+- não criar árvore excessivamente complexa de guards no MVP
+- começar com poucos guards bem definidos
 
 ---
 
-## Estrutura mínima recomendada
+## Estratégia de rotas protegidas
 
-A estrutura mínima do Backoffice para auth, RBAC e guards deve ser algo como:
+A proteção recomendada de rotas segue esta ordem:
 
 ```text
-src/app/
-  core/
-    auth/
-      auth-api.service.ts
-      auth-session.store.ts
-      models/
-        auth.model.ts
-        role.model.ts
-
-    guards/
-      auth.guard.ts
-      admin-access.guard.ts
-      role.guard.ts
-
-    interceptors/
-      auth.interceptor.ts
-      auth-error.interceptor.ts
+/login                       -> pública
+/auth/callback               -> pública com resolução de sessão
+/dashboard                   -> auth + acesso administrativo
+/seasons                     -> auth + acesso administrativo
+/seasons/new                 -> auth + papel mínimo
+/seasons/:slug/edit          -> auth + papel mínimo
+/news                        -> auth + acesso administrativo
+/news/new                    -> auth + papel mínimo
+/news/:id/edit               -> auth + papel mínimo
+/events                      -> auth + acesso administrativo
+/events/new                  -> auth + papel mínimo
+/events/:id/edit             -> auth + papel mínimo
+/403                         -> pública
+/404                         -> pública
 ```
 
-Essa estrutura já permite:
+Leitura recomendada:
 
-* boot session-first
-* resolução de identidade atual
-* navegação protegida
-* UI reativa por papel
-* tratamento consistente de `401` e `403`
+- nem toda rota administrativa precisa exigir `admin`
+- parte das superfícies pode exigir só autenticação administrativa
+- rotas de mutação devem exigir papel mínimo coerente com o domínio
 
 ---
 
-## Ordem de implementação recomendada
+## Relação entre guards e UI
 
-A ordem recomendada para materializar essa camada é:
+Guards e UI cumprem papéis diferentes.
 
-1. definir modelo de identidade, sessão e papel
-2. criar `auth-api.service.ts`
-3. criar `auth-session.store.ts` com Signals
-4. integrar `GET /auth/session`
-5. implementar `auth.guard` assíncrono
-6. implementar `admin-access.guard`
-7. implementar `role.guard` para rotas sensíveis
-8. integrar interceptors de auth
-9. adaptar shell e menu para papel atual
-10. adaptar features para checagem derivada de permissão
-11. validar `401`, `403`, refresh e ações sensíveis com smoke funcional
+### O guard faz
+
+- bloquear entrada em rota inadequada
+- impedir acesso estrutural à área protegida
+
+### A UI faz
+
+- ajustar menu
+- mostrar ou ocultar ações
+- desabilitar interações conforme permissão derivada
+- tratar 403 do backend quando a ação ainda assim for tentada
+
+Regra importante:
+
+- um guard não substitui o controle fino da tela
+- a tela não substitui o guard
+- ambos não substituem o backend
 
 ---
 
-## Resumo executivo
+## Menu e navegação por papel
 
-A camada de auth, RBAC e guards do Backoffice Admin do HSC deve ser construída sob o princípio:
+A navegação administrativa deve refletir o papel do operador.
 
-* sessão primeiro
-* backend como autoridade final
-* frontend como refletor disciplinado de acesso e permissão
+Comportamento esperado:
 
-A implementação recomendada é:
+- menu não exibe entradas sem utilidade para o papel atual
+- áreas sensíveis podem desaparecer ou ficar inacessíveis
+- o shell continua estável, mas a superfície disponível se adapta
 
-* store transversal de sessão com Signals
-* introspecção real via `GET /auth/session`
-* guards assíncronos e simples
-* RBAC explícito por domínio e ação
-* menu e UI adaptados por papel
-* `401` e `403` tratados como estados reais do produto
-* break-glass mantido apenas como contingência operacional do backend
+Exemplos:
 
-O Backoffice deve nascer pronto para RBAC real, sem depender de atalhos de UX, sem mascarar autorização e sem quebrar o modelo fail-closed do ecossistema HSC.
+- um `viewer` pode ver `seasons`, `news` e `events` apenas em modo leitura
+- um `editor` pode acessar rotas de create/edit compatíveis
+- um `admin` acessa lifecycle crítico e superfícies mais sensíveis
+
+---
+
+## 401, 403 e tratamento de erro
+
+A UI administrativa deve tratar 401 e 403 como estados reais de produto.
+
+### 401
+
+Leitura:
+
+- sessão inexistente, expirada ou inválida
+
+Comportamento esperado:
+
+- limpar estado administrativo local
+- redirecionar para `/login` quando apropriado
+- evitar loops silenciosos de tentativa infinita
+
+### 403
+
+Leitura:
+
+- sessão existe, mas a permissão é insuficiente
+
+Comportamento esperado:
+
+- manter sessão consistente
+- redirecionar para `/403` quando fizer sentido
+- evitar mascarar rejeição de permissão como erro genérico
+
+### 5xx
+
+Leitura:
+
+- falha sistêmica do backend ou infraestrutura
+
+Comportamento esperado:
+
+- mostrar erro útil
+- permitir retry quando couber
+- evitar interpretação indevida como ausência de sessão
+
+---
+
+## Critério de pronto
+
+Este documento está suficientemente pronto quando:
+
+- a jornada de auth publicada estiver corretamente refletida
+- `reloadSession()` estiver reconhecido como peça central do frontend
+- `/auth/callback` estiver documentado como superfície real do produto
+- guards estiverem tratados como assíncronos quando dependem de sessão real
+- backend permanecer documentado como autoridade final da sessão e da permissão
 
 ---
 
 ## Última revisão
 
-* Status: ativo
-* Classificação: canônico
-* Contexto: backoffice admin / auth, RBAC e guards
-* Última revisão: 2026-03-19
-
+- Revisado após a materialização do fluxo real de magic link admin publicado
+- Revisado após a estabilização da sessão cookie-based cross-subdomain
+- Revisado após a consolidação do callback `/auth/callback`

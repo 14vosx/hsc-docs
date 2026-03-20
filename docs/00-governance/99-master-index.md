@@ -14,7 +14,7 @@ Ele existe para:
 
 Regra canônica:
 
-**a verdade documental do sistema vive por contexto, e não em um documento único gigante.**  
+**a verdade documental do sistema vive por contexto, e não em um documento único gigante.**
 Este índice coordena a leitura. Ele não substitui os documentos especializados.
 
 ---
@@ -23,23 +23,23 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 A base documental canônica do HSC já está estruturada e utilizável.
 
-Neste checkpoint, os quatro contextos operacionais principais já foram reconciliados com o runtime real em pontos de maior valor:
+Neste checkpoint, os quatro contextos operacionais principais permanecem reconciliados com o runtime real em pontos de maior valor:
 
 - Infra Hostinger
 - Game Panel / CS2
 - Portal Estático / Static API v2
 - Infra AWS Lightsail / Auth API
 
-Além disso, o ecossistema agora passa a contar com um quinto contexto canônico de produto administrativo:
+Além disso, o ecossistema já conta com um quinto contexto canônico de produto administrativo:
 
 - Backoffice Admin
 
 Leitura correta do estado atual:
 
 - o repositório já pode ser tratado como **base canônica viva**
-- a maior parte das pendências críticas de realidade operacional dos quatro contextos operacionais já foi fechada
-- o Backoffice Admin já nasceu como **contexto canônico formal**, mesmo antes de sua implementação completa
-- o que resta agora é principalmente **acabamento fino, expansão controlada e reconciliação incremental do novo contexto administrativo**
+- a maior parte das pendências críticas de realidade operacional dos contextos de infraestrutura já foi fechada
+- o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
+- o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e cleanup residual de legado**
 
 ---
 
@@ -127,6 +127,7 @@ Função:
 - MariaDB local
 - deploy / rollback
 - backup / restore
+- camada dinâmica administrativa do ecossistema
 
 Arquivos principais:
 - `docs/04-infra-aws-lightsail/README.md`
@@ -135,6 +136,8 @@ Arquivos principais:
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
+- `docs/04-infra-aws-lightsail/auth-api-operations.md`
+- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/references-inventory.md`
 
 ---
@@ -167,8 +170,9 @@ Função:
 - preservar rastreabilidade das reconciliações
 - servir de trilha histórica curta e formal
 
-Arquivo atual:
+Arquivos atuais:
 - `docs/95-impl-log/2026-03-18-initial-canonical-context-migration.md`
+- `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
 
 ---
 
@@ -307,6 +311,9 @@ Principais fatos já reconciliados:
   - `0.0.0.0:3000`
 - vhost real:
   - `/etc/nginx/sites-available/hsc-auth-api`
+- release/deploy oficial por TAG com migrations explícitas
+- migrations SQL como caminho principal de evolução de schema
+- `schema.js` congelado como compatibilidade legada
 - script real de backup:
   - `/opt/hsc/backup-mariadb.sh`
 - diretório real dos dumps:
@@ -328,8 +335,8 @@ Principais fatos já reconciliados:
 
 Status:
 - **canônico**
-- **formalizado documentalmente**
-- **pronto para implementação incremental**
+- **reconciliado em auth base publicada**
+- **pronto para expansão incremental por domínio**
 
 Principais fatos já reconciliados:
 - o Backoffice já existe como contexto canônico próprio
@@ -339,15 +346,21 @@ Principais fatos já reconciliados:
 - o fallback break-glass permanece como contingência backend
 - mutações administrativas sensíveis devem respeitar fail-closed
 - a stack frontend alvo foi fixada como:
-  - Angular 20
+  - Angular 21
   - TypeScript
   - standalone-first
   - Signals
-- os domínios administrativos iniciais são:
+- as superfícies reais de auth publicadas incluem:
+  - `/login`
+  - `/auth/callback`
+  - `/dashboard`
+- o fluxo real publicado de login administrativo usa magic link
+- o callback resolve sessão real e navega ao dashboard
+- os domínios administrativos iniciais permanecem:
   - `seasons`
   - `news`
   - `events`
-- a ordem recomendada de implementação é:
+- a ordem recomendada de expansão continua sendo:
   - shell administrativo
   - auth/RBAC/guards
   - `seasons`
@@ -355,14 +368,9 @@ Principais fatos já reconciliados:
   - `events`
 
 Leitura correta do status atual:
-- o contexto já está formalmente aberto e utilizável
-- o runtime final do produto ainda será reconciliado durante a implementação
-- o contexto foi validado para não invadir:
-  - operação de host
-  - runtime profundo da Auth API
-  - Portal público estático
-  - ETL
-  - fluxos públicos de usuário final
+- o contexto já não é apenas preparatório
+- o runtime base do produto administrativo já foi validado em produção
+- o que resta agora é principalmente aprofundar contratos e implementar domínios incrementais
 
 ---
 
@@ -372,17 +380,7 @@ As pendências restantes, neste checkpoint, já não são blocos estruturais gra
 
 ## Pendências de maior valor ainda abertas
 
-### 1. Implementação real do shell e auth base do Backoffice
-
-Falta ainda:
-- materializar a SPA administrativa
-- subir o shell administrativo
-- reconciliar a rota final de sessão/identidade usada pelo frontend
-- validar guards, 401 e 403 em runtime real
-
-Esta é hoje a principal pendência estrutural do novo contexto `05-backoffice-admin`.
-
-### 2. Leituras administrativas canônicas de `seasons`
+### 1. Leituras administrativas canônicas de `seasons`
 
 Ainda falta confirmar ou materializar no runtime:
 - `GET /admin/seasons`
@@ -390,7 +388,7 @@ Ainda falta confirmar ou materializar no runtime:
 
 Isto é necessário para um MVP administrativo saudável do domínio.
 
-### 3. Leituras administrativas canônicas de `events`
+### 2. Leituras administrativas canônicas de `events`
 
 Ainda falta confirmar ou materializar no runtime:
 - `GET /admin/events`
@@ -398,14 +396,14 @@ Ainda falta confirmar ou materializar no runtime:
 
 O domínio já está previsto, mas ainda possui maturidade contratual inferior a `news` e `seasons`.
 
-### 4. Separação final entre gestão admin e fluxo público de `events`
+### 3. Separação final entre gestão admin e fluxo público de `events`
 
 Ainda falta fechar de forma final:
 - a superfície administrativa de eventos
 - a superfície pública de confirmação de presença
 - a fronteira entre staff flow e user flow
 
-### 5. Cleanup do drift residual da Auth API antiga na Hostinger
+### 4. Cleanup do drift residual da Auth API antiga na Hostinger
 
 Ainda existe evidência residual no host Hostinger de:
 - vhost/config antiga de `auth-api.haxixesmokeclub.com`
@@ -413,71 +411,33 @@ Ainda existe evidência residual no host Hostinger de:
 
 Isto já está identificado, mas o cleanup técnico ainda não foi executado/documentado como concluído.
 
-### 6. Eventual estratégia off-host de backup da Auth API
+### 5. Eventual estratégia off-host de backup da Auth API
 
-O backup local já está reconciliado.  
+O backup local já está reconciliado.
 Ainda não foi confirmado, neste ciclo, se existe cópia externa/off-host dos dumps.
 
 ---
 
-## O que já pode ser considerado fechado neste checkpoint
+## Ordem de leitura recomendada neste checkpoint
 
-Neste checkpoint, já podem ser tratados como fechados:
+A ordem de leitura recomendada do sistema, neste checkpoint, é:
 
-- separação canônica dos contextos operacionais originais
-- nascimento formal do contexto `05-backoffice-admin`
-- hostnames reais do lado Hostinger
-- hostnames e runtime real do Lightsail
-- path vivo real do `matchzy.db`
-- inventário real de plugins carregados
-- pipeline real da Static API v2
-- heartbeat real da v2 no host
-- reverse proxy real da Auth API
-- unit real do Node via `systemd`
-- diretório real dos dumps do MariaDB
-- cron real do backup
-- retenção real de backup
-- fronteira documental do Backoffice como camada administrativa separada
-- stack-alvo do frontend administrativo
+### Para visão macro do repositório
 
-Leitura correta:
-
-**o sistema documental já passou da fase de “migração estrutural” e entrou em fase de “refino operacional incremental” com abertura controlada de novos contextos de produto.**
-
----
-
-## Ordem recomendada de leitura
-
-Para visão macro do sistema:
-
-1. `docs/00-governance/README.md`
+1. `docs/00-governance/99-master-index.md`
 2. `docs/00-governance/documentation-system.md`
-3. `docs/00-governance/99-master-index.md`
 
-Para lado Hostinger + Portal:
-
-1. `docs/01-infra-hostinger/README.md`
-2. `docs/01-infra-hostinger/references-inventory.md`
-3. `docs/03-portal-estatico/README.md`
-4. `docs/03-portal-estatico/references-inventory.md`
-5. `docs/03-portal-estatico/operational-runbooks.md`
-
-Para lado jogo:
-
-1. `docs/02-game-panel/README.md`
-2. `docs/02-game-panel/references-inventory.md`
-3. `docs/02-game-panel/plugins-installed.md`
-4. `docs/02-game-panel/matchzy.md`
-
-Para lado Auth API:
+### Para lado Auth API
 
 1. `docs/04-infra-aws-lightsail/README.md`
 2. `docs/04-infra-aws-lightsail/references-inventory.md`
 3. `docs/04-infra-aws-lightsail/node-systemd.md`
 4. `docs/04-infra-aws-lightsail/backup-restore.md`
 5. `docs/04-infra-aws-lightsail/auth-api-operations.md`
+6. `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
+7. `docs/04-infra-aws-lightsail/mariadb-local.md`
 
-Para lado Backoffice Admin:
+### Para lado Backoffice Admin
 
 1. `docs/05-backoffice-admin/README.md`
 2. `docs/05-backoffice-admin/architecture-runtime.md`
@@ -514,9 +474,10 @@ Motivos:
 - principais verdades operacionais do sistema já foram reconciliadas
 - documentação já está segmentada por contexto e utilizável
 - principais riscos de drift documental já foram reduzidos
-- o Backoffice Admin já possui contexto formal próprio para crescer sem voltar ao modelo de master monolítico
-- o que resta agora é majoritariamente refino, implementação incremental do novo contexto e cleanup adicional
+- a Auth API já opera com migrations SQL como mecanismo principal de evolução de schema
+- o Backoffice Admin já possui auth base publicada, callback funcional e sessão real validada
+- o que resta agora é majoritariamente expansão incremental de domínio, troubleshooting fino e cleanup adicional de legado
 
 Leitura correta deste checkpoint:
 
-**o repositório documental do HSC já é suficientemente maduro para sustentar operação, expansão e implementação do Backoffice Admin sem depender dos antigos masters como eixo principal.**
+**o repositório documental do HSC já é suficientemente maduro para sustentar operação, expansão e implementação incremental do Backoffice Admin sem depender dos antigos masters como eixo principal.**
