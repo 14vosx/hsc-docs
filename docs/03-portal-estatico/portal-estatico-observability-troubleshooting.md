@@ -83,14 +83,14 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 

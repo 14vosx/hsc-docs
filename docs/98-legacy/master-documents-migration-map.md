@@ -114,15 +114,15 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/docker-host.md`
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 ---
 
@@ -146,16 +146,16 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
 - `docs/02-game-panel/mariadb-runtime.md`
-- `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
-- `docs/02-game-panel/references-inventory.md`
+- `docs/02-game-panel/game-panel-operational-runbooks`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 ---
 
@@ -180,17 +180,17 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/json-contracts.md`
-- `docs/03-portal-estatico/frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 ---
 
@@ -217,16 +217,16 @@ agora deve ser lido prioritariamente em:
 Documentos centrais de substituição:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 ---
 

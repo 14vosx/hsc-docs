@@ -78,12 +78,12 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/json-contracts.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve a camada de frontend do portal.  
 Ele não substitui os documentos de contrato, pipeline, publicação ou troubleshooting.

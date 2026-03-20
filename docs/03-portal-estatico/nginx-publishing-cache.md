@@ -27,16 +27,16 @@ Este documento existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
 - [Static API v2](./static-api-v2.md)
 - [JSON Contracts](./json-contracts.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 
 ### Infraestrutura de entrega
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
-- [Network, DNS and TLS](../01-infra-hostinger/network-dns-tls.md)
+- [Network, DNS and TLS](../01-infra-hostinger/infra-hostinger-network-dns-tls.md)
 
 ### Operação e suporte
-- [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -122,14 +122,14 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
-- `docs/03-portal-estatico/frontend-structure.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
 Este documento descreve a publicação pública e a estratégia de cache da camada portal/v2.  
 Ele não substitui os documentos de topologia geral, ETL, frontend ou troubleshooting aprofundado.

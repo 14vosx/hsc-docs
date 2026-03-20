@@ -124,14 +124,14 @@ Regra principal:
 Este arquivo é complementar a:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 
 Este documento não substitui nenhum dos arquivos acima.  
 Ele funciona como fechamento de inventário e referência do contexto.

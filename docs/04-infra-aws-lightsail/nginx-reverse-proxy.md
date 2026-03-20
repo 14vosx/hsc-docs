@@ -23,7 +23,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
 - [Auth API Operations](./auth-api-operations.md)
 - [Node Systemd](./node-systemd.md)
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)
@@ -32,11 +32,11 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Backoffice Admin](../05-backoffice-admin/README.md)
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
-- [Frontend Structure](../05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 
 ### Operação e suporte
-- [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
+- [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -110,12 +110,12 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este documento descreve a borda Nginx da Auth API no Lightsail.  
 Ele não substitui os documentos de runtime da aplicação, TLS, systemd ou troubleshooting aprofundado.

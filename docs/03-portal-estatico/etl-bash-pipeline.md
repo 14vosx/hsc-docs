@@ -32,13 +32,13 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Static API v2](./static-api-v2.md)
 - [JSON Contracts](./json-contracts.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 
 ### Operação e runtime
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
-- [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
 ---
 
@@ -123,14 +123,14 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 
 Este documento descreve a pipeline ETL Bash da v2.  

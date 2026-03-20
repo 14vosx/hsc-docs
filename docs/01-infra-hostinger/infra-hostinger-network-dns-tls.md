@@ -97,12 +97,12 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/certbot.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 
 Este documento descreve a borda de rede, DNS e TLS do lado Hostinger.  
 Ele não substitui os documentos de serving estático, publicação, Certbot ou troubleshooting.

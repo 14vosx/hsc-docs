@@ -93,12 +93,12 @@ Regra importante:
 Os documentos canônicos diretos de `05-backoffice-admin` são:
 
 - `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/architecture-runtime.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
-- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 Leitura recomendada:
 
@@ -136,7 +136,7 @@ Papel dessas referências:
 - `docs/04-infra-aws-lightsail/README.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Papel dessas referências:
 

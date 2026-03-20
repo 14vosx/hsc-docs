@@ -90,16 +90,16 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/cs2-server-configuration.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 
 Este documento descreve triagem, observabilidade e troubleshooting do lado jogo.  
 Ele não substitui os documentos de runbook, MatchZy, plugins, configuração do servidor ou troubleshooting da infraestrutura base.

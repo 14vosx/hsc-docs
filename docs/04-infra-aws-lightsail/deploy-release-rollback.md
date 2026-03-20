@@ -84,12 +84,12 @@ As evidências principais deste fluxo são:
 
 Este arquivo é complementar a:
 
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 - `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
 
 ---

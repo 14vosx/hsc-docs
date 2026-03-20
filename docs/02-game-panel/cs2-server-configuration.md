@@ -78,13 +78,13 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/amp-instance-manager.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/observability-troubleshooting.md`
+- `docs/02-game-panel/game-panel-operational-runbooks.md`
+- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
 
 Este documento descreve a configuração do runtime do servidor CS2 em nível canônico.  
 Ele não substitui os documentos de MatchZy, inventário de plugins ou runbooks operacionais detalhados.

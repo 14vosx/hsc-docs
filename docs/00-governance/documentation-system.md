@@ -745,6 +745,22 @@ Regra importante:
 - abertura de novo contexto canônico exige atualização explícita de `00-governance/README.md`, `documentation-system.md` e `99-master-index.md`
 - essa atualização faz parte do fechamento da governança, não de uma fase opcional posterior
 
+### Regra complementar de navegação viva
+
+Quando uma mudança alterar a forma de entrada, leitura ou travessia entre documentos, a manutenção documental deve considerar também a camada de navegação.
+
+Isso pode exigir revisão explícita de:
+
+- `docs/README.md`, quando a mudança impactar a entrada global da documentação
+- `README.md` do contexto, quando o hub local precisar refletir novo documento, nova trilha ou novo fluxo
+- `00-governance/99-master-index.md`, quando a mudança tiver impacto transversal
+- links contextuais dos documentos centrais afetados, quando entradas, dependências, saídas ou relações operacionais tiverem mudado
+
+Regra prática:
+
+- mudança estrutural relevante não deve atualizar apenas conteúdo técnico
+- ela deve atualizar também a navegabilidade do sistema documental, quando necessário
+
 ---
 
 ## Critério de qualidade documental

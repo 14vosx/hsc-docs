@@ -23,8 +23,8 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
-- [Network, DNS and TLS](./network-dns-tls.md)
+- [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
+- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
 - [Systemd Automation](./systemd-automation.md)
 - [Certbot](./certbot.md)
 
@@ -32,11 +32,11 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Portal Estático](../03-portal-estatico/README.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
-- [Frontend Structure](../03-portal-estatico/frontend-structure.md)
+- [Frontend Structure](../03-portal-estatico/portal-estatico-frontend-structure.md)
 
 ### Operação e suporte
-- [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
+- [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -110,11 +110,11 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
+- `docs/01-infra-hostinger/./infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/certbot.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 
 Este documento descreve o serving estático do lado Hostinger.  

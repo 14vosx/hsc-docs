@@ -23,12 +23,12 @@ Este documento existe para:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Documentos deste contexto
-- [Architecture Runtime](./architecture-runtime.md)
-- [Frontend Structure](./frontend-structure.md)
+- [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
+- [Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Admin API Contracts](./admin-api-contracts.md)
-- [Operational Runbooks](./operational-runbooks.md)
-- [References and Inventory](./references-inventory.md)
+- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
+- [References and Inventory](./backoffice-admin-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
@@ -187,12 +187,12 @@ O legado não governa este contexto, mas sustenta sua reconciliação histórica
 Os documentos canônicos diretos de `05-backoffice-admin` são:
 
 - `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/architecture-runtime.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
-- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 
@@ -203,12 +203,12 @@ Este `README.md` funciona como porta de entrada e índice local do contexto.
 A ordem recomendada de leitura é:
 
 1. `docs/05-backoffice-admin/README.md`
-2. `docs/05-backoffice-admin/architecture-runtime.md`
-3. `docs/05-backoffice-admin/frontend-structure.md`
+2. `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
+3. `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
-6. `docs/05-backoffice-admin/operational-runbooks.md`
-7. `docs/05-backoffice-admin/references-inventory.md`
+6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 

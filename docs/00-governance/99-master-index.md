@@ -95,11 +95,11 @@ Função:
 
 Arquivos principais:
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
-- `docs/01-infra-hostinger/references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
 
 ---
 
@@ -114,11 +114,11 @@ Função:
 
 Arquivos principais:
 - `docs/02-game-panel/README.md`
-- `docs/02-game-panel/architecture-runtime.md`
+- `docs/02-game-panel/game-panel-architecture-runtime.md`
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/02-game-panel/matchzy.md`
 - `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/references-inventory.md`
+- `docs/02-game-panel/game-panel-references-inventory.md`
 
 ---
 
@@ -134,12 +134,12 @@ Função:
 
 Arquivos principais:
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 ---
 
@@ -156,14 +156,14 @@ Função:
 
 Arquivos principais:
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 ---
 
@@ -179,12 +179,12 @@ Função:
 
 Arquivos principais:
 - `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/architecture-runtime.md`
-- `docs/05-backoffice-admin/frontend-structure.md`
+- `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/operational-runbooks.md`
-- `docs/05-backoffice-admin/references-inventory.md`
+- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 
@@ -455,7 +455,7 @@ A ordem de leitura recomendada do sistema, neste checkpoint, é:
 ### Para lado Auth API
 
 1. `docs/04-infra-aws-lightsail/README.md`
-2. `docs/04-infra-aws-lightsail/references-inventory.md`
+2. `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 3. `docs/04-infra-aws-lightsail/node-systemd.md`
 4. `docs/04-infra-aws-lightsail/backup-restore.md`
 5. `docs/04-infra-aws-lightsail/auth-api-operations.md`
@@ -465,12 +465,12 @@ A ordem de leitura recomendada do sistema, neste checkpoint, é:
 ### Para lado Backoffice Admin
 
 1. `docs/05-backoffice-admin/README.md`
-2. `docs/05-backoffice-admin/architecture-runtime.md`
-3. `docs/05-backoffice-admin/frontend-structure.md`
+2. `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
+3. `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
-6. `docs/05-backoffice-admin/operational-runbooks.md`
-7. `docs/05-backoffice-admin/references-inventory.md`
+6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 

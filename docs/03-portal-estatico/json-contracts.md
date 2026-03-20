@@ -29,14 +29,14 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Static API v2](./static-api-v2.md)
 
 ### Consumo e publicação
-- [Frontend Structure](./frontend-structure.md)
+- [Frontend Structure](./portal-estatico-frontend-structure.md)
 - [Nginx Publishing and Cache](./nginx-publishing-cache.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 
 ### Infraestrutura e suporte
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
 ---
 
@@ -100,14 +100,14 @@ Enquanto a migração canônica do contexto não estiver concluída, essas fonte
 Este arquivo é complementar a:
 
 - `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/architecture-runtime.md`
+- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
-- `docs/03-portal-estatico/frontend-structure.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/observability-troubleshooting.md`
+- `docs/03-portal-estatico/portal-estatico-frontend-structure.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 
 Este documento descreve os contratos públicos da v2 em nível canônico.  
 Ele não substitui os documentos de ETL, origem dos dados, frontend ou troubleshooting.

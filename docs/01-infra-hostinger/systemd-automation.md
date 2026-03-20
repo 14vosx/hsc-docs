@@ -23,7 +23,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
 - [Nginx Static Serving](./nginx-static-serving.md)
@@ -32,11 +32,11 @@ Este documento existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
-- [Operational Runbooks](../03-portal-estatico/operational-runbooks.md)
+- [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
 
 ### Operação e suporte
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
-- [Network, DNS and TLS](./network-dns-tls.md)
+- [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
+- [Network, DNS and TLS](././infra-hostinger-network-dns-tls.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -123,12 +123,12 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/architecture-runtime.md`
-- `docs/01-infra-hostinger/references-inventory.md`
-- `docs/01-infra-hostinger/observability-troubleshooting.md`
+- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
+- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
-- `docs/03-portal-estatico/operational-runbooks.md`
-- `docs/03-portal-estatico/references-inventory.md`
+- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
+- `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`
 
 Este documento descreve a automação do host.  
 Ele não substitui os documentos do pipeline ETL, dos runbooks da v2 ou do inventário do portal.

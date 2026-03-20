@@ -27,7 +27,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Runtime e infraestrutura imediata
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
 - [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
 - [Node Systemd](./node-systemd.md)
 - [MariaDB Local](./mariadb-local.md)
@@ -37,11 +37,11 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Backoffice Admin](../05-backoffice-admin/README.md)
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
-- [Frontend Structure](../05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 
 ### Operação e suporte
-- [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
+- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
+- [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
 ---
@@ -119,12 +119,12 @@ As principais evidências deste documento, nesta fase, são:
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`

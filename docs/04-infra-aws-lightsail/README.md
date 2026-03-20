@@ -22,16 +22,16 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Documentos deste contexto
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
 - [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
 - [Node Systemd](./node-systemd.md)
 - [MariaDB Local](./mariadb-local.md)
 - [Auth API Operations](./auth-api-operations.md)
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)
 - [Backup / Restore](./backup-restore.md)
-- [Operational Runbooks](./operational-runbooks.md)
-- [Observability and Troubleshooting](./observability-troubleshooting.md)
-- [References and Inventory](./references-inventory.md)
+- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
+- [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
+- [References and Inventory](./infra-aws-lightsail-references-inventory.md)
 
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
@@ -41,7 +41,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Trilhas operacionais relevantes
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
-- [Frontend Structure — Backoffice](../05-backoffice-admin/frontend-structure.md)
+- [Frontend Structure — Backoffice](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Documentation System](../00-governance/documentation-system.md)
 
@@ -185,16 +185,16 @@ Enquanto a migração do contexto não estiver concluída, os documentos antigos
 Os documentos canônicos previstos para este contexto são:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
-- `docs/04-infra-aws-lightsail/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/mariadb-local.md`
 - `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
 - `docs/04-infra-aws-lightsail/backup-restore.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
 
 Este `README.md` funciona como porta de entrada e índice local do contexto.
 

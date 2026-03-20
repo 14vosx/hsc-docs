@@ -25,10 +25,10 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Master Index](../00-governance/99-master-index.md)
 
 ### Contexto administrativo imediato
-- [Architecture Runtime](./architecture-runtime.md)
+- [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
 - [Admin API Contracts](./admin-api-contracts.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
-- [Operational Runbooks](./operational-runbooks.md)
+- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
 ### Backend e runtime consumido
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
@@ -38,7 +38,7 @@ Este documento existe para registrar, de forma estável e auditável:
 
 ### Governança e suporte
 - [Documentation System](../00-governance/documentation-system.md)
-- [References and Inventory](./references-inventory.md)
+- [References and Inventory](./backoffice-admin-references-inventory.md)
 
 ---
 

@@ -90,13 +90,13 @@ Enquanto o runtime real permanecer neste formato, essas evidências prevalecem c
 Este arquivo é complementar a:
 
 - `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/architecture-runtime.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
 - `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
 - `docs/04-infra-aws-lightsail/node-systemd.md`
 - `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/observability-troubleshooting.md`
-- `docs/04-infra-aws-lightsail/references-inventory.md`
-- `docs/01-infra-hostinger/network-dns-tls.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md`
+- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
+- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
 Este documento descreve a camada de rede, DNS e TLS da Auth API no Lightsail.  
 Ele não substitui os documentos de reverse proxy, runtime da aplicação, observabilidade ou inventário do contexto.
