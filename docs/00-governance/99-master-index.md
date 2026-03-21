@@ -78,9 +78,11 @@ Função:
 - índice mestre canônico
 
 Arquivos principais:
-- `docs/00-governance/README.md`
-- `docs/00-governance/documentation-system.md`
-- `docs/00-governance/99-master-index.md`
+- [Governance — README](./README.md)
+- [Documentation System](./documentation-system.md)
+- [HSC Docs Maintenance Playbook](./hsc-docs-maintenance-playbook.md)
+- [Master Index](./99-master-index.md)
+
 
 ---
 
@@ -94,12 +96,12 @@ Função:
 - systemd e automação da v2
 
 Arquivos principais:
-- `docs/01-infra-hostinger/README.md`
-- `docs/01-infra-hostinger/infra-hostinger-architecture-runtime.md`
-- `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
-- `docs/01-infra-hostinger/nginx-static-serving.md`
-- `docs/01-infra-hostinger/systemd-automation.md`
-- `docs/01-infra-hostinger/infra-hostinger-references-inventory.md`
+- [Infra Hostinger — README](../01-infra-hostinger/README.md)
+- [Infra Hostinger Architecture Runtime](../01-infra-hostinger/infra-hostinger-architecture-runtime.md)
+- [Infra Hostinger Network, DNS and TLS](../01-infra-hostinger/infra-hostinger-network-dns-tls.md)
+- [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [Infra Hostinger References Inventory](../01-infra-hostinger/infra-hostinger-references-inventory.md)
 
 ---
 
@@ -113,12 +115,15 @@ Função:
 - camada operacional do servidor
 
 Arquivos principais:
-- `docs/02-game-panel/README.md`
-- `docs/02-game-panel/game-panel-architecture-runtime.md`
-- `docs/02-game-panel/instance-mixhaxixe01.md`
-- `docs/02-game-panel/matchzy.md`
-- `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/game-panel-references-inventory.md`
+- [Game Panel — README](../02-game-panel/README.md)
+- [Game Panel Architecture Runtime](../02-game-panel/game-panel-architecture-runtime.md)
+- [CS2 Server Configuration](../02-game-panel/cs2-server-configuration.md)
+- [MariaDB Runtime](../02-game-panel/mariadb-runtime.md)
+- [MatchZy](../02-game-panel/matchzy.md)
+- [Plugins Installed](../02-game-panel/plugins-installed.md)
+- [Game Panel Operational Runbooks](../02-game-panel/game-panel-operational-runbooks.md)
+- [Game Panel Observability and Troubleshooting](../02-game-panel/game-panel-observability-troubleshooting.md)
+- [Game Panel References Inventory](../02-game-panel/game-panel-references-inventory.md)
 
 ---
 
@@ -133,13 +138,18 @@ Função:
 - runbooks operacionais da camada pública
 
 Arquivos principais:
-- `docs/03-portal-estatico/README.md`
-- `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
-- `docs/03-portal-estatico/static-api-v2.md`
-- `docs/03-portal-estatico/etl-bash-pipeline.md`
-- `docs/03-portal-estatico/nginx-publishing-cache.md`
-- `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
-- `docs/03-portal-estatico/portal-estatico-references-inventory.md`
+- [Portal Estático — README](../03-portal-estatico/README.md)
+- [Portal Estático Architecture Runtime](../03-portal-estatico/portal-estatico-architecture-runtime.md)
+- [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
+- [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [Portal Estático Frontend Structure](../03-portal-estatico/portal-estatico-frontend-structure.md)
+- [JSON Contracts](../03-portal-estatico/json-contracts.md)
+- [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
+- [Portal Estático Observability and Troubleshooting](../03-portal-estatico/portal-estatico-observability-troubleshooting.md)
+- [Portal Estático Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
+- [Portal Estático References Inventory](../03-portal-estatico/portal-estatico-references-inventory.md)
+- [SQL Queries and Views](../03-portal-estatico/sql-queries-and-views.md)
+- [Static API v2](../03-portal-estatico/static-api-v2.md)
 
 ---
 
@@ -155,15 +165,16 @@ Função:
 - camada dinâmica administrativa do ecossistema
 
 Arquivos principais:
-- `docs/04-infra-aws-lightsail/README.md`
-- `docs/04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md`
-- `docs/04-infra-aws-lightsail/nginx-reverse-proxy.md`
-- `docs/04-infra-aws-lightsail/node-systemd.md`
-- `docs/04-infra-aws-lightsail/mariadb-local.md`
-- `docs/04-infra-aws-lightsail/backup-restore.md`
-- `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
+- [Infra AWS Lightsail — README](../04-infra-aws-lightsail/README.md)
+- [Infra AWS Lightsail Architecture Runtime](../04-infra-aws-lightsail/infra-aws-lightsail-architecture-runtime.md)
+- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
+- [Backup / Restore](../04-infra-aws-lightsail/backup-restore.md)
+- [Deploy / Release / Rollback](../04-infra-aws-lightsail/deploy-release-rollback.md)
+- [Infra AWS Lightsail Network, DNS and TLS](../04-infra-aws-lightsail/infra-aws-lightsail-network-dns-tls.md)
+- [Nginx Reverse Proxy](../04-infra-aws-lightsail/nginx-reverse-proxy.md)
+- [Node Systemd](../04-infra-aws-lightsail/node-systemd.md)
+- [Infra AWS Lightsail Observability and Troubleshooting](../04-infra-aws-lightsail/infra-aws-lightsail-observability-troubleshooting.md)
+- [Infra AWS Lightsail References Inventory](../04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md)
 
 ---
 
@@ -178,13 +189,13 @@ Função:
 - superfícies administrativas de `news`, `seasons` e `events`
 
 Arquivos principais:
-- `docs/05-backoffice-admin/README.md`
-- `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
-- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
-- `docs/05-backoffice-admin/auth-rbac-and-guards.md`
-- `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-- `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+- [Backoffice Admin — README](../05-backoffice-admin/README.md)
+- [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
+- [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
+- [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
+- [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
+- [Backoffice Admin Operational Runbooks](../05-backoffice-admin/backoffice-admin-operational-runbooks.md)
+- [Backoffice Admin References Inventory](../05-backoffice-admin/backoffice-admin-references-inventory.md)
 
 ---
 
