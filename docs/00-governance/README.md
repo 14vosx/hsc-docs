@@ -47,14 +47,46 @@ A ordem recomendada de navegação é:
 
 1. esta pasta `00-governance/`
 2. `docs/00-governance/documentation-system.md`
-3. `docs/00-governance/99-master-index.md`
-4. o contexto técnico que você precisa operar, revisar ou atualizar
+3. `docs/00-governance/hsc-docs-maintenance-playbook.md`
+4. `docs/00-governance/99-master-index.md`
+5. o contexto técnico que você precisa operar, revisar ou atualizar
 
 Regra importante:
 
 - o índice mestre é o mapa do repositório
 - o `documentation-system.md` é a regra do jogo
 - os contextos são a documentação operacional real
+
+#### `docs/00-governance/hsc-docs-maintenance-playbook.md`
+
+- playbook operacional curto de manutenção do `hsc-docs`
+- consolidação prática das regras de criação, navegação, renomeação e revisão
+- guia de operação incremental para manter o repositório saudável
+
+---
+
+## Navegação rápida
+
+### Entrada global
+- [Home da documentação](../README.md)
+
+### Documentos centrais desta pasta
+- [Governance — README](./README.md)
+- [Documentation System](./documentation-system.md)
+- [HSC Docs Maintenance Playbook](./hsc-docs-maintenance-playbook.md)
+- [Master Index](./99-master-index.md)
+
+### Contextos canônicos ativos
+- [Infra Hostinger](../01-infra-hostinger/README.md)
+- [Game Panel](../02-game-panel/README.md)
+- [Portal Estático](../03-portal-estatico/README.md)
+- [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+- [Backoffice Admin](../05-backoffice-admin/README.md)
+
+### Trilhas auxiliares
+- [Impl Log](../95-impl-log/2026-03-18-initial-canonical-context-migration.md)
+- [Audit](../97-audit/2026-03-18-post-migration-open-items.md)
+- [Legacy](../98-legacy/README.md)
 
 ---
 
