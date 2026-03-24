@@ -75,25 +75,44 @@ Esses assuntos vivem em documentos próprios do contexto.
 
 ---
 
+Aqui está uma proposta de consolidação, unindo o documento atual com as novas atualizações de forma lógica e organizada por contexto (Infraestrutura, Segurança, Endpoints e Banco de Dados) para facilitar a leitura técnica:
+
+***
+
 ## Estado atual
 
-A Auth API opera como backend dinâmico central do HSC no contexto AWS Lightsail.
+A Auth API opera como backend dinâmico central do HSC no contexto AWS Lightsail. A linha operacional publicada já avançou além da `v0.4.7`, tendo concluído o rollout de *admin users management* através das releases sequenciais `v0.4.8`, `v0.4.9` e `v0.4.10`.
 
 O estado operacional reconciliado desta camada inclui:
 
-- execução em Node.js via systemd
-- exposição pública por Nginx com TLS e reverse proxy
-- persistência em MariaDB local
-- superfícies públicas de conteúdo (`health`, `content/news`, `content/seasons`)
-- superfícies administrativas protegidas (`admin/schema`, mutações de `news` e `seasons`)
-- autenticação administrativa session-first publicada
-- emissão real de magic link administrativo por SMTP Hostinger
-- introspecção administrativa por `GET /auth/session`
-- callback administrativo do Backoffice publicado em subdomínio próprio
-- política de CORS por allowlist explícita de origens
-- cookie administrativo cross-subdomain com política compatível com produção
-- `schema.js` tratado como compatibilidade legada e não como mecanismo principal de evolução do banco
-- migrations SQL explícitas executadas no deploy antes do restart do serviço
+**Infraestrutura e Execução**
+- execução em Node.js via systemd;
+- exposição pública por Nginx com TLS e reverse proxy;
+- persistência em MariaDB local.
+
+**Autenticação, Sessão e CORS**
+- autenticação administrativa *session-first* publicada (o login administrativo continua estritamente *admin-only*);
+- emissão real de magic link administrativo por SMTP Hostinger;
+- introspecção administrativa por `GET /auth/session`;
+- política de CORS por allowlist explícita de origens, dependente de `withCredentials: true` e com preflight configurado para aceitar `GET`, `POST`, `PATCH` (via hotfix recente) e `OPTIONS`;
+- cookie administrativo *cross-subdomain* com política compatível com produção.
+
+**Superfícies da API e Integração**
+- superfícies públicas de conteúdo ativas (`health`, `content/news`, `content/seasons`);
+- superfícies administrativas protegidas funcionais, incluindo `admin/schema` e mutações de `news` e `seasons`;
+- **CRUD administrativo básico de usuários publicado e funcional**, expondo:
+  - `GET /admin/users`
+  - `POST /admin/users`
+  - `PATCH /admin/users/:id`
+- callback administrativo do Backoffice publicado em subdomínio próprio (`backoffice.haxixesmokeclub.com`), que depende explicitamente dessas superfícies e fluxos.
+
+**Banco de Dados e Evolução**
+- `schema.js` tratado como compatibilidade legada e não como mecanismo principal de evolução do banco;
+- migrations SQL explícitas executadas no deploy antes do restart do serviço;
+- a reconciliação de produção desta linha já incluiu as execuções de:
+  - `0003_admin_audit_log.sql`
+  - `0004_users_role_enum_reconcile.sql`
+
 
 A Auth API sustenta a metade dinâmica do ecossistema HSC, enquanto o host Hostinger continua sustentando jogo, ETL e portal público estático.
 

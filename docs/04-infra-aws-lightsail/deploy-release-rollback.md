@@ -43,25 +43,48 @@ Esses assuntos vivem em documentos próprios.
 
 ## Estado atual
 
-O modelo operacional reconciliado da Auth API é:
+Aqui está a consolidação deste bloco, mantendo a clareza técnica e agrupando o modelo geral de infraestrutura com o histórico recente de entregas e suas implicações:
 
-- repositório Git versionado
-- release determinística por TAG
-- deploy manual controlado no host Lightsail
-- diretório de produção em `/opt/hsc/hsc-auth-api`
-- instalação de dependências via `npm ci --omit=dev`
-- execução explícita de `npm run db:migrate` antes do restart
-- restart controlado do serviço `hsc-auth-api`
-- state file da última TAG implantada em `/opt/hsc/.deploy-auth-last-tag`
-- logging operacional de deploy em `/var/log/hsc/deploy-auth.log`
-- smoke tests obrigatórios após deploy
-- runtime da app restrito a readiness check, e não mais evolução de schema
+***
 
-Esse modelo separa claramente:
+## Estado atual do Modelo Operacional e Deploy
 
-1. release do código
-2. migração do banco
-3. execução do runtime
+O modelo operacional reconciliado da Auth API baseia-se em uma separação clara de três etapas fundamentais: **1. release do código**, **2. migração do banco** e **3. execução do runtime**. 
+
+As características e diretrizes deste modelo incluem:
+
+**Infraestrutura e Execução**
+- repositório Git versionado com release determinística por TAG;
+- deploy manual controlado no host Lightsail;
+- diretório de produção consolidado em `/opt/hsc/hsc-auth-api`;
+- instalação rigorosa de dependências via `npm ci --omit=dev`;
+- restart controlado do serviço `hsc-auth-api`;
+- runtime da aplicação restrito a *readiness check*, não sendo mais responsável pela evolução do schema.
+
+**Migrações e Verificações**
+- execução explícita de `npm run db:migrate` sempre antes do restart do serviço;
+- smoke tests obrigatórios após o deploy.
+
+**Estado e Logging**
+- state file da última TAG implantada mantido em `/opt/hsc/.deploy-auth-last-tag`;
+- logging operacional de deploy registrado em `/var/log/hsc/deploy-auth.log`.
+
+### Histórico Recente: Rollout de Admin Users Management
+A linha publicada já avançou além da `v0.4.7`. É importante notar que a entrega funcional de *users management* não foi concluída em uma única tag, exigindo três releases sequenciais para a sua reconciliação e estabilização:
+
+- **`v0.4.8`**:
+  - publicou as superfícies administrativas de users;
+  - publicou a migration `0003_admin_audit_log.sql`.
+- **`v0.4.9`**:
+  - publicou a migration `0004_users_role_enum_reconcile.sql`;
+  - reconciliou o legado de `users.role`, convertendo o valor `user` para `viewer`.
+- **`v0.4.10`**:
+  - publicou o hotfix de política de CORS liberando o método `PATCH`;
+  - destravou as mutações da área `/users` no Backoffice publicado.
+
+### Consequências Operacionais Críticas
+- A linha funcional final para a entrega de gestão de usuários só é considerada **completa a partir da tag `v0.4.10`**.
+- **Atenção a Rollbacks:** Qualquer operação de rollback para uma tag anterior a `v0.4.10` terá impacto funcional direto, quebrando as operações de mutação na área `/users` do Backoffice.
 
 ---
 

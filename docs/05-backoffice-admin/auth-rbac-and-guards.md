@@ -273,22 +273,39 @@ Capacidades esperadas:
 
 ---
 
-## Nota de reconciliação com legado
+## Estado efetivo publicado do RBAC
 
-O legado do HSC já aponta hierarquia próxima a `user < editor < admin`.
+Embora o modelo administrativo já reconheça a hierarquia:
 
-Para o Backoffice, a leitura recomendada é:
+```text
+viewer
+editor
+admin
+```
 
-- `user` não é papel natural de operação administrativa
-- no contexto da SPA administrativa, o papel prático de leitura pode ser modelado como `viewer`
-- a reconciliação final entre nomenclatura backend e nomenclatura de UX deve ser explícita em contrato
+o estado efetivo publicado do Backoffice continua restrito ao primeiro corte admin-only.
 
-Regra importante:
+Isso significa:
 
-- se o backend expuser `user`, `editor`, `admin`, o frontend pode mapear isso para uma semântica administrativa mais clara
-- esse mapeamento deve ser documentado e não pode gerar perda de segurança
+- o enum administrativo já suporta viewer, editor e admin
+- a gestão administrativa de usuários já permite criar e editar esses papéis
+- a UI do Backoffice já consegue refletir esses papéis
+- porém, o login administrativo publicado por magic link continua elegível apenas para role = 'admin'
+- as rotas administrativas protegidas continuam dependentes de requireAdmin(...) no backend
 
----
+Leitura operacional correta neste estágio:
+
+- viewer e editor já existem como papéis válidos de domínio administrativo
+- isso não implica, por enquanto, acesso efetivo ao shell administrativo publicado
+- o acesso administrativo publicado continua sendo admin-only até reconciliação futura de autorização fina
+
+Consequências para frontend e operação:
+
+- o Backoffice pode exibir ou editar o papel atual de um usuário
+- o frontend não deve inferir que viewer ou editor já têm entrada garantida no shell administrativo
+- a Auth API continua sendo a autoridade final para aceitar ou negar login e mutações administrativas
+- uma futura abertura para viewer/editor deve ser tratada como expansão explícita de RBAC, não como efeito colateral do enum
+
 
 ## Matriz inicial de permissões por domínio
 
