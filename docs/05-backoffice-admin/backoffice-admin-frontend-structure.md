@@ -291,6 +291,44 @@ Leitura dessa topologia:
 
 ---
 
+## Estado publicado da feature `/users`
+
+A estrutura do Backoffice Admin publicado já não se limita mais aos domínios iniciais de dashboard e placeholders.
+
+Estado efetivo publicado desta linha:
+
+- a rota protegida `/users` já existe no shell administrativo
+- o sidebar administrativo já expõe a entrada `Users`
+- a feature já foi materializada em:
+  - `src/app/features/users/data-access/users-admin-api.service.ts`
+  - `src/app/features/users/pages/users-page/users-page.component.ts`
+  - `src/app/features/users/pages/users-page/users-page.component.html`
+  - `src/app/features/users/pages/users-page/users-page.component.scss`
+
+Capacidades já validadas no ambiente publicado:
+
+- listagem real de usuários
+- criação de usuário
+- alteração de role
+- renomeação
+- alteração de email
+
+Leitura arquitetural correta neste estágio:
+
+- `core/auth` continua transversal
+- `users` já é um domínio funcional próprio dentro de `features/`
+- a superfície `/users` depende da Auth API publicada para:
+  - `GET /admin/users`
+  - `POST /admin/users`
+  - `PATCH /admin/users/:id`
+
+Observação importante:
+
+- a existência da feature `/users` no frontend não altera, por si só, o modelo efetivo de autorização publicado
+- o shell administrativo publicado continua sendo, neste estágio, admin-only
+
+---
+
 ## Estrutura detalhada recomendada
 
 A estrutura inicial sugerida é:

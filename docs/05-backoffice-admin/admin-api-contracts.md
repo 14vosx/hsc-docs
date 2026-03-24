@@ -1,278 +1,698 @@
-# Auth, RBAC and Guards
+# Admin API Contracts
 
 ## Objetivo
 
-Documentar o modelo real de autenticação, autorização, guards e persistência de sessão do Backoffice Admin, refletindo o estado publicado session-first e a dependência explícita da Auth API como autoridade final.
+Definir o contrato canônico entre o HSC Backoffice Admin e a HSC Auth API para superfícies administrativas publicadas.
 
-Este documento existe para registrar, de forma estável e auditável:
+Este documento cobre:
 
-- o modelo publicado session-first
-- o uso de cookie administrativo cross-subdomain
-- o papel dos guards do frontend
-- a dependência de `reloadSession()`
-- o comportamento do callback com retry curto
-- a autoridade final do backend para auth e RBAC
+- autenticação administrativa baseada em sessão
+- introspecção de sessão
+- request de magic link
+- superfícies administrativas de users já publicadas
+- superfícies administrativas auxiliares já publicadas
+- regras de transporte, cookies, CORS e erros esperados
+
+Este documento não cobre:
+
+- contratos públicos de conteúdo
+- detalhes internos de implementação Express/Angular
+- contratos futuros ainda não publicados
 
 ---
 
 ## Navegação
 
-### Entrada
-- [Home da documentação](../README.md)
-- [Backoffice Admin](./README.md)
-- [Master Index](../00-governance/99-master-index.md)
-
-### Contexto administrativo imediato
-- [Architecture Runtime](./backoffice-admin-architecture-runtime.md)
-- [Frontend Structure](./backoffice-admin-frontend-structure.md)
-- [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
-- [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
-
-### Backend e operação da API
-- [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
-- [Nginx Reverse Proxy](../04-infra-aws-lightsail/nginx-reverse-proxy.md)
-- [Node Systemd](../04-infra-aws-lightsail/node-systemd.md)
-- [Deploy / Release / Rollback](../04-infra-aws-lightsail/deploy-release-rollback.md)
-
-### Governança e suporte
-- [Documentation System](../00-governance/documentation-system.md)
-- [References and Inventory](./backoffice-admin-references-inventory.md)
+- `docs/04-infra-aws-lightsail/auth-api-operations.md`
+- `docs/05-backoffice-admin/auth-rbac-and-guards.md`
+- `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
+- `docs/95-impl-log/2026-03-24-local-auth-users-management-checkpoint.md`
 
 ---
 
 ## Escopo
 
-Este documento cobre:
+Este documento descreve o **contrato publicado** consumido pelo Backoffice Admin.
 
-- autenticação administrativa session-first
-- cookie-based auth entre subdomínios
-- guards e shell do frontend
-- store de sessão do Backoffice
-- uso de `reloadSession()`
-- callback administrativo e revalidação de sessão
-- papel do backend na decisão final de permissão
+A leitura correta é:
 
-Este documento não cobre em profundidade:
-
-- contratos administrativos de domínio
-- implementação detalhada do sistema de menu
-- detalhes de layout do frontend
+- o backend é a autoridade final
+- o frontend consome contratos HTTP explícitos
+- autenticação administrativa é baseada em cookie de sessão
+- mutações administrativas exigem sessão válida e papel aceito pelo backend
+- no estado publicado atual, o shell administrativo continua admin-only
 
 ---
 
-## Estado atual
+## Estado atual publicado
 
-O Backoffice publicado já opera no modelo session-first real.
+No estado publicado atual, a Auth API expõe para o Backoffice Admin:
 
-O estado reconciliado inclui:
+### Auth / sessão
+- `POST /auth/magic-link/request`
+- `GET /auth/magic-link/consume`
+- `GET /auth/session`
 
-- login administrativo por magic link
-- sessão administrativa persistida por cookie
-- `GET /auth/session` como contrato real
-- guards protegendo shell e rotas privadas
-- callback `/auth/callback` consolidando o login
-- retry curto no callback para reduzir race condition de primeiro acesso
-- autoridade final da Auth API sobre autenticação e permissão
+### Desenvolvimento local
+- `POST /auth/dev/bootstrap-session`
 
----
+### Admin schema / suporte
+- `GET /admin/schema`
 
-## Relações com outros documentos
+### Admin users
+- `GET /admin/users`
+- `POST /admin/users`
+- `PATCH /admin/users/:id`
 
-Este arquivo deve ser lido junto com:
-
-- `docs/05-backoffice-admin/admin-api-contracts.md`
-- `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-- `docs/04-infra-aws-lightsail/auth-api-operations.md`
-- `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
+Outras superfícies administrativas podem existir no backend, mas este documento prioriza o contrato efetivamente usado pela linha atual do Backoffice Admin publicado.
 
 ---
 
-## Modelo publicado: session-first
+## Regras gerais de transporte
 
-O modelo administrativo real do Backoffice é session-first.
+### Origem e credenciais
 
-Fluxo funcional resumido:
+O Backoffice Admin publicado consome a Auth API com:
 
-1. operador solicita magic link em `/login`
-2. backend envia email real
-3. operador consome o link no browser
-4. Auth API cria sessão e emite cookie
-5. callback do Backoffice reexecuta `GET /auth/session`
-6. frontend navega para `/dashboard`
+- `withCredentials: true`
+- cookie HTTP-only de sessão
+- CORS com allowlist explícita de origens administrativas
 
-Regra importante:
+### Métodos efetivamente exigidos pela linha publicada
 
-- o frontend só considera o operador autenticado após introspecção real da sessão
+Para o fluxo administrativo atual, a política CORS precisa aceitar:
 
----
+- `GET`
+- `POST`
+- `PATCH`
+- `OPTIONS`
 
-## Cookie-based auth cross-subdomain
+### Headers esperados
 
-A sessão administrativa publicada depende de cookie HTTP-only emitido pela Auth API.
+Headers mínimos aceitos na linha publicada:
 
-Topologia publicada:
+- `Content-Type`
+- `Authorization`
 
-- Auth API: `auth-api.haxixesmokeclub.com`
-- Backoffice: `backoffice.haxixesmokeclub.com`
+### Content-Type
 
-Para esse fluxo funcionar, o cookie publicado foi reconciliado para política compatível com produção HTTPS e navegação cross-subdomain.
+Quando há body JSON, o contrato esperado é:
 
-Consequências práticas:
-
-- o frontend precisa enviar requests com `withCredentials: true`
-- o backend precisa aceitar credenciais via CORS
-- o navegador precisa persistir e reenviar o cookie no fluxo de introspecção
+- `Content-Type: application/json`
 
 ---
 
-## Papel da sessão no frontend
+## Cookie de sessão administrativa
 
-O frontend mantém uma store de sessão administrativa.
+A sessão administrativa é mantida por cookie emitido pela Auth API.
 
-Essa store é responsável por:
+Características esperadas da linha publicada:
 
-- saber se a sessão está resolvida
-- saber se o operador está autenticado
-- armazenar identidade e papel atuais
-- permitir guards e shell coerentes com o backend
+- cookie HTTP-only
+- `Secure` em ambiente publicado
+- `SameSite` compatível com o fluxo cross-subdomain
+- reutilização do cookie nas chamadas subsequentes para `/auth/session` e superfícies `/admin/*`
 
-### Regra fundamental
-
-A store não é fonte autônoma de verdade.
-
-Ela é um espelho do contrato de `GET /auth/session`.
+O frontend **não** deve depender de leitura direta do cookie.  
+A fonte de verdade para “usuário autenticado ou não” é o resultado de `GET /auth/session`.
 
 ---
 
-## Papel de `reloadSession()`
+## Auth — request de magic link
 
-`reloadSession()` é a operação explícita que reconsulta o backend para resolver a sessão atual.
+### Endpoint
 
-Ela é usada em pontos críticos como:
-
-- boot do shell administrativo
-- callback do login após `status=ok`
-- refresh em rota protegida
-- ações explícitas de “resolver sessão atual” no ambiente administrativo
-
-### Consequência operacional
-
-- `reloadSession()` é o ponto que reconcilia frontend e backend
-- se `reloadSession()` falha ou retorna não autenticado, o frontend não deve fingir que a sessão existe
-
----
-
-## Guards do frontend
-
-Os guards do Backoffice têm papel de contenção de navegação, não de autoridade final.
-
-### Responsabilidades esperadas
-
-- impedir entrada em rotas protegidas quando a sessão não está autenticada
-- aguardar resolução assíncrona do contrato de sessão quando necessário
-- redirecionar para `/login` quando não houver sessão válida
-- permitir shell e dashboard apenas quando o backend confirmou a sessão
-
-### O que os guards não fazem
-
-- não substituem a autorização final do backend
-- não tornam o operador autorizado só porque a rota abriu
-- não eliminam a necessidade de tratar `403` reais de mutações administrativas
-
----
-
-## Callback do login e retry curto
-
-O callback publicado do Backoffice recebe o redirect do consume com:
-
-- `status=ok`
-- ou `error=<code>`
-
-### Comportamento atual reconciliado
-
-Em `status=ok`, o callback:
-
-1. tenta resolver a sessão
-2. se necessário, aplica retry curto
-3. só então conclui erro ou navega para `/dashboard`
-
-### Motivo do retry curto
-
-No checkpoint do login publicado, foi observado um race condition leve entre:
-
-- emissão do cookie no consume
-- primeira tentativa de `GET /auth/session`
-
-O retry curto foi introduzido para reduzir esse timing gap sem exigir `F5` do operador.
-
----
-
-## Backend como autoridade final
-
-A Auth API continua sendo a autoridade final para:
-
-- autenticação
-- resolução da identidade atual
-- validação de papel
-- validação de permissão
-- bloqueio de mutações indevidas
-- auditoria administrativa
-
-Consequências para o frontend:
-
-- um item de menu visível não implica autorização garantida
-- um guard aprovado não implica mutação garantida
-- `403` do backend deve ser tratado como decisão final
-
----
-
-## Modelo inicial de RBAC
-
-O Backoffice deve se manter preparado para RBAC explícito.
-
-Hierarquia administrativa inicial coerente:
-
-```text
-viewer
-editor
-admin
+```http
+POST /auth/magic-link/request
 ```
 
-### Leitura operacional
+### Objetivo
 
-- `viewer`: leitura administrativa
-- `editor`: edição controlada
-- `admin`: ações administrativas sensíveis e lifecycle crítico
+Solicitar link administrativo de entrada por email.
 
-### Reconciliação com o backend
+### Request body
 
-O papel que chega da Auth API é a referência real que governa o frontend.
+```json
+{
+  "email": "admin@example.com"
+}
+```
 
-A UI pode adaptar apresentação, mas não deve divergir semanticamente da autoridade do backend.
+### Resposta esperada
+
+A resposta é intencionalmente genérica para evitar enumeração de contas.
+
+Exemplo:
+
+```json
+{
+  "ok": true,
+  "message": "If the account is allowed, a sign-in link has been sent."
+}
+```
+
+### Regras importantes
+
+* magic link **não cria usuário**
+* magic link apenas autentica usuário **já existente e elegível**
+* no estado publicado atual, elegível significa:
+
+  * usuário existente
+  * `role = "admin"`
+
+### Observações
+
+* reutilização do mesmo token não é suportada
+* token já consumido ou expirado deve resultar em erro de callback/consume
+* o fluxo canônico do frontend é:
+
+  1. request do magic link
+  2. clique no email
+  3. callback
+  4. introspecção de sessão em `/auth/session`
 
 ---
 
-## Invariantes do modelo auth/rbac
+## Auth — consume de magic link
 
-1. o Backoffice published é session-first
-2. a sessão administrativa é cookie-based
-3. `withCredentials: true` é obrigatório nos contratos de sessão
-4. `reloadSession()` é a operação principal de reconciliação
-5. guards restringem navegação, não substituem autorização final
-6. callback com retry curto faz parte do comportamento normal do login publicado
-7. backend é a autoridade final de autenticação e permissão
+### Endpoint
+
+```http
+GET /auth/magic-link/consume?token=...
+```
+
+### Objetivo
+
+Consumir token one-time de autenticação administrativa.
+
+### Comportamento esperado
+
+Em caso de sucesso:
+
+* cria sessão administrativa
+* emite cookie
+* redireciona para o callback do Backoffice
+
+Em caso de falha:
+
+* redireciona com status/erro de link inválido ou expirado
+
+### Observações
+
+* token é one-time use
+* consumir via terminal antes do navegador invalida o clique posterior no email
+* o frontend não deve tentar inferir sucesso apenas pelo redirect; ele deve revalidar a sessão em `/auth/session`
 
 ---
 
-## Critério de pronto deste documento
+## Auth — introspecção de sessão
 
-Este documento pode ser considerado reconciliado quando:
+### Endpoint
 
-- session-first estiver explicitado como modelo real
-- cookie cross-subdomain estiver descrito
-- papel dos guards estiver claro
-- dependência de `reloadSession()` estiver explícita
-- callback com retry curto estiver registrado
-- backend como autoridade final estiver inequívoco
+```http
+GET /auth/session
+```
 
-Neste checkpoint, esse critério está atendido.
+### Objetivo
+
+Retornar o estado administrativo atual da sessão.
+
+### Sem sessão válida
+
+Resposta típica:
+
+```json
+{
+  "authenticated": false
+}
+```
+
+Status esperado:
+
+* `401` ou equivalente não autenticado
+
+### Com sessão válida
+
+Resposta típica:
+
+```json
+{
+  "authenticated": true,
+  "user": {
+    "id": "2",
+    "email": "admin@example.com",
+    "name": "Admin Name"
+  },
+  "role": "admin"
+}
+```
+
+### Contrato lógico consumido pelo frontend
+
+Campos relevantes:
+
+* `authenticated: boolean`
+* `user.id`
+* `user.email`
+* `user.name`
+* `role`
+
+### Papéis reconhecidos
+
+O modelo atual reconhece:
+
+* `viewer`
+* `editor`
+* `admin`
+
+### Observação importante
+
+Embora o enum reconheça `viewer`, `editor` e `admin`, o estado efetivo publicado do shell administrativo continua admin-only.
+
+---
+
+## Auth — bootstrap dev local
+
+### Endpoint
+
+```http
+POST /auth/dev/bootstrap-session
+```
+
+### Objetivo
+
+Criar/promover sessão administrativa local para desenvolvimento.
+
+### Uso correto
+
+* somente em desenvolvimento local
+* não faz parte do fluxo administrativo publicado para produção
+* serve para acelerar smoke local do Backoffice
+
+### Comportamento esperado
+
+* cria ou promove o usuário local configurado para admin
+* emite cookie de sessão
+* permite navegar localmente no shell administrativo
+
+---
+
+## Admin schema
+
+### Endpoint
+
+```http
+GET /admin/schema
+```
+
+### Objetivo
+
+Superfície administrativa auxiliar para diagnóstico/inspeção de schema.
+
+### Regras
+
+* protegida por sessão administrativa válida
+* útil para smoke administrativo pós-deploy
+* não substitui documentação canônica de schema
+
+---
+
+## Admin users — listagem
+
+### Endpoint
+
+```http
+GET /admin/users
+```
+
+### Objetivo
+
+Listar usuários administrativos e relacionados ao Backoffice.
+
+### Resposta esperada
+
+```json
+{
+  "ok": true,
+  "count": 2,
+  "items": [
+    {
+      "id": 5,
+      "email": "user@example.com",
+      "display_name": "User Name",
+      "role": "viewer",
+      "created_at": "2026-03-24T18:00:00.000Z",
+      "updated_at": "2026-03-24T18:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Campos relevantes por item
+
+* `id`
+* `email`
+* `display_name`
+* `role`
+* `created_at`
+* `updated_at`
+
+### Observações
+
+* a linha publicada atual não expõe paginação nesta superfície
+* o frontend publicado trata essa resposta como lista integral para o primeiro corte da área `/users`
+
+---
+
+## Admin users — criação
+
+### Endpoint
+
+```http
+POST /admin/users
+```
+
+### Objetivo
+
+Criar usuário administrativo/domínio para a linha atual do Backoffice.
+
+### Request body
+
+```json
+{
+  "email": "user@example.com",
+  "display_name": "User Name",
+  "role": "viewer"
+}
+```
+
+### Regras de validação esperadas
+
+* `email` obrigatório e válido
+* `display_name` obrigatório
+* `role` aceito dentro de:
+
+  * `viewer`
+  * `editor`
+  * `admin`
+
+### Resposta de sucesso
+
+```json
+{
+  "ok": true,
+  "item": {
+    "id": 10,
+    "email": "user@example.com",
+    "display_name": "User Name",
+    "role": "viewer",
+    "created_at": "2026-03-24T18:00:00.000Z",
+    "updated_at": "2026-03-24T18:00:00.000Z"
+  }
+}
+```
+
+### Respostas de erro esperadas
+
+#### campos ausentes
+
+```json
+{
+  "ok": false,
+  "error": "missing_fields"
+}
+```
+
+#### email inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_email"
+}
+```
+
+#### nome inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_display_name"
+}
+```
+
+#### papel inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_role"
+}
+```
+
+#### email já existente
+
+```json
+{
+  "ok": false,
+  "error": "email_already_exists"
+}
+```
+
+#### erro genérico de banco
+
+```json
+{
+  "ok": false,
+  "error": "db_error"
+}
+```
+
+### Observação funcional importante
+
+Criar usuário com `role = "viewer"` ou `role = "editor"` **não** implica acesso administrativo ao Backoffice no estado publicado atual.
+
+---
+
+## Admin users — atualização parcial
+
+### Endpoint
+
+```http
+PATCH /admin/users/:id
+```
+
+### Objetivo
+
+Atualizar parcialmente um usuário existente.
+
+### Campos aceitos no body
+
+* `email`
+* `display_name`
+* `role`
+
+### Exemplo — alterar role
+
+```json
+{
+  "role": "editor"
+}
+```
+
+### Exemplo — renomear
+
+```json
+{
+  "display_name": "Novo Nome"
+}
+```
+
+### Exemplo — alterar email
+
+```json
+{
+  "email": "novo-email@example.com"
+}
+```
+
+### Resposta de sucesso
+
+```json
+{
+  "ok": true,
+  "item": {
+    "id": 10,
+    "email": "novo-email@example.com",
+    "display_name": "Novo Nome",
+    "role": "editor",
+    "created_at": "2026-03-24T18:00:00.000Z",
+    "updated_at": "2026-03-24T18:10:00.000Z"
+  }
+}
+```
+
+### Respostas de erro esperadas
+
+#### id inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_id"
+}
+```
+
+#### nenhum campo enviado
+
+```json
+{
+  "ok": false,
+  "error": "no_fields_to_update"
+}
+```
+
+#### email inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_email"
+}
+```
+
+#### nome inválido
+
+```json
+{
+  "ok": false,
+  "error": "invalid_display_name"
+}
+```
+
+#### role inválida
+
+```json
+{
+  "ok": false,
+  "error": "invalid_role"
+}
+```
+
+#### registro não encontrado
+
+```json
+{
+  "ok": false,
+  "error": "not_found"
+}
+```
+
+#### email duplicado
+
+```json
+{
+  "ok": false,
+  "error": "email_already_exists"
+}
+```
+
+#### erro genérico de banco
+
+```json
+{
+  "ok": false,
+  "error": "db_error"
+}
+```
+
+---
+
+## Regras de autorização do contrato
+
+### Estado efetivo publicado
+
+No estado publicado atual:
+
+* `GET /admin/users` exige sessão administrativa aceita pelo backend
+* `POST /admin/users` exige sessão administrativa aceita pelo backend
+* `PATCH /admin/users/:id` exige sessão administrativa aceita pelo backend
+
+### Interpretação correta
+
+Embora o enum de `role` já reconheça `viewer`, `editor` e `admin`, a linha publicada continua com autorização efetiva admin-only para shell administrativo e mutações administrativas.
+
+---
+
+## Regras de compatibilidade com legado
+
+A linha publicada atual já passou pelas seguintes reconciliações:
+
+### `0003_admin_audit_log.sql`
+
+* criação/alinhamento da tabela de audit administrativo
+
+### `0004_users_role_enum_reconcile.sql`
+
+* reconciliação do legado de `users.role`
+* conversão de `user` para `viewer`
+* enum final publicado:
+
+  * `viewer`
+  * `editor`
+  * `admin`
+
+### Hotfix de CORS
+
+* liberação de `PATCH` no CORS da Auth API
+* necessária para:
+
+  * alterar role
+  * renomear
+  * alterar email pela UI publicada
+
+---
+
+## Relação com o frontend publicado
+
+A área `/users` do Backoffice publicado depende explicitamente deste contrato:
+
+* `GET /admin/users`
+* `POST /admin/users`
+* `PATCH /admin/users/:id`
+
+Capacidades publicadas na UI:
+
+* listagem real de usuários
+* criação
+* alteração de role
+* renomeação
+* alteração de email
+
+O frontend deve tratar a Auth API como autoridade final para:
+
+* elegibilidade de login
+* mutações administrativas
+* validação de papel
+* CORS e aceitação real de método
+
+---
+
+## Critério de pronto
+
+Este documento está correto quando:
+
+* reflete apenas contratos administrativos realmente publicados
+* deixa claro que magic link não cria usuário
+* deixa claro que login administrativo publicado continua admin-only
+* descreve corretamente o CRUD básico de users
+* registra reconciliações de schema relevantes para a linha publicada
+* não mistura contrato administrativo com wish-list futura
+
+---
+
+## Última revisão
+
+* 2026-03-24
+* reconciliado após rollout completo de admin users management e hotfixes `v0.4.8`, `v0.4.9` e `v0.4.10`
+
