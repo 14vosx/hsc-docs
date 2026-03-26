@@ -97,6 +97,9 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
+- `docs/05-backoffice-admin/news-admin-api-contracts.md`
+- `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
+- `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -106,7 +109,10 @@ Leitura recomendada:
 - `architecture-runtime.md` define a topologia funcional do produto administrativo
 - `frontend-structure.md` define a estrutura da SPA
 - `auth-rbac-and-guards.md` define acesso e proteção
-- `admin-api-contracts.md` define contratos com a Auth API
+- `admin-api-contracts.md` define contratos transversais com a Auth API
+- `news-admin-api-contracts.md` consolida o contrato canônico do domínio `news`
+- `news-admin-integration-and-evolution.md` define uso e expansão disciplinada do domínio `news`
+- `news-admin-feature-implementation-spec.md` traduz o domínio reconciliado em feature implementável no frontend
 - `operational-runbooks.md` define validação e troubleshooting
 - este arquivo consolida o inventário de referência e dependência
 
@@ -172,6 +178,25 @@ Papel dessas referências:
 - registrar roadmap e visão anterior de camadas
 - reaproveitar material de `news`, `seasons`, `events` e RBAC
 - servir como base de comparação, não como autoridade superior ao canônico atual
+
+---
+
+## Referências canônicas novas do domínio `news`
+
+O domínio `news` passa a contar com três referências canônicas específicas dentro do contexto `05-backoffice-admin`:
+
+- `docs/05-backoffice-admin/news-admin-api-contracts.md`
+- `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
+- `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
+
+Papel dessas referências:
+
+- separar contrato transversal de auth dos contratos específicos de domínio
+- consolidar payloads, responses e lifecycle já reconciliados de `news`
+- orientar a implementação das telas `/news`, `/news/new` e `/news/:id/edit`
+- estabilizar a passagem entre contrato reconciliado e implementação da feature
+- registrar a fronteira entre Backoffice, Auth API e mirror público do Portal
+- orientar expansão futura do domínio sem transformar `admin-api-contracts.md` em documento monolítico
 
 ---
 

@@ -27,6 +27,9 @@ Este documento existe para:
 - [Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Admin API Contracts](./admin-api-contracts.md)
+- [News Admin API Contracts](./news-admin-api-contracts.md)
+- [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
+- [News Admin Feature Implementation Spec](./news-admin-feature-implementation-spec.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 - [References and Inventory](./backoffice-admin-references-inventory.md)
 
@@ -191,6 +194,9 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 - `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 - `docs/05-backoffice-admin/admin-api-contracts.md`
+- `docs/05-backoffice-admin/news-admin-api-contracts.md`
+- `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
+- `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -207,8 +213,11 @@ A ordem recomendada de leitura é:
 3. `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
 4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
 5. `docs/05-backoffice-admin/admin-api-contracts.md`
-6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+6. `docs/05-backoffice-admin/news-admin-api-contracts.md`
+7. `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
+8. `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
+9. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+10. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 
