@@ -304,7 +304,112 @@ Com base nas respostas reconciliadas, cada item administrativo tende a expor:
 
 ---
 
+## Contrato administrativo — detalhe
+
+### Endpoint
+
+```http
+GET /admin/news/:id
+```
+
+### Objetivo
+
+Expor o detalhe administrativo de um item de `news` por `id`, com dados suficientes para hidratar de forma robusta a tela `/news/:id/edit`.
+
+### Status desta seção
+
+Leitura correta:
+
+- esta superfície já possui implementação local no `hsc-auth-api`
+- o runtime local já foi validado com sucesso `200 OK` para item existente
+- o runtime local já foi validado com `404 Not Found` + `error: "not_found"` para item inexistente
+- esta revisão ainda não deve tratá-la como baseline reconciliada do runtime principal até PR, merge e publicação correspondentes
+
+### Auth esperada
+
+Sem sessão válida, a expectativa continua alinhada à superfície administrativa já observada:
+
+```json
+{
+  "ok": false,
+  "error": "Unauthorized"
+}
+```
+
+Status esperado:
+
+* `401 Unauthorized`
+
+### Resposta de sucesso validada localmente
+
+```json
+{
+  "ok": true,
+  "item": {
+    "id": 1,
+    "slug": "news-crud-smoke-20260325",
+    "title": "News CRUD Smoke 2026-03-25 Atualizada",
+    "content": "Draft atualizado no teste completo de CRUD do recurso news.",
+    "excerpt": null,
+    "image_url": null,
+    "status": "draft",
+    "published_at": null,
+    "created_at": "2026-03-25T19:11:24.000Z",
+    "updated_at": "2026-03-25T19:12:50.000Z"
+  }
+}
+```
+
+Status validado localmente:
+
+- `200 OK`
+
+### Erro relevante mínimo validado localmente
+
+```json
+{
+  "ok": false,
+  "error": "not_found"
+}
+```
+
+Status validado localmente:
+
+- `404 Not Found`
+
+### Campos mínimos propostos do item
+
+* `id`
+* `slug`
+* `title`
+* `content`
+* `excerpt`
+* `image_url`
+* `status`
+* `published_at`
+* `created_at`
+* `updated_at`
+
+### Invariantes propostos
+
+* o endpoint não altera estado do recurso
+* o endpoint deve refletir o estado administrativo atual do item
+* `content` deve estar disponível no detalhe administrativo
+* este contrato não promove nova mutabilidade de `slug`, `excerpt` ou `image_url`
+* este contrato não altera o shape reconciliado de `PATCH /admin/news/:id`
+
+### Leitura correta
+
+- a fonte de verdade inicial desta superfície continua sendo `05-backoffice-admin`
+- a implementação local correspondente já existe no `hsc-auth-api`
+- o runtime local já confirmou sucesso com `content` no detail DTO e erro `404 not_found`
+- esta superfície ainda depende de PR, merge e publicação para passar a integrar o baseline reconciliado do runtime principal
+- após merge e publicação, o Backoffice deve preferir esta leitura para hidratar `/news/:id/edit`
+
+---
+
 ## Contrato administrativo — criação
+
 
 ### Endpoint
 
@@ -356,7 +461,7 @@ Status observado:
 
 - `400 Bad Request`
 
-### Resposta de sucesso observada
+### Resposta de sucesso validada localmente
 
 ```json
 {
@@ -728,16 +833,21 @@ O fluxo de edição deve consumir:
 PATCH /admin/news/:id
 ```
 
-Leitura importante do checkpoint atual:
+Leitura correta do estado atual:
 
-- não foi reconciliado, nesta revisão, um `GET /admin/news/:id`
-- portanto, a tela de edição não deve presumir esse endpoint como canônico até confirmação futura
+* `GET /admin/news/:id` passa a ser tratado como evolução prioritária do domínio
+* porém, este endpoint ainda não está reconciliado como superfície publicada no runtime desta revisão
+* portanto, a tela de edição não deve presumir sua disponibilidade até validação futura explícita
 
 Estratégias aceitáveis no checkpoint atual:
 
-- hidratar a edição a partir da listagem já carregada, quando suficiente
-- reter estado do item recém-criado/atualizado no fluxo do frontend
-- adicionar leitura dedicada apenas quando essa superfície estiver publicada e reconciliada
+* hidratar a edição a partir da listagem já carregada, quando suficiente
+* reter estado do item recém-criado/atualizado no fluxo do frontend
+* adicionar leitura dedicada apenas quando essa superfície estiver publicada e reconciliada
+
+Leitura alvo após evolução do contrato:
+
+* após publicação e reconciliação de `GET /admin/news/:id`, a tela `/news/:id/edit` deve preferir essa leitura para hidratação do detalhe administrativo
 
 ### Ações de ciclo de vida
 
