@@ -34,6 +34,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
+  - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
@@ -198,6 +199,7 @@ Arquivos principais:
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
 - [News Admin API Contracts](../05-backoffice-admin/news-admin-api-contracts.md)
 - [News Admin Integration and Evolution](../05-backoffice-admin/news-admin-integration-and-evolution.md)
+- [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 - [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
