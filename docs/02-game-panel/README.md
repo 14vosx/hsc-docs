@@ -2,15 +2,15 @@
 
 ## Objetivo
 
-Documentar o contexto canônico do Game Panel do ecossistema HSC, incluindo a camada operacional do servidor CS2, o AMP Instance Manager, a instância oficial `MixHAXIXE01`, o MatchZy, os plugins instalados e os runbooks de operação do lado jogo.
+Documentar o contexto canônico do Game Panel do ecossistema HSC, incluindo a camada operacional do servidor CS2, o AMP Instance Manager, a instância oficial `MixHAXIXE01`, o MatchZy, os plugins instalados e a trilha administrativa do lado jogo baseada no CounterStrikeSharp.
 
 Este contexto existe para registrar, de forma estável e auditável:
 
 - o papel do Game Panel dentro do ecossistema HSC
 - a relação entre AMP, instância, servidor CS2 e plugins
 - os limites entre infraestrutura base, operação do jogo e publicação pública de dados
-- as dependências operacionais que precisam permanecer estáveis para o funcionamento do servidor
-- os procedimentos recorrentes de operação e troubleshooting do lado game
+- a baseline administrativa canônica do lado jogo
+- os procedimentos recorrentes de operação, manutenção e troubleshooting do servidor
 
 ---
 
@@ -21,7 +21,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Governance](../00-governance/README.md)
 - [Master Index](../00-governance/99-master-index.md)
 
-### Documentos deste contexto
+### Núcleo do contexto
 - [AMP Instance Manager](./amp-instance-manager.md)
 - [Architecture Runtime](./game-panel-architecture-runtime.md)
 - [CS2 Server Configuration](./cs2-server-configuration.md)
@@ -33,10 +33,17 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 - [References and Inventory](./game-panel-references-inventory.md)
 
+### Trilha administrativa do lado jogo
+- [Admin Authority Runtime](./game-panel-admin-authority-runtime.md)
+- [Admin Operational Runbooks](./game-panel-admin-operational-runbooks.md)
+- [Admin Command Profiles](./game-panel-admin-command-profiles.md)
+- [Admin References Inventory](./game-panel-admin-references-inventory.md)
+
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
 - [Portal Estático](../03-portal-estatico/README.md)
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
+- [Backoffice Admin](../05-backoffice-admin/README.md)
 
 ### Trilhas operacionais relevantes
 - [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
@@ -44,28 +51,6 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Docker Host](../01-infra-hostinger/docker-host.md)
-
----
-
----
-
-## Navegação
-
-### Entrada
-- [Home da documentação](../README.md)
-- [Game Panel](./README.md)
-- [Master Index](../00-governance/99-master-index.md)
-
-### Contexto operacional imediato
-- [CS2 Server Configuration](./cs2-server-configuration.md)
-- [Plugins Installed](./plugins-installed.md)
-- [Instance MixHAXIXE01](./instance-mixhaxixe01.md)
-- [Game Panel Operational Runbooks](./game-panel-operational-runbooks.md)
-
-### Infraestrutura e suporte
-- [Docker Host](../01-infra-hostinger/docker-host.md)
-- [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
-- [Game Panel Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 
 ---
 
@@ -81,6 +66,7 @@ Estão dentro do escopo deste contexto:
 - MatchZy
 - plugins instalados
 - configurações operacionais do servidor
+- baseline administrativa do lado jogo
 - runbooks de scrim, BO1, BO3, veto, coach, warmup e fallback admin
 - troubleshooting funcional do lado jogo
 - MariaDB do lado game, se e quando fizer parte do runtime real
@@ -92,6 +78,7 @@ Este contexto não cobre, em profundidade:
 - contratos JSON do portal
 - frontend público do portal
 - Auth API no AWS Lightsail
+- SPA administrativa do Backoffice
 - credenciais e arquivos sensíveis
 
 ---
@@ -108,8 +95,16 @@ O estado operacional conhecido deste contexto é:
 - há plugins instalados e relevantes para a operação do servidor
 - o lado jogo produz a base de dados estatística que depois alimenta o Portal Estático
 - a operação do Game Panel exige runbooks claros para evitar dependência de memória informal
+- a autoridade administrativa do lado jogo foi centralizada no CounterStrikeSharp
+- o grupo administrativo canônico ativo é `#hsc/root`
+- o MatchZy e o CS2-SimpleAdmin deixaram de manter cadastros paralelos como fonte primária de autoridade
 
-O Game Panel é a camada operacional viva do lado CS2 do HSC.
+Leitura correta do estado atual:
+
+- o Game Panel continua sendo a camada operacional viva do lado CS2 do HSC
+- a administração do servidor e a administração da partida seguem separadas por responsabilidade
+- a autoridade de admin agora tem baseline única e auditável
+- a manutenção futura deve preservar essa topologia
 
 ---
 
@@ -123,69 +118,79 @@ Seu papel é:
 - permitir gestão prática da instância via AMP
 - manter MatchZy e plugins funcionando
 - sustentar fluxos de scrim e partida organizada
+- sustentar a baseline administrativa do lado jogo
 - produzir a base estatística operacional que alimenta a cadeia pública de dados do portal
 
 Em termos arquiteturais, o Game Panel é o contexto que transforma a Infra Hostinger em um servidor de jogo efetivamente utilizável.
 
 ---
 
-## O que roda aqui
+## Subtrilhas internas do contexto
 
-Este contexto sustenta, em nível operacional:
+A organização viva deste contexto, neste checkpoint, se divide em quatro subtrilhas.
 
-- AMP Instance Manager
+### 1. Runtime estrutural do lado jogo
+
+Cobre:
+
+- AMP
 - instância `MixHAXIXE01`
-- servidor Counter-Strike 2
+- servidor CS2
+- filesystem e runtime de container associados
+
+Documentos principais:
+
+- `game-panel-architecture-runtime.md`
+- `amp-instance-manager.md`
+- `instance-mixhaxixe01.md`
+
+### 2. Fluxo competitivo e operação de partida
+
+Cobre:
+
 - MatchZy
-- plugins auxiliares
-- arquivos de configuração do runtime do jogo
-- banco(s) ou artefatos operacionais ligados ao lado game
-- rotinas práticas de administração da instância
+- warmup
+- BO1 / BO3
+- ready flow
+- coach
+- comandos de partida
 
-Do ponto de vista arquitetural, esta camada não é a borda pública do portal e não é o backend dinâmico da Auth API; ela é o runtime de jogo do ecossistema.
+Documentos principais:
 
----
+- `matchzy.md`
+- `cs2-server-configuration.md`
+- `game-panel-operational-runbooks.md`
 
-## O que não roda aqui
+### 3. Plugins e superfícies auxiliares
 
-Este contexto não deve ser confundido com:
+Cobre:
 
-### Infra Hostinger
+- plugins carregados
+- plugins core
+- plugins administrativos
+- plugins de suporte visual e funcional
 
-Este contexto não documenta, em profundidade:
+Documentos principais:
 
-- Debian
-- Nginx edge
-- Certbot
-- Docker host como substrate
-- systemd e timers do host
-- filesystem base e permissões do host
+- `plugins-installed.md`
+- `player-model-changer.md`
+- `player-model-changer-references-inventory.md`
 
-Esses itens pertencem a `docs/01-infra-hostinger/`.
+### 4. Autoridade administrativa do lado jogo
 
-### Portal Estático
+Cobre:
 
-Este contexto não documenta, em profundidade:
+- CounterStrikeSharp como fonte de verdade para admins
+- CS2-SimpleAdmin como administração do servidor
+- MatchZy como administração da partida
+- baseline viva de grupos, admins e guardrails contra drift
 
-- Static API v2
-- pipeline ETL Bash
-- contratos JSON
-- frontend público
-- publishing via Nginx
+Documentos principais:
 
-Esses itens pertencem a `docs/03-portal-estatico/`.
-
-### Auth API
-
-Este contexto não documenta:
-
-- runtime do Lightsail
-- Nginx reverse proxy da Auth API
-- Node.js via systemd da camada dinâmica
-- MariaDB local do backend dinâmico
-- deploy/release/rollback da Auth API
-
-Esses itens pertencem a `docs/04-infra-aws-lightsail/`.
+- `game-panel-admin-authority-runtime.md`
+- `game-panel-admin-operational-runbooks.md`
+- `game-panel-admin-command-profiles.md`
+- `game-panel-admin-references-inventory.md`
 
 ---
 
@@ -199,8 +204,9 @@ Seu papel no ecossistema é:
 - sustentar a experiência de scrim e partidas organizadas
 - centralizar MatchZy e plugins do lado game
 - preservar a estrutura da instância oficial
+- centralizar a autoridade administrativa do lado jogo em baseline explícita
 - gerar a base operacional de stats que alimenta o Portal Estático
-- separar a lógica do jogo da infraestrutura base e da camada pública de publicação
+- separar a lógica do jogo da infraestrutura base, da camada pública de publicação e da camada dinâmica de auth/admin
 
 Em termos arquiteturais:
 
@@ -208,8 +214,9 @@ Em termos arquiteturais:
 - Game Panel = operação do jogo
 - Portal Estático = publicação pública dos dados
 - AWS Lightsail = backend dinâmico da Auth API
+- Backoffice Admin = superfície administrativa de produto
 
-Essa separação reduz confusão entre “host”, “jogo”, “portal” e “backend dinâmico”.
+Essa separação reduz confusão entre “host”, “jogo”, “portal”, “backend dinâmico” e “produto administrativo”.
 
 ---
 
@@ -229,6 +236,13 @@ Papel:
 - representar a instância oficial do ecossistema
 - sustentar a árvore operacional do runtime do jogo
 
+### CounterStrikeSharp
+
+Papel:
+- base de plugins do lado jogo
+- camada-base de autoridade administrativa
+- ponto canônico de carga de `admins.json` e `admin_groups.json`
+
 ### Counter-Strike 2
 
 Papel:
@@ -240,8 +254,16 @@ Papel:
 Papel:
 - administrar lógica competitiva e estatística do runtime de partida
 - atuar como peça central da operação do servidor e da geração de dados
+- consumir a autoridade administrativa vinda do CounterStrikeSharp
 
-### Plugins
+### CS2-SimpleAdmin
+
+Papel:
+- administrar o servidor em runtime
+- oferecer painel de staff, moderação e comandos utilitários
+- consumir a autoridade administrativa vinda do CounterStrikeSharp
+
+### Plugins auxiliares
 
 Papel:
 - complementar a operação do servidor
@@ -249,199 +271,66 @@ Papel:
 
 ---
 
-## Relação com a Infra Hostinger
+## Leitura recomendada por objetivo
 
-Este contexto depende diretamente da Infra Hostinger para:
+### Entender o runtime do lado jogo
 
-- host Debian
-- Docker host
-- árvore operacional da instância
-- filesystem do lado `amp`
-- disponibilidade do substrate que sustenta o runtime do jogo
+Ler nesta ordem:
 
-Regra arquitetural:
+1. `game-panel-architecture-runtime.md`
+2. `amp-instance-manager.md`
+3. `instance-mixhaxixe01.md`
 
-- o Game Panel vive sobre a Hostinger
-- mas sua semântica operacional precisa ser documentada separadamente para evitar mistura entre infraestrutura e workload
+### Entender partida, MatchZy e fluxo competitivo
 
----
+Ler nesta ordem:
 
-## Relação com o Portal Estático
+1. `matchzy.md`
+2. `cs2-server-configuration.md`
+3. `game-panel-operational-runbooks.md`
 
-Este contexto se relaciona diretamente com o Portal Estático porque o lado jogo produz a origem de dados que depois será transformada na Static API v2.
+### Entender autoridade administrativa e manutenção de admins
 
-Essa relação inclui:
+Ler nesta ordem:
 
-- MatchZy produzindo estatísticas
-- persistência operacional em SQLite
-- dependência do portal em relação ao `matchzy.db`
-- dependência do ETL em relação ao schema e ao path da instância
+1. `game-panel-admin-authority-runtime.md`
+2. `game-panel-admin-operational-runbooks.md`
+3. `game-panel-admin-command-profiles.md`
+4. `game-panel-admin-references-inventory.md`
 
-Regra importante:
+### Entender troubleshooting e checkpoints vivos
 
-- o Game Panel produz a fonte
-- o Portal Estático consome a fonte e publica os artefatos derivados
+Ler nesta ordem:
 
----
-
-## Relação com o MatchZy
-
-O MatchZy é peça central deste contexto por duas razões:
-
-- ele participa diretamente da operação das partidas
-- ele participa da produção da base estatística do ecossistema
-
-Isso significa que o MatchZy tem dupla natureza:
-
-- componente operacional de jogo
-- componente estrutural da cadeia de dados públicos
-
-Por isso, ele precisa de documentação própria dentro deste contexto.
+1. `game-panel-observability-troubleshooting.md`
+2. `game-panel-references-inventory.md`
+3. `game-panel-admin-references-inventory.md`
 
 ---
 
-## Relação com plugins
+## Regra canônica deste contexto
 
-Os plugins instalados fazem parte do runtime real do servidor.
+No HSC, o contexto `02-game-panel` deve documentar o lado jogo com fronteiras claras.
 
-Eles podem influenciar:
+Isso significa:
 
-- administração
-- permissões
-- experiência dos players
-- persistência de dados auxiliares
-- operação de MatchZy e rotinas da partida
-
-Regra importante:
-
-- plugin instalado em produção é parte da verdade do contexto
-- ele não deve ficar apenas em memória informal ou em prints de console
+- não absorver documentação de host base que pertence ao contexto `01-infra-hostinger`
+- não absorver documentação de ETL e publicação pública que pertence ao contexto `03-portal-estatico`
+- não absorver documentação da Auth API e do backend dinâmico que pertence ao contexto `04-infra-aws-lightsail`
+- não absorver documentação da SPA administrativa que pertence ao contexto `05-backoffice-admin`
+- manter a autoridade administrativa do lado jogo como baseline explícita, e não como memória informal de plugin
 
 ---
 
-## Documentos canônicos deste contexto
+## Estado documental desejado deste contexto
 
-Os documentos canônicos previstos para este contexto são:
+Este contexto é considerado documentalmente saudável quando:
 
-- `docs/02-game-panel/README.md`
-- `docs/02-game-panel/game-panel-architecture-runtime.md`
-- `docs/02-game-panel/amp-instance-manager.md`
-- `docs/02-game-panel/instance-mixhaxixe01.md`
-- `docs/02-game-panel/cs2-server-configuration.md`
-- `docs/02-game-panel/matchzy.md`
-- `docs/02-game-panel/plugins-installed.md`
-- `docs/02-game-panel/mariadb-runtime.md`
-- `docs/02-game-panel/operational-runbooks.md`
-- `docs/02-game-panel/game-panel-observability-troubleshooting.md`
-- `docs/02-game-panel/game-panel-references-inventory.md`
+- a topologia do runtime do lado jogo está clara
+- a instância oficial está identificada
+- MatchZy e plugins relevantes estão inventariados
+- os runbooks operacionais do servidor estão explícitos
+- a trilha administrativa do lado jogo está documentada e sustentável
+- troubleshooting e checkpoints vivos estão fáceis de localizar
 
-Este `README.md` funciona como porta de entrada e índice local do contexto.
-
----
-
-## Dependências externas
-
-Este contexto depende de componentes e condições externas relevantes, incluindo:
-
-- substrate íntegro da Infra Hostinger
-- Docker host funcional
-- árvore operacional da instância AMP íntegra
-- MatchZy funcional
-- plugins carregando corretamente
-- configurações do servidor coerentes
-- permissões e admins operando como esperado
-- integridade da produção local de dados estatísticos
-
-Também há dependência de disciplina operacional para evitar:
-
-- drift de configuração
-- perda de permissões/admins
-- inconsistência entre modo de jogo e runbook
-- regressão após update de plugin ou ajuste manual no runtime
-
----
-
-## Source of truth / evidências
-
-As principais evidências que sustentam este contexto, nesta fase de migração documental, são:
-
-- documentação consolidada atual do ecossistema HSC
-- blueprint técnico consolidado do HSC
-- documentação específica da camada AMP/CS2
-- documentação reconciliada de MatchZy, plugins e runbooks do servidor
-- reconciliação do papel da instância `MixHAXIXE01` no ecossistema
-
-Enquanto a migração do contexto não estiver concluída, os documentos antigos seguem como fonte de extração e checagem cruzada, mas não como canônico final.
-
----
-
-## Relação com outros contextos
-
-Este contexto se relaciona diretamente com:
-
-### `docs/01-infra-hostinger/`
-
-Relação estrutural forte.  
-A Infra Hostinger sustenta o substrate técnico sobre o qual o Game Panel existe.
-
-### `docs/03-portal-estatico/`
-
-Relação estrutural forte.  
-O Portal Estático depende dos dados produzidos a partir do runtime do jogo operado neste contexto.
-
-### `docs/04-infra-aws-lightsail/`
-
-Relação indireta de arquitetura global.  
-A camada dinâmica da Auth API vive fora do lado game, em Lightsail.
-
-### `docs/90-adr/`
-
-Deve registrar decisões arquiteturais relevantes sobre a operação do lado jogo, adoção de MatchZy, estrutura de instância ou regras estruturais do runtime.
-
-### `docs/95-impl-log/`
-
-Deve registrar mudanças incrementais relevantes deste contexto, como updates de plugin, ajustes de configuração, mudanças de fluxo operacional ou endurecimentos administrativos.
-
-### `docs/97-audit/`
-
-Pode conter análises, gaps, inconsistências ou verificações ligadas ao Game Panel.
-
-### `docs/98-legacy/`
-
-Preserva documentação histórica usada como base de migração desta camada.
-
----
-
-## Relações com outros documentos
-
-Este arquivo é complementar a:
-
-- `docs/99-master-index.md`
-- `docs/00-governance/README.md`
-- `docs/00-governance/documentation-system.md`
-
-Dentro deste próprio contexto, ele é a porta de entrada para todos os documentos canônicos específicos do Game Panel.
-
----
-
-## Critério de pronto deste contexto
-
-Este contexto poderá ser considerado formalmente migrado quando:
-
-- a camada operacional do servidor CS2 estiver documentada sem depender do master antigo
-- o papel do AMP estiver claro
-- a instância `MixHAXIXE01` estiver formalizada como dependência estrutural do ecossistema
-- o MatchZy estiver documentado como componente operacional e produtor de dados
-- os plugins instalados estiverem inventariados
-- os runbooks operacionais estiverem centralizados
-- troubleshooting e observabilidade do lado jogo estiverem centralizados
-- os documentos antigos passarem a servir apenas como referência cruzada
-
----
-
-## Última revisão
-
-- Status: ativo
-- Classificação: canônico
-- Contexto: game panel / porta de entrada do contexto
-- Última revisão: 2026-03-18
+Quando isso deixa de ser verdade, este contexto deve ser revisado.
