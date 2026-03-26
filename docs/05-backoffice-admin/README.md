@@ -30,6 +30,7 @@ Este documento existe para:
 - [News Admin API Contracts](./news-admin-api-contracts.md)
 - [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
 - [News Admin Feature Implementation Spec](./news-admin-feature-implementation-spec.md)
+- [News Admin Frontend Implementation Runtime](./news-admin-frontend-implementation-runtime.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 - [References and Inventory](./backoffice-admin-references-inventory.md)
 
@@ -197,6 +198,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-api-contracts.md`
 - `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
 - `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
+- `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -216,8 +218,9 @@ A ordem recomendada de leitura é:
 6. `docs/05-backoffice-admin/news-admin-api-contracts.md`
 7. `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
 8. `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
-9. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-10. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+9. `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
+10. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+11. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 
