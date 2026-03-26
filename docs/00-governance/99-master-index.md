@@ -10,6 +10,7 @@ Ele existe para:
 - registrar o estado atual de maturidade dos contextos canônicos
 - resumir os principais fatos operacionais já reconciliados no runtime real
 - indicar quais pendências ainda existem de forma explícita
+- coordenar a leitura transversal entre contextos
 - evitar retorno ao modelo anterior de “master monolítico” como fonte primária de verdade
 
 Regra canônica:
@@ -32,10 +33,12 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 - [03 — Portal Estático](../03-portal-estatico/README.md)
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
+  - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
 - [Fluxo admin → auth → backoffice](../04-infra-aws-lightsail/auth-api-operations.md)
+- [Fluxo autoridade admin do lado jogo](../02-game-panel/game-panel-admin-authority-runtime.md)
 
 ### Histórico e auditoria
 - [Impl Log](../95-impl-log/2026-03-18-initial-canonical-context-migration.md)
@@ -48,15 +51,12 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 A base documental canônica do HSC já está estruturada e utilizável.
 
-Neste checkpoint, os quatro contextos operacionais principais permanecem reconciliados com o runtime real em pontos de maior valor:
+Neste checkpoint, os cinco contextos canônicos ativos permanecem úteis como base viva de operação e produto:
 
 - Infra Hostinger
 - Game Panel / CS2
 - Portal Estático / Static API v2
 - Infra AWS Lightsail / Auth API
-
-Além disso, o ecossistema já conta com um quinto contexto canônico de produto administrativo:
-
 - Backoffice Admin
 
 Leitura correta do estado atual:
@@ -64,7 +64,8 @@ Leitura correta do estado atual:
 - o repositório já pode ser tratado como **base canônica viva**
 - a maior parte das pendências críticas de realidade operacional dos contextos de infraestrutura já foi fechada
 - o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
-- o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e cleanup residual de legado**
+- o contexto `02-game-panel` agora também possui trilha administrativa explícita, com autoridade centralizada no CounterStrikeSharp e runbooks próprios de manutenção
+- o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e evolução sustentável das superfícies administrativas**
 
 ---
 
@@ -82,7 +83,6 @@ Arquivos principais:
 - [Documentation System](./documentation-system.md)
 - [HSC Docs Maintenance Playbook](./hsc-docs-maintenance-playbook.md)
 - [Master Index](./99-master-index.md)
-
 
 ---
 
@@ -113,6 +113,7 @@ Função:
 - MatchZy
 - plugins carregados
 - camada operacional do servidor
+- baseline administrativa do lado jogo
 
 Arquivos principais:
 - [Game Panel — README](../02-game-panel/README.md)
@@ -124,6 +125,10 @@ Arquivos principais:
 - [Game Panel Operational Runbooks](../02-game-panel/game-panel-operational-runbooks.md)
 - [Game Panel Observability and Troubleshooting](../02-game-panel/game-panel-observability-troubleshooting.md)
 - [Game Panel References Inventory](../02-game-panel/game-panel-references-inventory.md)
+- [Game Panel Admin Authority Runtime](../02-game-panel/game-panel-admin-authority-runtime.md)
+- [Game Panel Admin Operational Runbooks](../02-game-panel/game-panel-admin-operational-runbooks.md)
+- [Admin Command Profiles](../02-game-panel/game-panel-admin-command-profiles.md)
+- [Admin References Inventory](../02-game-panel/game-panel-admin-references-inventory.md)
 
 ---
 
@@ -191,49 +196,13 @@ Função:
 Arquivos principais:
 - [Backoffice Admin — README](../05-backoffice-admin/README.md)
 - [Admin API Contracts](../05-backoffice-admin/admin-api-contracts.md)
+- [News Admin API Contracts](../05-backoffice-admin/news-admin-api-contracts.md)
+- [News Admin Integration and Evolution](../05-backoffice-admin/news-admin-integration-and-evolution.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 - [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 - [Backoffice Admin Operational Runbooks](../05-backoffice-admin/backoffice-admin-operational-runbooks.md)
 - [Backoffice Admin References Inventory](../05-backoffice-admin/backoffice-admin-references-inventory.md)
-
----
-
-## 95-impl-log
-
-Função:
-- registrar mudanças relevantes
-- preservar rastreabilidade das reconciliações
-- servir de trilha histórica curta e formal
-
-Arquivos atuais:
-- `docs/95-impl-log/2026-03-18-initial-canonical-context-migration.md`
-- `docs/95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md`
-
----
-
-## 97-audit
-
-Função:
-- registrar pendências reais pós-migração
-- separar “falta documental” de “pendência operacional real”
-
-Arquivo atual:
-- `docs/97-audit/2026-03-18-post-migration-open-items.md`
-
----
-
-## 98-legacy
-
-Função:
-- preservar masters e documentos históricos
-- evitar que material legado continue governando o sistema novo
-
-Arquivos principais:
-- `docs/98-legacy/README.md`
-- `docs/98-legacy/HSC_MASTER_DOCUMENTATION.md`
-- `docs/98-legacy/HSC_Master_Blueprint.md`
-- `docs/98-legacy/master-documents-migration-map.md`
 
 ---
 
@@ -246,24 +215,9 @@ Status:
 - **reconciliado em pontos críticos**
 - **operacionalmente confiável**
 
-Principais fatos já reconciliados:
-- hostname técnico real:
-  - `srv1353392.hstgr.cloud`
-- hostnames públicos canônicos reais:
-  - `haxixesmokeclub.com`
-  - `www.haxixesmokeclub.com`
-- hostnames não ativos para a borda Hostinger:
-  - `portal.haxixesmokeclub.com`
-  - `api.haxixesmokeclub.com`
-- arquivo principal real do Nginx:
-  - `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
-- heartbeat real da automação da v2:
-  - `gen-all-v2.timer`
-  - `gen-health.timer`
-- agregador real da v2:
-  - `/usr/local/bin/gen-all-v2.sh`
-- base operacional real:
-  - `/opt/cs2-portal/`
+Leitura sintética:
+- substrate do lado Hostinger estabilizado
+- rede, publicação estática e automação já tratadas como baseline viva
 
 ---
 
@@ -271,26 +225,24 @@ Principais fatos já reconciliados:
 
 Status:
 - **canônico**
-- **reconciliado em runtime**
+- **reconciliado em pontos críticos**
 - **operacionalmente confiável**
 
 Principais fatos já reconciliados:
-- instância oficial:
-  - `MixHAXIXE01`
-- container relevante:
-  - `AMP_MixHAXIXE01`
-- MatchZy real:
-  - `0.8.15`
-- path vivo real do banco:
-  - `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
-- inventário real de plugins carregados:
-  - `WeaponPaints`
-  - `PlayerSettings [Core]`
-  - `CS2-SimpleAdmin Fun Commands`
-  - `MatchZy`
-  - `MenuManager [Core]`
-  - `[CS2-SimpleAdmin] Stealth Module`
-  - `CS2-SimpleAdmin (RELEASE)`
+- a instância oficial do lado jogo continua sendo `MixHAXIXE01`
+- MatchZy continua como peça central do runtime competitivo
+- plugins relevantes do lado jogo permanecem inventariados
+- a autoridade administrativa do lado jogo foi centralizada no CounterStrikeSharp
+- `admins.json` + `admin_groups.json` passaram a ser a baseline canônica de admin do contexto
+- `#hsc/root` é o grupo administrativo canônico ativo do checkpoint atual
+- MatchZy e CS2-SimpleAdmin deixaram de manter autoridade paralela como fonte primária
+- o resíduo legado de configuração do Railway foi removido do `CS2-SimpleAdmin.json`
+- o contexto agora possui trilha documental própria para autoridade, manutenção, comandos e inventário administrativo
+
+Leitura sintética:
+- o lado jogo já não depende mais de memória informal para governança de admins
+- a separação entre admin de servidor e admin de partida segue preservada por responsabilidade
+- o contexto está mais sustentável para operação e evolução futura
 
 ---
 
@@ -298,30 +250,11 @@ Principais fatos já reconciliados:
 
 Status:
 - **canônico**
-- **reconciliado em paths públicos e pipeline**
+- **reconciliado em pontos críticos**
 - **operacionalmente confiável**
 
-Principais fatos já reconciliados:
-- path público oficial do portal:
-  - `/portal/cs2/`
-- path público oficial da Static API v2:
-  - `/api/cs2/v2/`
-- mirror same-origin de News:
-  - `/content/news/`
-- árvore pública do portal:
-  - `/var/www/portal/cs2/`
-- árvore pública da v2:
-  - `/var/www/api/cs2/v2/`
-- pipeline real da v2:
-  - `/usr/local/bin/gen-all-v2.sh`
-- ordem real reconciliada da pipeline:
-  - `gen-matches.sh`
-  - `gen-ranking.sh`
-  - `gen-players-incremental.sh`
-  - `gen-players-from-ranking.sh`
-  - `gen-maps.sh`
-- v1 pública desativada:
-  - `/api/cs2/v1/` retorna `404`
+Leitura sintética:
+- cadeia MatchZy SQLite → ETL → Static API v2 → portal segue como trilha principal do lado público
 
 ---
 
@@ -329,41 +262,11 @@ Principais fatos já reconciliados:
 
 Status:
 - **canônico**
-- **reconciliado em runtime real**
+- **reconciliado em pontos críticos**
 - **operacionalmente confiável**
 
-Principais fatos já reconciliados:
-- hostname público canônico:
-  - `auth-api.haxixesmokeclub.com`
-- unit real da app:
-  - `hsc-auth-api.service`
-- usuário real:
-  - `hscadmin`
-- working directory real:
-  - `/opt/hsc/hsc-auth-api`
-- `ExecStart` real:
-  - `/usr/bin/node index.js`
-- binding observado:
-  - `0.0.0.0:3000`
-- vhost real:
-  - `/etc/nginx/sites-available/hsc-auth-api`
-- release/deploy oficial por TAG com migrations explícitas
-- migrations SQL como caminho principal de evolução de schema
-- `schema.js` congelado como compatibilidade legada
-- script real de backup:
-  - `/opt/hsc/backup-mariadb.sh`
-- diretório real dos dumps:
-  - `/opt/hsc/backups/mariadb/`
-- log real:
-  - `/opt/hsc/backups/mariadb/backup.log`
-- invocador real do backup:
-  - crontab do root
-- linha real do cron:
-  - `15 3 * * * /opt/hsc/backup-mariadb.sh`
-- timezone do host:
-  - `Etc/UTC`
-- retenção real configurada:
-  - `14 dias`
+Leitura sintética:
+- Auth API e infraestrutura dinâmica seguem com baseline operacional viva própria
 
 ---
 
@@ -371,149 +274,22 @@ Principais fatos já reconciliados:
 
 Status:
 - **canônico**
-- **reconciliado em auth base publicada**
-- **pronto para expansão incremental por domínio**
+- **ativo**
+- **em expansão incremental de domínio**
 
-Principais fatos já reconciliados:
-- o Backoffice já existe como contexto canônico próprio
-- a camada administrativa é separada do Portal público
-- a Auth API é a camada dinâmica central do contexto
-- o modelo administrativo é session-first
-- o fallback break-glass permanece como contingência backend
-- mutações administrativas sensíveis devem respeitar fail-closed
-- a stack frontend alvo foi fixada como:
-  - Angular 21
-  - TypeScript
-  - standalone-first
-  - Signals
-- as superfícies reais de auth publicadas incluem:
-  - `/login`
-  - `/auth/callback`
-  - `/dashboard`
-- o fluxo real publicado de login administrativo usa magic link
-- o callback resolve sessão real e navega ao dashboard
-- os domínios administrativos iniciais permanecem:
-  - `seasons`
-  - `news`
-  - `events`
-- a ordem recomendada de expansão continua sendo:
-  - shell administrativo
-  - auth/RBAC/guards
-  - `seasons`
-  - `news`
-  - `events`
-
-Leitura correta do status atual:
-- o contexto já não é apenas preparatório
-- o runtime base do produto administrativo já foi validado em produção
-- o que resta agora é principalmente aprofundar contratos e implementar domínios incrementais
+Leitura sintética:
+- shell administrativo, auth frontend e contratos iniciais já existem
+- a tendência agora é expansão por features e superfícies de produto
 
 ---
 
-## Pendências reais que ainda permanecem
+## Regra final de leitura
 
-As pendências restantes, neste checkpoint, já não são blocos estruturais grandes do repositório como um todo.
+Quando um leitor quiser entender um tema do HSC, a ordem correta é:
 
-## Pendências de maior valor ainda abertas
+1. entrar pelo `README.md` do contexto
+2. ler os documentos especializados daquele contexto
+3. voltar a este índice apenas para navegação transversal
 
-### 1. Leituras administrativas canônicas de `seasons`
-
-Ainda falta confirmar ou materializar no runtime:
-- `GET /admin/seasons`
-- `GET /admin/seasons/:slug`
-
-Isto é necessário para um MVP administrativo saudável do domínio.
-
-### 2. Leituras administrativas canônicas de `events`
-
-Ainda falta confirmar ou materializar no runtime:
-- `GET /admin/events`
-- `GET /admin/events/:id`
-
-O domínio já está previsto, mas ainda possui maturidade contratual inferior a `news` e `seasons`.
-
-### 3. Separação final entre gestão admin e fluxo público de `events`
-
-Ainda falta fechar de forma final:
-- a superfície administrativa de eventos
-- a superfície pública de confirmação de presença
-- a fronteira entre staff flow e user flow
-
-### 4. Cleanup do drift residual da Auth API antiga na Hostinger
-
-Ainda existe evidência residual no host Hostinger de:
-- vhost/config antiga de `auth-api.haxixesmokeclub.com`
-- `hsc-auth-api.service` residual
-
-Isto já está identificado, mas o cleanup técnico ainda não foi executado/documentado como concluído.
-
-### 5. Eventual estratégia off-host de backup da Auth API
-
-O backup local já está reconciliado.
-Ainda não foi confirmado, neste ciclo, se existe cópia externa/off-host dos dumps.
-
----
-
-## Ordem de leitura recomendada neste checkpoint
-
-A ordem de leitura recomendada do sistema, neste checkpoint, é:
-
-### Para visão macro do repositório
-
-1. `docs/00-governance/99-master-index.md`
-2. `docs/00-governance/documentation-system.md`
-
-### Para lado Auth API
-
-1. `docs/04-infra-aws-lightsail/README.md`
-2. `docs/04-infra-aws-lightsail/infra-aws-lightsail-references-inventory.md`
-3. `docs/04-infra-aws-lightsail/node-systemd.md`
-4. `docs/04-infra-aws-lightsail/backup-restore.md`
-5. `docs/04-infra-aws-lightsail/auth-api-operations.md`
-6. `docs/04-infra-aws-lightsail/deploy-release-rollback.md`
-7. `docs/04-infra-aws-lightsail/mariadb-local.md`
-
-### Para lado Backoffice Admin
-
-1. `docs/05-backoffice-admin/README.md`
-2. `docs/05-backoffice-admin/backoffice-admin-architecture-runtime.md`
-3. `docs/05-backoffice-admin/backoffice-admin-frontend-structure.md`
-4. `docs/05-backoffice-admin/auth-rbac-and-guards.md`
-5. `docs/05-backoffice-admin/admin-api-contracts.md`
-6. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-7. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
-
----
-
-## Regra editorial do índice mestre
-
-Este arquivo deve ser atualizado quando houver:
-
-- mudança de status de um contexto canônico
-- fechamento ou abertura de pendência operacional relevante
-- alteração do papel estrutural de algum contexto
-- reconciliação importante de runtime que mude a leitura macro do sistema
-- mudança de ordem recomendada de leitura
-
-Mudanças pequenas e locais devem ser registradas primeiro nos documentos especializados.
-
----
-
-## Declaração de checkpoint
-
-### Checkpoint atual
-
-**Checkpoint válido e forte.**
-
-Motivos:
-
-- principais verdades operacionais do sistema já foram reconciliadas
-- documentação já está segmentada por contexto e utilizável
-- principais riscos de drift documental já foram reduzidos
-- a Auth API já opera com migrations SQL como mecanismo principal de evolução de schema
-- o Backoffice Admin já possui auth base publicada, callback funcional e sessão real validada
-- o que resta agora é majoritariamente expansão incremental de domínio, troubleshooting fino e cleanup adicional de legado
-
-Leitura correta deste checkpoint:
-
-**o repositório documental do HSC já é suficientemente maduro para sustentar operação, expansão e implementação incremental do Backoffice Admin sem depender dos antigos masters como eixo principal.**
+Este índice existe para coordenar.  
+A verdade continua vivendo nos contextos canônicos e em seus documentos especializados.
