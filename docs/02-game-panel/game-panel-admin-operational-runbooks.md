@@ -1,5 +1,12 @@
 # Admin Operational Runbooks
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os runbooks canônicos de manutenção da autoridade administrativa do contexto Game Panel do HSC após a equalização baseada no CounterStrikeSharp.

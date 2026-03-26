@@ -36,7 +36,6 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 
 ### Operação e suporte
-- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
 - [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [Documentation System](../00-governance/documentation-system.md)
 

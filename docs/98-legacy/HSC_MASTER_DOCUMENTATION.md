@@ -11,6 +11,15 @@ Gerado em: 2026-03-06 (UTC)
 
 ---
 
+## Navegação rápida
+
+- [Legacy](./README.md)
+- [Home da documentação](../README.md)
+- [Master Index](../00-governance/99-master-index.md)
+- [HSC Master Blueprint](./HSC_Master_Blueprint.md)
+- [Master Documents Migration Map](./master-documents-migration-map.md)
+
+
 # 0. Glossário HSC
 
 * **HSC** — Haxixe Smoke Club (plataforma híbrida Game + Identity)

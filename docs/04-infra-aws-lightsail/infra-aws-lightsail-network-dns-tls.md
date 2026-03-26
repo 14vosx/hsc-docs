@@ -1,5 +1,12 @@
 # Network, DNS and TLS
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a camada de entrada pública do contexto Infra AWS Lightsail do ecossistema HSC, registrando a superfície de rede da Auth API, o hostname canônico, a borda TLS e os cuidados operacionais ligados à exposição externa dessa camada dinâmica.

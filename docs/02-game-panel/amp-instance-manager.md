@@ -1,5 +1,12 @@
 # AMP Instance Manager
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar o papel do AMP Instance Manager no contexto Game Panel do ecossistema HSC, registrando sua função operacional, sua relação com a instância oficial `MixHAXIXE01` e seus limites dentro da arquitetura do lado jogo.

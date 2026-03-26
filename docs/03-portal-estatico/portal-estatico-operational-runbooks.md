@@ -1,5 +1,12 @@
 # Operational Runbooks
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Portal Estático](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os procedimentos operacionais recorrentes do contexto Portal Estático do ecossistema HSC, com foco na geração da Static API v2, na publicação pública via Nginx, no mirror same-origin de conteúdo e nas validações mínimas que mantêm o portal íntegro no runtime real.

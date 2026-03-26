@@ -30,7 +30,6 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Auth API Operations](./auth-api-operations.md)
 - [Deploy / Release / Rollback](./deploy-release-rollback.md)
 - [Backup / Restore](./backup-restore.md)
-- [Operational Runbooks](./infra-aws-lightsail-operational-runbooks.md)
 - [Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
 - [References and Inventory](./infra-aws-lightsail-references-inventory.md)
 
@@ -48,25 +47,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 
 ---
 
-## Navegação
 
-### Entrada
-- [Home da documentação](../README.md)
-- [Infra AWS Lightsail](./README.md)
-- [Master Index](../00-governance/99-master-index.md)
-
-### Infraestrutura imediata
-- [Architecture Runtime](./infra-aws-lightsail-architecture-runtime.md)
-- [Nginx Reverse Proxy](./nginx-reverse-proxy.md)
-- [Node Systemd](./node-systemd.md)
-- [Auth API Operations](./auth-api-operations.md)
-
-### Contextos e docs adjacentes
-- [Infra Hostinger — Network, DNS and TLS](../01-infra-hostinger/infra-hostinger-network-dns-tls.md)
-- [Deploy / Release / Rollback](./deploy-release-rollback.md)
-- [Infra AWS Lightsail Observability and Troubleshooting](./infra-aws-lightsail-observability-troubleshooting.md)
-
----
 
 ## Escopo
 

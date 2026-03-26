@@ -1,5 +1,12 @@
 # Architecture Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a topologia real de runtime do contexto AWS Lightsail que hospeda a Auth API do ecossistema HSC.

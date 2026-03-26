@@ -1,5 +1,12 @@
 # Architecture Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a topologia real de runtime do contexto Game Panel do ecossistema HSC, registrando como AMP, instância, servidor CS2, MatchZy, plugins e persistências operacionais se relacionam.

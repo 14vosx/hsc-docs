@@ -1,5 +1,12 @@
 # MariaDB Local
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a operação do MariaDB local associado à Auth API no contexto AWS Lightsail/HSC Auth API, incluindo o estado atual do schema, o modelo novo de migrations SQL, o baseline dos ambientes existentes e o papel legado de `schema.js`.

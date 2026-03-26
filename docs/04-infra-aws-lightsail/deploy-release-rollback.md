@@ -1,5 +1,12 @@
 # Deploy, Release and Rollback
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar o fluxo oficial de release, deploy e rollback da Auth API no contexto AWS Lightsail, refletindo o modelo atual de publicação por TAG, migrations explícitas antes do restart e runtime desacoplado da evolução de schema.

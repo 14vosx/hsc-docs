@@ -84,8 +84,8 @@ Regra importante:
 - [Backoffice Admin](../05-backoffice-admin/README.md)
 
 ### Trilhas auxiliares
-- [Impl Log](../95-impl-log/2026-03-18-initial-canonical-context-migration.md)
-- [Audit](../97-audit/2026-03-18-post-migration-open-items.md)
+- [Impl Log](../95-impl-log/README.md)
+- [Audit](../97-audit/README.md)
 - [Legacy](../98-legacy/README.md)
 
 ---

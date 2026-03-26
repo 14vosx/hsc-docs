@@ -1,5 +1,12 @@
 # 2026-03-19 — Auth Admin Magic Link and SQL Migrations Cutover
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Impl Log](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Registrar, de forma estável e auditável, o checkpoint técnico construído ao longo desta frente de trabalho, cobrindo:

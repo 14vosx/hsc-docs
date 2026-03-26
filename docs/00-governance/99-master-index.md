@@ -41,8 +41,8 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 - [Fluxo autoridade admin do lado jogo](../02-game-panel/game-panel-admin-authority-runtime.md)
 
 ### Histórico e auditoria
-- [Impl Log](../95-impl-log/2026-03-18-initial-canonical-context-migration.md)
-- [Audit — Open Items](../97-audit/2026-03-18-post-migration-open-items.md)
+- [Impl Log](../95-impl-log/README.md)
+- [Audit](../97-audit/README.md)
 - [Legacy](../98-legacy/README.md)
 
 ---

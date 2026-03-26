@@ -1,5 +1,12 @@
 # References and Inventory
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Consolidar o inventário de referências, evidências, artefatos operacionais, paths críticos e itens pendentes de validação do contexto Infra Hostinger do ecossistema HSC.

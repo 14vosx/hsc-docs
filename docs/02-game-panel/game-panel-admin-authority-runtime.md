@@ -1,5 +1,12 @@
 # Game Panel Admin Authority Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar, de forma canônica, a arquitetura de autoridade administrativa do contexto Game Panel do ecossistema HSC após a equalização concluída com base no CounterStrikeSharp.

@@ -1,5 +1,12 @@
 # Observability and Troubleshooting
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os sinais de saúde, os pontos de observabilidade e a sequência padrão de diagnóstico do contexto AWS Lightsail da Auth API.

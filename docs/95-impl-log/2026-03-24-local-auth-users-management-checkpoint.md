@@ -1,5 +1,12 @@
 # 2026-03-24 — Local Auth + Users Management Checkpoint
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Impl Log](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Registrar, de forma estável e auditável, o checkpoint local desta frente de trabalho, cobrindo:

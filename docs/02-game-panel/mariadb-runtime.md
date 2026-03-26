@@ -1,5 +1,12 @@
 # MariaDB Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar, de forma honesta e explícita, o estado atual da camada MariaDB no contexto Game Panel do ecossistema HSC.
