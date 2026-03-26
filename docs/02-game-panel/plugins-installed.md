@@ -1,5 +1,12 @@
 # Plugins Installed
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a camada de plugins instalada no contexto Game Panel do ecossistema HSC, registrando o inventário real reconciliado do runtime do servidor CS2, os plugins atualmente carregados em produção, seus diretórios no host e os pontos ainda pendentes de validação fina.

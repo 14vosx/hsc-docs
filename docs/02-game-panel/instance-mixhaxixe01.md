@@ -1,5 +1,12 @@
 # Instance `MixHAXIXE01`
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a instância oficial `MixHAXIXE01` do ecossistema HSC, registrando seu papel estrutural no lado jogo, sua posição na topologia operacional e sua relevância para a cadeia de dados públicos do projeto.

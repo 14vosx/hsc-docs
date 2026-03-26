@@ -1,5 +1,12 @@
 # Architecture Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Portal Estático](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a arquitetura real de runtime do contexto Portal Estático do ecossistema HSC, registrando a cadeia de dados, os componentes envolvidos e as dependências operacionais que sustentam a publicação pública do portal e da Static API v2.

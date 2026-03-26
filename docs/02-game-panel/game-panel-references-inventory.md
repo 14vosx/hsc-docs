@@ -1,5 +1,12 @@
 # References and Inventory
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Consolidar o inventário de referências, evidências, artefatos operacionais, componentes críticos e itens pendentes de validação do contexto Game Panel do ecossistema HSC.

@@ -1,5 +1,19 @@
 # HSC Docs — Home
 
+## Navegação rápida
+
+- [Governance](./00-governance/README.md)
+- [Master Index](./00-governance/99-master-index.md)
+- [Infra Hostinger](./01-infra-hostinger/README.md)
+- [Game Panel](./02-game-panel/README.md)
+- [Portal Estático](./03-portal-estatico/README.md)
+- [Infra AWS Lightsail](./04-infra-aws-lightsail/README.md)
+- [Backoffice Admin](./05-backoffice-admin/README.md)
+- [Impl Log](./95-impl-log/README.md)
+- [Audit](./97-audit/README.md)
+- [Legacy](./98-legacy/README.md)
+
+---
 ## Objetivo
 
 Este é o ponto de entrada principal da documentação viva do ecossistema HSC.
@@ -73,13 +87,9 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 
 ## Logs, auditoria e legado
 
-- [Impl Log](./95-impl-log/2026-03-18-initial-canonical-context-migration.md)
-- [Impl Log — Auth Admin Magic Link and SQL Migrations Cutover](./95-impl-log/2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md)
-- [Audit — Post Migration Open Items](./97-audit/2026-03-18-post-migration-open-items.md)
+- [Impl Log](./95-impl-log/README.md)
+- [Audit](./97-audit/README.md)
 - [Legacy](./98-legacy/README.md)
-- [HSC MASTER DOCUMENTATION](./98-legacy/HSC_MASTER_DOCUMENTATION.md)
-- [HSC Master Blueprint](./98-legacy/HSC_Master_Blueprint.md)
-- [Master Documents Migration Map](./98-legacy/master-documents-migration-map.md)
 
 ---
 

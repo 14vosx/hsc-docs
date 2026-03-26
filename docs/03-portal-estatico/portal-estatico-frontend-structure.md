@@ -1,5 +1,12 @@
 # Frontend Structure
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Portal Estático](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a estrutura do frontend do Portal Estático do ecossistema HSC, registrando sua stack, seus princípios de implementação, sua relação com a Static API v2 e os limites operacionais da camada pública.

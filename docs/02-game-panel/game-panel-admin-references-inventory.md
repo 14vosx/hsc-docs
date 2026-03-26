@@ -1,5 +1,12 @@
 # Admin References Inventory
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Inventariar os arquivos, paths, componentes, baselines e checkpoints operacionais relevantes para a camada administrativa do contexto Game Panel do HSC após a equalização baseada no CounterStrikeSharp.

@@ -1,5 +1,12 @@
 # Filesystem Paths and Permissions
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os paths, ownerships, grupos e permissões da camada-base da Infra Hostinger, registrando quais diretórios são críticos para o funcionamento do lado game + portal do ecossistema HSC.

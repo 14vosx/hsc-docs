@@ -1,5 +1,12 @@
 # Legacy Master Documents Migration Map
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Legacy](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Registrar como os antigos documentos mestres do ecossistema HSC devem ser preservados dentro de `docs/98-legacy/` sem continuar governando a navegação principal do sistema documental novo.

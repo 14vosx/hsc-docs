@@ -1,5 +1,12 @@
 # Documentation System
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Governance](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Definir o sistema oficial de documentação do ecossistema HSC.

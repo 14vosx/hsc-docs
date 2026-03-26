@@ -1,5 +1,12 @@
 # Post-Migration Open Items Audit
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Audit](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Registrar, de forma curta e honesta, as pendências reais que permaneceram após a migração inicial dos quatro contextos canônicos do sistema documental HSC.

@@ -1,5 +1,12 @@
 # Network, DNS and TLS
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a camada de entrada pública da Infra Hostinger do ecossistema HSC, registrando a superfície de rede, o papel do DNS, a terminação TLS e os cuidados operacionais ligados à exposição externa do lado game + portal.

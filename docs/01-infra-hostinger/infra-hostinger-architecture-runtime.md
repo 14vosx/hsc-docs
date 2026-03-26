@@ -1,5 +1,12 @@
 # Architecture Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a topologia real de runtime da Infra Hostinger que sustenta a metade game + portal do ecossistema HSC.

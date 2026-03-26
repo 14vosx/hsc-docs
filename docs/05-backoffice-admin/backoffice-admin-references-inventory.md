@@ -1,5 +1,12 @@
 # References Inventory
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Backoffice Admin](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar o inventário de referências, dependências, artefatos, integrações e gaps do contexto `05-backoffice-admin` do ecossistema HSC.

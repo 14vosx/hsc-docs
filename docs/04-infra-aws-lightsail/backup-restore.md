@@ -1,5 +1,12 @@
 # Backup and Restore
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra AWS Lightsail](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a camada real de backup do MariaDB no contexto Infra AWS Lightsail do ecossistema HSC, registrando o script real observado no host, o diretório reconciliado dos dumps, o mecanismo exato de agendamento, o formato dos artefatos de backup, a política real de retenção e a validação prática do restore com distinção clara entre o que já foi confirmado e o que ainda depende de validação adicional.

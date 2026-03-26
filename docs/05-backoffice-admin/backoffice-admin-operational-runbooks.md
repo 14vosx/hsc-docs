@@ -1,5 +1,12 @@
 # Operational Runbooks
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Backoffice Admin](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os runbooks operacionais reais do Backoffice Admin, cobrindo desenvolvimento local e, principalmente, o fluxo publicado de login administrativo por magic link, incluindo troubleshooting de CORS, cookie, SMTP, callback e sessão não validada.

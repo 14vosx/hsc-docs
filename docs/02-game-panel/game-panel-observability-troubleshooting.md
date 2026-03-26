@@ -1,5 +1,12 @@
 # Observability and Troubleshooting
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os sinais de saúde, os pontos de observabilidade e a sequência padrão de diagnóstico do contexto Game Panel do ecossistema HSC.

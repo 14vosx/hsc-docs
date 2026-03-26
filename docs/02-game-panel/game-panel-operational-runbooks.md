@@ -1,5 +1,12 @@
 # Operational Runbooks
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os procedimentos operacionais recorrentes do contexto Game Panel do ecossistema HSC, com foco na administração prática da instância `MixHAXIXE01`, na operação do servidor CS2, no uso do MatchZy e nos fluxos competitivos reais do lado jogo.

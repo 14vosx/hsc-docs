@@ -1,5 +1,12 @@
 # Admin Command Profiles
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a superfície administrativa do lado jogo por categoria de comando, por perfil operacional e por contexto de uso após a equalização do HSC baseada no CounterStrikeSharp.

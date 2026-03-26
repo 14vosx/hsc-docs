@@ -1,5 +1,12 @@
 # Observability and Troubleshooting
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar os sinais de saúde, os pontos de observabilidade e a sequência padrão de diagnóstico da camada-base da Infra Hostinger no ecossistema HSC.

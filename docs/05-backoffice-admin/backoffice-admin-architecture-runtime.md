@@ -1,5 +1,12 @@
 # Architecture Runtime
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Backoffice Admin](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a topologia funcional e a relação de runtime do Backoffice Admin do HSC.

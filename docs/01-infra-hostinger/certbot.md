@@ -1,5 +1,12 @@
 # Certbot
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Infra Hostinger](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar o papel do Certbot na Infra Hostinger do ecossistema HSC, registrando como a camada de certificados TLS participa da borda pública do lado game + portal.

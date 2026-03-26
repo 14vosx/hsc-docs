@@ -1,5 +1,12 @@
 # CS2 Server Configuration
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Game Panel](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Documentar a camada de configuração do servidor Counter-Strike 2 no contexto Game Panel do ecossistema HSC, registrando quais tipos de configuração governam o runtime do jogo, como elas se organizam e quais cuidados operacionais precisam existir para manter o servidor previsível.

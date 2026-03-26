@@ -8,6 +8,15 @@
 
 ---
 
+## Navegação rápida
+
+- [Legacy](./README.md)
+- [Home da documentação](../README.md)
+- [Master Index](../00-governance/99-master-index.md)
+- [HSC MASTER DOCUMENTATION](./HSC_MASTER_DOCUMENTATION.md)
+- [Master Documents Migration Map](./master-documents-migration-map.md)
+
+
 ## 0) Glossário rápido (nomes que aparecem nos docs)
 | Termo | Significado | Onde impacta |
 |---|---|---|

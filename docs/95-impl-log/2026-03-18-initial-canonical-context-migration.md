@@ -1,5 +1,12 @@
 # Impl Log — Initial Canonical Context Migration
 
+## Navegação rápida
+
+- [Home da documentação](../README.md)
+- [Impl Log](./README.md)
+- [Master Index](../00-governance/99-master-index.md)
+
+---
 ## Objetivo
 
 Registrar formalmente a migração documental inicial do ecossistema HSC para o novo modelo canônico baseado em contextos.
