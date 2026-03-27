@@ -157,13 +157,14 @@ PATCH /admin/news/:id
 Leitura importante:
 
 - a mutação de edição está confirmada
-- a leitura dedicada por `id` ainda não está confirmada como superfície canônica
+- `GET /admin/news/:id` passa a ser tratado como evolução prioritária do domínio
+- porém, a leitura dedicada por `id` ainda não está reconciliada como superfície canônica publicada no runtime atual
 
 Uso correto no checkpoint atual:
 
 - não tornar a tela dependente de um `GET /admin/news/:id` ainda não reconciliado
 - preferir hidratação a partir de cache de listagem, estado roteado ou resultado da criação
-- só promover leitura dedicada quando o endpoint existir e for documentado
+- só promover leitura dedicada quando o endpoint existir, for documentado e estiver validado no runtime
 
 ### 4. Publish e unpublish
 
@@ -370,6 +371,7 @@ A fonte de verdade do contrato novo deve ser explicitada.
 Exemplos:
 
 - `GET /admin/news/:id` → `05-backoffice-admin`
+- este contrato passa a ser tratado como evolução prioritária do domínio `news`
 - `GET /content/news/:slug` → Auth API como fonte canônica de conteúdo
 - `/content/news/<slug>/` → Portal/Nginx como mirror same-origin
 
@@ -436,7 +438,7 @@ Antes de considerar um novo contrato saudável, validar:
 
 Este documento deve ser expandido quando houver:
 
-- publicação de `GET /admin/news/:id`
+- publicação e validação de runtime de `GET /admin/news/:id`
 - suporte confirmado para `excerpt`
 - suporte confirmado para `image_url`
 - validação explícita de erro para slug duplicado
@@ -451,7 +453,7 @@ Este documento deve ser expandido quando houver:
 Os principais anti-padrões para este domínio são:
 
 - usar o mirror same-origin do Portal como contrato admin
-- assumir `GET /admin/news/:id` sem confirmação
+- assumir `GET /admin/news/:id` como disponível antes de publicação e validação de runtime
 - transformar publish/unpublish em patch genérico de status
 - inventar shape de erro não validado
 - misturar contrato público e contrato administrativo no mesmo tipo frontend
