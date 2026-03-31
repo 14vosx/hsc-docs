@@ -29,8 +29,16 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 ### Contextos canônicos
 - [01 — Infra Hostinger](../01-infra-hostinger/README.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
 - [02 — Game Panel](../02-game-panel/README.md)
+  - [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [03 — Portal Estático](../03-portal-estatico/README.md)
+  - [Brand Hub Root — Product and Surface Decisions](../03-portal-estatico/brand-hub-root-product-and-surface-decisions.md)
+  - [Brand Hub Root — Architecture Runtime](../03-portal-estatico/brand-hub-root-architecture-runtime.md)
+  - [Brand Hub Root — Publishing and Cutover Runtime](../03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md)
+  - [Brand Hub Root — Brand and Logo System](../03-portal-estatico/brand-hub-root-brand-and-logo-system.md)
+  - [Brand Hub Root — Frontend Implementation Runtime](../03-portal-estatico/brand-hub-root-frontend-implementation-runtime.md)
+  - [Brand Hub Root — References and Inventory](../03-portal-estatico/brand-hub-root-references-inventory.md)
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
