@@ -32,6 +32,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Operational Runbooks](./game-panel-operational-runbooks.md)
 - [Observability and Troubleshooting](./game-panel-observability-troubleshooting.md)
 - [References and Inventory](./game-panel-references-inventory.md)
+- [Public Access and Ops Entrypoint](./game-panel-public-access-and-ops-entrypoint.md)
 
 ### Trilha administrativa do lado jogo
 - [Admin Authority Runtime](./game-panel-admin-authority-runtime.md)
