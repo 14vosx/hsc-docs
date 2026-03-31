@@ -29,6 +29,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 ### Contextos canônicos
 - [01 — Infra Hostinger](../01-infra-hostinger/README.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
 - [02 — Game Panel](../02-game-panel/README.md)
   - [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [03 — Portal Estático](../03-portal-estatico/README.md)

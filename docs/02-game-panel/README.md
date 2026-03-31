@@ -39,6 +39,8 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Admin Operational Runbooks](./game-panel-admin-operational-runbooks.md)
 - [Admin Command Profiles](./game-panel-admin-command-profiles.md)
 - [Admin References Inventory](./game-panel-admin-references-inventory.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
+- [Brand Hub Root — Product and Surface Decisions](../03-portal-estatico/brand-hub-root-product-and-surface-decisions.md)
 
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
@@ -54,6 +56,20 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Docker Host](../01-infra-hostinger/docker-host.md)
 
 ---
+
+## Entry point operacional atual
+
+O acesso operacional ao AMP / Game Panel não depende mais do apex público do domínio principal.
+
+O entrypoint oficial atual do painel é:
+
+- `https://ops.haxixesmokeclub.com`
+
+O detalhamento dessa decisão e da restauração de acesso operacional vive em:
+
+- [Game Panel — Public Access and Ops Entrypoint](./game-panel-public-access-and-ops-entrypoint.md)
+
+---- 
 
 ## Escopo
 

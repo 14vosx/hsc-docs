@@ -24,6 +24,12 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Documentos deste contexto
 - [Architecture Runtime](./portal-estatico-architecture-runtime.md)
 - [Static API v2](./static-api-v2.md)
+- [Brand Hub Root — Product and Surface Decisions](./brand-hub-root-product-and-surface-decisions.md)
+- [Brand Hub Root — Architecture Runtime](./brand-hub-root-architecture-runtime.md)
+- [Brand Hub Root — Publishing and Cutover Runtime](./brand-hub-root-publishing-and-cutover-runtime.md)
+- [Brand Hub Root — Brand and Logo System](./brand-hub-root-brand-and-logo-system.md)
+- [Brand Hub Root — Frontend Implementation Runtime](./brand-hub-root-frontend-implementation-runtime.md)
+- [Brand Hub Root — References and Inventory](./brand-hub-root-references-inventory.md)
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
 - [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
 - [SQL Queries and Views](./sql-queries-and-views.md)
@@ -37,6 +43,8 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
 - [Game Panel](../02-game-panel/README.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
+- [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [Backoffice Admin](../05-backoffice-admin/README.md)
 
@@ -57,6 +65,10 @@ Estão dentro do escopo deste contexto:
 - portal público estático do HSC
 - Static API v2
 - pipeline ETL Bash
+- Brand Hub Root no apex como superfície pública principal
+- separação explícita entre
+  - root da marca
+  - portal público
 - fonte de dados baseada em `matchzy.db`
 - contratos JSON publicados
 - frontend em HTML, CSS modular e JavaScript com ESModules
@@ -90,6 +102,11 @@ O estado operacional conhecido deste contexto é:
 
 A arquitetura do Portal Estático existe para entregar:
 
+- hub público da marca no root
+- entrada institucional e narrativa do ecossistema
+- ponte de marca para a superfície operacional do portal
+- separação entre branding, leitura pública e operação administrativa
+- continuidade da superfície pública CS2 em `/portal/cs2/`
 - páginas públicas de consulta
 - navegação leve
 - consumo de JSONs estáticos previsíveis
@@ -191,6 +208,23 @@ Regra importante:
 
 ---
 
+## Brand Hub Root dentro deste contexto
+
+O contexto `03-portal-estatico` também passa a documentar o **Brand Hub Root** publicado no apex:
+
+- `https://haxixesmokeclub.com`
+
+Os documentos específicos dessa superfície são:
+
+- `brand-hub-root-product-and-surface-decisions.md`
+- `brand-hub-root-architecture-runtime.md`
+- `brand-hub-root-publishing-and-cutover-runtime.md`
+- `brand-hub-root-brand-and-logo-system.md`
+- `brand-hub-root-frontend-implementation-runtime.md`
+- `brand-hub-root-references-inventory.md`
+
+---
+
 ## Papel do ETL neste contexto
 
 O ETL Bash é a ponte entre a fonte de dados operacional e a publicação pública da Static API v2.
@@ -228,6 +262,12 @@ Os documentos canônicos previstos para este contexto são:
 - `docs/03-portal-estatico/README.md`
 - `docs/03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/static-api-v2.md`
+- `docs/03-portal-estatico/brand-hub-root-product-and-surface-decisions.md`
+- `docs/03-portal-estatico/brand-hub-root-architecture-runtime.md`
+- `docs/03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md`
+- `docs/03-portal-estatico/brand-hub-root-brand-and-logo-system.md`
+- `docs/03-portal-estatico/brand-hub-root-frontend-implementation-runtime.md`
+- `docs/03-portal-estatico/brand-hub-root-references-inventory.md`
 - `docs/03-portal-estatico/data-sources-matchzy-sqlite.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
 - `docs/03-portal-estatico/sql-queries-and-views.md`
