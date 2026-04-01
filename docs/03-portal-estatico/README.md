@@ -25,12 +25,10 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [Architecture Runtime](./portal-estatico-architecture-runtime.md)
 - [Static API v2](./static-api-v2.md)
 - [Brand Hub Root — Product and Surface Decisions](./brand-hub-root-product-and-surface-decisions.md)
-- [Brand Hub Root — Architecture Runtime](./brand-hub-root-architecture-runtime.md)
 - [Brand Hub Root — Publishing and Cutover Runtime](./brand-hub-root-publishing-and-cutover-runtime.md)
-- [Brand Hub Root — Brand and Logo System](./brand-hub-root-brand-and-logo-system.md)
-- [Brand Hub Root — Frontend Implementation Runtime](./brand-hub-root-frontend-implementation-runtime.md)
-- [Brand Hub Root — References and Inventory](./brand-hub-root-references-inventory.md)
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
+- [ETL Runtime Reconciliation](./etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
 - [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
 - [SQL Queries and Views](./sql-queries-and-views.md)
 - [JSON Contracts](./json-contracts.md)
@@ -43,7 +41,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Relações com outros contextos
 - [Infra Hostinger](../01-infra-hostinger/README.md)
 - [Game Panel](../02-game-panel/README.md)
-- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/infra-hostinger-public-architecture-current-state.md)
 - [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [Backoffice Admin](../05-backoffice-admin/README.md)
@@ -52,6 +50,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [MatchZy](../02-game-panel/matchzy.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
 
 ---
@@ -99,6 +98,10 @@ O estado operacional conhecido deste contexto é:
 - a publicação final é feita por Nginx
 - o frontend usa HTML, CSS modular e JavaScript com ESModules
 - o contexto não usa framework frontend como base da entrega pública atual
+- o runtime ETL da v2 já foi reconciliado com o repositório `hsc-cs2-etl`
+- `bin/` passou a ser a fonte versionada dos scripts ETL
+- `/usr/local/bin/*.sh` passou a ser tratado como runtime materializado no host
+- a materialização live dessa camada já foi validada via `systemd`
 
 A arquitetura do Portal Estático existe para entregar:
 

@@ -33,6 +33,8 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
 - [Operational Runbooks](../03-portal-estatico/portal-estatico-operational-runbooks.md)
+- [ETL Runtime Reconciliation](../03-portal-estatico/etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](../03-portal-estatico/etl-runtime-materialization-runbook.md)
 
 ### Operação e suporte
 - [Observability and Troubleshooting](./infra-hostinger-observability-troubleshooting.md)
@@ -680,10 +682,33 @@ Este documento pode ser considerado maduro quando:
 - ele puder ser usado como referência confiável da automação `systemd` do lado Hostinger sem depender do master legado
 
 ---
+---
+
+## Contrato atual entre `systemd` e runtime materializado
+
+A leitura canônica consolidada nesta frente passa a ser:
+
+- `bin/` no repositório ETL é a fonte versionada
+- `/usr/local/bin/*.sh` é a camada materializada de runtime no host
+- `systemd` continua apontando para `/usr/local/bin/*`
+- `${ETL_BASE_DIR}` continua sustentando `locks`, `state`, `sql` e scripts de `content/news`
+
+Motivo desta decisão:
+
+- as units atuais já rodam como `amp:www-data`
+- o host já possui hardening, `ReadWritePaths` e paths operacionais consolidados
+- retargetar `ExecStart` diretamente para a árvore do repositório nesta fase aumentaria risco sem ganho proporcional
+
+Leitura canônica:
+
+- o `systemd` continua host-facing
+- a materialização passa a ser a ponte entre o Git e o runtime real
+
+---
 
 ## Última revisão
 
 - Status: ativo
 - Classificação: canônico
-- Contexto: infraestrutura Hostinger / systemd automation
-- Última revisão: 2026-03-18
+- Contexto: infra-hostinger / systemd
+- Última revisão: 2026-04-01

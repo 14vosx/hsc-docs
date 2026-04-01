@@ -80,6 +80,8 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
   - `gen-all-v2.service`
 - comando agregador real da v2:
   - `/usr/local/bin/gen-all-v2.sh`
+- a camada `/usr/local/bin` já foi materializada a partir do repositório ETL reconciliado
+- o baseline operacional reconciliado do repositório ETL foi marcado pela tag `etl-v0.3.0`
 
 Também ficou reconciliado que o host ainda contém drift residual ligado à Auth API, incluindo:
 
@@ -156,6 +158,8 @@ Este arquivo é complementar a:
 - `docs/01-infra-hostinger/systemd-automation.md`
 - `docs/01-infra-hostinger/filesystem-paths-permissions.md`
 - `docs/01-infra-hostinger/infra-hostinger-observability-troubleshooting.md`
+- `docs/03-portal-estatico/etl-runtime-reconciliation.md`
+- `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
 - `ddocs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/02-game-panel/game-panel-references-inventory.md`
 
@@ -198,6 +202,18 @@ Regra documental:
 ## Artefatos reais do host
 
 Os artefatos reais conhecidos ou esperados do host Hostinger incluem:
+
+### Repositório versionado do runtime ETL
+
+- `14vosx/hsc-cs2-etl`
+
+### Tag operacional reconciliada do ETL
+
+- `etl-v0.3.0`
+
+### Backup operacional validado durante a materialização live
+
+- `/tmp/hsc-etl-live-backup-20260401T200736Z`
 
 ### Host e sistema
 

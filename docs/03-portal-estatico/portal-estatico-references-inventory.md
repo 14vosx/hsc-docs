@@ -82,10 +82,9 @@ Neste estágio da reconciliação, o contexto já possui confirmação operacion
 
 Ainda restam pendências menores, principalmente ligadas a:
 
-- nomes exatos de units/timers da automação do host
-- comando agregador real de regeneração da v2
-- detalhes finais de root/alias em todos os blocos relevantes
-- inventário completo dos scripts e presets operacionais efetivamente em uso
+- expansão controlada do inventário de materialização e release do runtime ETL
+- formalização incremental de variáveis operacionais do ETL além do baseline já parametrizado
+- evolução futura do contrato de deploy sem quebrar o `systemd` atual
 
 ---
 
@@ -151,6 +150,8 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/03-portal-estatico/etl-runtime-reconciliation.md`
+- `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
@@ -231,6 +232,7 @@ Os artefatos reais conhecidos ou esperados deste contexto incluem:
 ### Base operacional do portal / ETL
 
 - `/opt/cs2-portal/`
+- base de `locks`, `state`, `sql` e scripts `content/news` no contrato atual
 
 ### Lock global conhecido
 
@@ -243,6 +245,24 @@ Os artefatos reais conhecidos ou esperados deste contexto incluem:
 ### Scripts operacionais
 
 - `/usr/local/bin/`
+- camada runtime materializada do ETL
+
+
+### Repositório versionado do runtime ETL
+
+- `14vosx/hsc-cs2-etl`
+
+### Tag operacional reconciliada
+
+- `etl-v0.3.0`
+
+### Evidência bruta da baseline importada
+
+- `_reconcile/2026-04-01/vps-runtime/raw/` dentro do repositório ETL
+
+### Script de materialização do runtime
+
+- `scripts/materialize-etl-runtime.sh` no repositório ETL
 
 ### Fonte de dados principal
 
@@ -384,6 +404,7 @@ Os paths críticos conhecidos deste contexto incluem:
 ### Scripts operacionais
 
 - `/usr/local/bin/`
+- camada runtime materializada do ETL
 
 ### Fonte viva do `matchzy.db`
 
