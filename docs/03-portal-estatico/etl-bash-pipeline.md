@@ -37,6 +37,8 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Operação e runtime
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [ETL Runtime Reconciliation](./etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
@@ -85,6 +87,10 @@ O estado operacional conhecido e reconciliado da pipeline ETL do portal é:
   - `/opt/cs2-portal/`
 - a árvore pública da v2 continua sendo:
   - `/var/www/api/cs2/v2/`
+- a fonte versionada dos scripts ETL agora vive em `bin/` no repositório `hsc-cs2-etl`
+- o runtime live do host continua sendo materializado em `/usr/local/bin/`
+- o contrato do host permanece `systemd` -> `/usr/local/bin/*` -> ETL parametrizado -> `/var/www/api/cs2/v2/`
+- o baseline operacional reconciliado do repositório ETL foi marcado pela tag `etl-v0.3.0`
 
 Também ficou reconciliado no runtime real que:
 
@@ -111,7 +117,8 @@ As principais evidências deste documento, nesta fase de reconciliação, são:
 - `ExecStart=` reconciliado de `gen-all-v2.service`
 - scripts reais em `/usr/local/bin/`
 - base operacional real em `/opt/cs2-portal/`
-- grep reconciliado do conteúdo de `gen-all-v2.sh`
+- comparação de hashes staged vs live durante a materialização
+- repositório `14vosx/hsc-cs2-etl` com `bin/`, `deploy/systemd/`, `_reconcile/` e `scripts/materialize-etl-runtime.sh`
 - documentação reconciliada da Infra Hostinger e do Portal Estático
 
 Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
@@ -131,6 +138,8 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
+- `docs/03-portal-estatico/etl-runtime-reconciliation.md`
+- `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 
 Este documento descreve a pipeline ETL Bash da v2.  
@@ -218,18 +227,23 @@ Leitura canônica:
 O conteúdo reconciliado do `gen-all-v2.sh` mostra a seguinte ordem de execução principal:
 
 1. `gen-matches.sh`
-2. `gen-ranking.sh`
-3. `gen-players-incremental.sh`
-4. `gen-players-from-ranking.sh`
-5. `gen-maps.sh`
+2. `gen-match-details-incremental.sh`
+3. `gen-ranking.sh`
+4. `gen-players-incremental.sh`
+5. `gen-players-from-ranking.sh`
+6. `gen-maps.sh`
+7. `gen-content-news-cache.sh`
+8. `gen-content-news-items-cache.sh`
 
 Leitura canônica:
 
-- a geração de `matches` vem antes de `ranking`
+- a geração de `matches` vem antes de `match` detalhado e de `ranking`
+- a pipeline já materializa também o detalhe incremental de partidas em `match/{id}.json`
 - o pipeline separa:
   - geração incremental de players
   - derivação de players a partir do ranking
-- `maps` entra como etapa final reconciliada do agregador
+- `maps` entra antes do mirror same-origin de News
+- o agregador principal já incorpora o refresh de `content/news/index.json` e dos itens espelhados do mirror
 
 Essa ordem deve ser tratada como a ordem operacional viva da v2 no estado atual do host.
 
@@ -271,6 +285,15 @@ Observação reconciliada:
 
 ---
 
+## `gen-match-details-incremental.sh`
+
+Papel:
+- gerar `match/{id}.json` incrementalmente
+- sustentar o detalhe público de partidas finalizadas
+- atualizar o statefile `matches_last_matchid` do runtime
+
+---
+
 ## `gen-ranking.sh`
 
 Papel:
@@ -307,18 +330,65 @@ Papel:
 
 ---
 
+## `gen-content-news-cache.sh`
+
+Papel:
+- gerar `content/news/index.json` como mirror same-origin de News
+- manter a camada pública do portal consumindo `content/news/` sem depender diretamente de origem cross-domain
+
+---
+
+## `gen-content-news-items-cache.sh`
+
+Papel:
+- espelhar os itens individuais de News sob `${ETL_BASE_DIR}/bin` no contrato atual
+- complementar o índice `content/news/index.json`
+
+---
+
 ## Scripts adicionais presentes no host
 
 O host também possui scripts instalados que fazem parte do ecossistema operacional do portal:
 
-- `gen-match-details-incremental.sh`
 - `gen-player.sh`
 
 Leitura canônica:
 
-- esses scripts existem materialmente e podem ser usados em fluxos auxiliares ou específicos
-- eles não foram reconciliados como heartbeat principal da pipeline
-- sua presença deve ser tratada como parte da malha operacional instalada, não necessariamente como fluxo principal automático
+- `gen-player.sh` continua sendo helper operacional explícito para geração individual de player
+- `gen-match-details-incremental.sh` deixou de ser apenas presença material auxiliar e já faz parte da ordem reconciliada do agregador principal
+- os scripts de content/news permanecem consumidos via `${ETL_BASE_DIR}/bin` no contrato atual
+
+---
+
+## Fonte versionada, runtime materializado e evidência bruta
+
+A leitura reconciliada do runtime ETL passa a distinguir três camadas:
+
+### 1. Fonte versionada
+
+No repositório `hsc-cs2-etl`:
+
+- `bin/` = fonte versionada dos scripts ETL
+- `deploy/systemd/` = contrato host-facing atual das units
+- `_reconcile/2026-04-01/vps-runtime/raw/` = evidência bruta da baseline importada
+
+### 2. Runtime materializado
+
+No host Hostinger:
+
+- `/usr/local/bin/*.sh` = runtime materializado atualmente consumido pelo `systemd`
+
+### 3. Base operacional
+
+No host Hostinger:
+
+- `/opt/cs2-portal/` = base de `locks`, `state`, `sql` e scripts de `content/news`
+
+Leitura canônica:
+
+- `bin/` é a origem
+- `/usr/local/bin` é o runtime
+- `/opt/cs2-portal` continua sendo a base operacional auxiliar do pipeline
 
 ---
 

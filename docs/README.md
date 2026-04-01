@@ -61,6 +61,8 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [Portal Estático](./03-portal-estatico/README.md)
 - [Static API v2](./03-portal-estatico/static-api-v2.md)
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
+- [ETL Runtime Reconciliation](./03-portal-estatico/etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](./03-portal-estatico/etl-runtime-materialization-runbook.md)
 - [Data Sources — MatchZy SQLite](./03-portal-estatico/data-sources-matchzy-sqlite.md)
 - [JSON Contracts](./03-portal-estatico/json-contracts.md)
 - [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
@@ -100,6 +102,8 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [Data Sources — MatchZy SQLite](./03-portal-estatico/data-sources-matchzy-sqlite.md)
 - [SQL Queries and Views](./03-portal-estatico/sql-queries-and-views.md)
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
+- [ETL Runtime Reconciliation](./03-portal-estatico/etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](./03-portal-estatico/etl-runtime-materialization-runbook.md)
 - [Static API v2](./03-portal-estatico/static-api-v2.md)
 - [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
 

@@ -59,6 +59,7 @@ O estado operacional conhecido da camada de filesystem do lado Hostinger inclui:
 - locks e statefiles do ETL sob `/opt/cs2-portal/`
 - SQLs versionados do portal sob `/opt/cs2-portal/sql/`
 - scripts operacionais em `/usr/local/bin/`
+- `/usr/local/bin` deve ser lido como runtime materializado do ETL, e não como origem manual da autoria
 - árvore operacional do lado AMP sob `/home/amp/.ampdata/instances/`
 - dependência de leitura pública por `www-data`
 - dependência de escrita por processos operacionais do host e/ou usuários associados ao fluxo de geração
@@ -99,6 +100,8 @@ Este arquivo é complementar a:
 - `docs/02-game-panel/instance-mixhaxixe01.md`
 - `docs/../03-portal-estatico/portal-estatico-architecture-runtime.md`
 - `docs/03-portal-estatico/etl-bash-pipeline.md`
+- `docs/03-portal-estatico/etl-runtime-reconciliation.md`
+- `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 
 Este documento descreve a camada de paths e permissões do host Hostinger.  
@@ -236,6 +239,7 @@ Natureza:
 
 Papel:
 - concentrar scripts do host, inclusive scripts `gen-*` ou equivalentes usados na automação do portal e de outras camadas do lado Hostinger
+- servir como destino da materialização do runtime ETL reconciliado
 
 Natureza:
 - operacional

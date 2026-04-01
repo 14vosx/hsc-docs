@@ -36,6 +36,8 @@ Este documento existe para registrar, de forma estável e auditável:
 ### Operação e suporte
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
+- [ETL Runtime Reconciliation](./etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
@@ -78,6 +80,8 @@ O estado operacional conhecido da Static API v2 é:
 - a v2 é consumida pelo frontend público por `fetch`
 - a v2 substitui o modelo anterior como versão oficial em uso
 - a arquitetura do portal assume v2 como contrato público estável da camada de dados
+- o runtime ETL que publica a v2 já foi reconciliado com o repositório `hsc-cs2-etl`
+- o runtime live continua materializado em `/usr/local/bin` sem alterar o contrato atual do `systemd`
 
 A v2 existe para entregar dados públicos previsíveis com custo operacional baixo e baixa complexidade de serving.
 
@@ -92,6 +96,7 @@ As principais evidências deste documento, nesta fase de migração documental, 
 - documentação reconciliada da Static API v2
 - inventário de recursos públicos já documentados
 - reconciliação entre ETL, paths de publicação e consumo pelo frontend
+- documentação do runtime ETL reconciliado e de sua materialização
 
 Enquanto a migração canônica do contexto não estiver concluída, essas fontes seguem sendo usadas como base de reconciliação.
 
@@ -111,6 +116,8 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/nginx-publishing-cache.md`
 - `docs/03-portal-estatico/portal-estatico-operational-runbooks.md`
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
+- `docs/03-portal-estatico/etl-runtime-reconciliation.md`
+- `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
 
 Este documento descreve a camada v2 como contrato público de alto nível.  
 Ele não substitui os documentos de contrato detalhado, pipeline ou troubleshooting.

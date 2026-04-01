@@ -29,16 +29,12 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 ### Contextos canônicos
 - [01 — Infra Hostinger](../01-infra-hostinger/README.md)
-- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/hsc-public-architecture-current-state.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](../01-infra-hostinger/infra-hostinger-public-architecture-current-state.md)
 - [02 — Game Panel](../02-game-panel/README.md)
   - [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [03 — Portal Estático](../03-portal-estatico/README.md)
   - [Brand Hub Root — Product and Surface Decisions](../03-portal-estatico/brand-hub-root-product-and-surface-decisions.md)
-  - [Brand Hub Root — Architecture Runtime](../03-portal-estatico/brand-hub-root-architecture-runtime.md)
   - [Brand Hub Root — Publishing and Cutover Runtime](../03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md)
-  - [Brand Hub Root — Brand and Logo System](../03-portal-estatico/brand-hub-root-brand-and-logo-system.md)
-  - [Brand Hub Root — Frontend Implementation Runtime](../03-portal-estatico/brand-hub-root-frontend-implementation-runtime.md)
-  - [Brand Hub Root — References and Inventory](../03-portal-estatico/brand-hub-root-references-inventory.md)
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
@@ -156,6 +152,8 @@ Arquivos principais:
 - [Portal Estático Architecture Runtime](../03-portal-estatico/portal-estatico-architecture-runtime.md)
 - [Data Sources — MatchZy SQLite](../03-portal-estatico/data-sources-matchzy-sqlite.md)
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [ETL Runtime Reconciliation](../03-portal-estatico/etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](../03-portal-estatico/etl-runtime-materialization-runbook.md)
 - [Portal Estático Frontend Structure](../03-portal-estatico/portal-estatico-frontend-structure.md)
 - [JSON Contracts](../03-portal-estatico/json-contracts.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
@@ -265,6 +263,8 @@ Status:
 
 Leitura sintética:
 - cadeia MatchZy SQLite → ETL → Static API v2 → portal segue como trilha principal do lado público
+- o runtime ETL da v2 já foi reconciliado com o repositório `hsc-cs2-etl`
+- a materialização em `/usr/local/bin` já passou a ser tratada como camada runtime, e não como superfície manual de autoria
 
 ---
 

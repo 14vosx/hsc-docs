@@ -24,7 +24,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Documentos deste contexto
 - [Architecture Runtime](./infra-hostinger-architecture-runtime.md)
 - [Docker Host](./docker-host.md)
-- [HSC — Estado Atual Oficial da Arquitetura Pública](./hsc-public-architecture-current-state.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](./infra-hostinger-public-architecture-current-state.md)
 - [Filesystem Paths and Permissions](./filesystem-paths-permissions.md)
 - [Network, DNS and TLS](./infra-hostinger-network-dns-tls.md)
 - [Nginx Static Serving](./nginx-static-serving.md)
@@ -36,15 +36,17 @@ Este contexto existe para registrar, de forma estável e auditável:
 ### Relações com outros contextos
 - [Game Panel](../02-game-panel/README.md)
 - [Portal Estático](../03-portal-estatico/README.md)
-[Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
+- [Game Panel — Public Access and Ops Entrypoint](../02-game-panel/game-panel-public-access-and-ops-entrypoint.md)
 - [Brand Hub Root — Product and Surface Decisions](../03-portal-estatico/brand-hub-root-product-and-surface-decisions.md)
 - [Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 
 ### Trilhas operacionais relevantes
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
-- [Brand Hub Root — Publishing and Cutover Runtime](../-03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md)
+- [Brand Hub Root — Publishing and Cutover Runtime](../03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md)
 - [Static API v2](../03-portal-estatico/static-api-v2.md)
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
+- [ETL Runtime Reconciliation](../03-portal-estatico/etl-runtime-reconciliation.md)
+- [ETL Runtime Materialization Runbook](../03-portal-estatico/etl-runtime-materialization-runbook.md)
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
 
 ---
@@ -88,6 +90,7 @@ O estado operacional conhecido deste contexto é:
 - porta público
 - entrypoint operacional do AMP
 - automações do host usam systemd e timers
+- o runtime ETL da v2 agora é materializado em `/usr/local/bin` a partir de fonte versionada reconciliada
 - workloads do ecossistema rodam sobre essa base, especialmente:
   - Game Panel / AMP / servidor CS2
   - Portal Estático
@@ -233,7 +236,7 @@ Em termos operacionais:
 
 Este contexto também passa a hospedar o documento canônico que consolida o estado atual da arquitetura pública do HSC:
 
-- [HSC — Estado Atual Oficial da Arquitetura Pública](./hsc-public-architecture-current-state.md)
+- [HSC — Estado Atual Oficial da Arquitetura Pública](./infra-hostinger-public-architecture-current-state.md)
 
 Esse documento existe para registrar, de forma transversal:
 

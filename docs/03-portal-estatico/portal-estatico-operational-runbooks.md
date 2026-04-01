@@ -661,10 +661,30 @@ Este documento pode ser considerado maduro quando:
 - ele puder ser usado como guia prático de operação do Portal Estático sem depender do master legado
 
 ---
+---
+
+## Runbook de materialização do runtime ETL
+
+A materialização do runtime ETL deixa de depender de cópia manual arquivo a arquivo em `/usr/local/bin`.
+
+A leitura canônica desta frente passa a ser:
+
+- `bin/` no repositório ETL é a fonte versionada
+- `/usr/local/bin/*.sh` é a camada materializada de runtime
+- o `systemd` continua apontando para `/usr/local/bin/*`
+
+O procedimento detalhado de staging, comparação de hashes, backup, materialização live, validação via `systemd` e rollback vive em:
+
+- [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
+
+Este `operational-runbooks.md` continua como hub operacional do contexto.
+O runbook dedicado existe para evitar que o fluxo de materialização fique diluído no meio dos demais procedimentos da camada pública.
+
+---
 
 ## Última revisão
 
 - Status: ativo
 - Classificação: canônico
-- Contexto: portal estático / operational runbooks
-- Última revisão: 2026-03-18
+- Contexto: portal-estatico / runbooks operacionais
+- Última revisão: 2026-04-01
