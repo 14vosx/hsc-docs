@@ -35,6 +35,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 - [03 — Portal Estático](../03-portal-estatico/README.md)
   - [Brand Hub Root — Product and Surface Decisions](../03-portal-estatico/brand-hub-root-product-and-surface-decisions.md)
   - [Brand Hub Root — Publishing and Cutover Runtime](../03-portal-estatico/brand-hub-root-publishing-and-cutover-runtime.md)
+  - [ETL Repository — Minimal Shell CI](../03-portal-estatico/etl-repository-minimal-shell-ci.md)
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
@@ -47,6 +48,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 
 ### Histórico e auditoria
 - [Impl Log](../95-impl-log/README.md)
+  - [2026-04-02 — ETL Minimal Shell CI Workflow](../95-impl-log/2026-04-02-etl-minimal-shell-ci-workflow.md)
 - [Audit](../97-audit/README.md)
 - [Legacy](../98-legacy/README.md)
 
@@ -154,6 +156,7 @@ Arquivos principais:
 - [ETL Bash Pipeline](../03-portal-estatico/etl-bash-pipeline.md)
 - [ETL Runtime Reconciliation](../03-portal-estatico/etl-runtime-reconciliation.md)
 - [ETL Runtime Materialization Runbook](../03-portal-estatico/etl-runtime-materialization-runbook.md)
+- [ETL Repository — Minimal Shell CI](../03-portal-estatico/etl-repository-minimal-shell-ci.md)
 - [Portal Estático Frontend Structure](../03-portal-estatico/portal-estatico-frontend-structure.md)
 - [JSON Contracts](../03-portal-estatico/json-contracts.md)
 - [Nginx Publishing and Cache](../03-portal-estatico/nginx-publishing-cache.md)
