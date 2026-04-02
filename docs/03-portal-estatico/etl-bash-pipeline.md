@@ -39,6 +39,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [ETL Runtime Reconciliation](./etl-runtime-reconciliation.md)
 - [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
+- [ETL Repository — Minimal Shell CI](./etl-repository-minimal-shell-ci.md)
 - [Operational Runbooks](./portal-estatico-operational-runbooks.md)
 - [Observability and Troubleshooting](./portal-estatico-observability-troubleshooting.md)
 
@@ -91,6 +92,7 @@ O estado operacional conhecido e reconciliado da pipeline ETL do portal é:
 - o runtime live do host continua sendo materializado em `/usr/local/bin/`
 - o contrato do host permanece `systemd` -> `/usr/local/bin/*` -> ETL parametrizado -> `/var/www/api/cs2/v2/`
 - o baseline operacional reconciliado do repositório ETL foi marcado pela tag `etl-v0.3.0`
+- o repositório `hsc-cs2-etl` agora possui gate mínimo de CI para sintaxe shell e lint básico
 
 Também ficou reconciliado no runtime real que:
 
@@ -119,6 +121,7 @@ As principais evidências deste documento, nesta fase de reconciliação, são:
 - base operacional real em `/opt/cs2-portal/`
 - comparação de hashes staged vs live durante a materialização
 - repositório `14vosx/hsc-cs2-etl` com `bin/`, `deploy/systemd/`, `_reconcile/` e `scripts/materialize-etl-runtime.sh`
+- workflow `.github/workflows/ci-shell.yml` no repositório ETL
 - documentação reconciliada da Infra Hostinger e do Portal Estático
 
 Enquanto o runtime real permanecer neste formato, essas evidências prevalecem como source of truth operacional.
@@ -140,10 +143,36 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/portal-estatico-references-inventory.md`
 - `docs/03-portal-estatico/etl-runtime-reconciliation.md`
 - `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
+- `docs/03-portal-estatico/etl-repository-minimal-shell-ci.md`
 - `docs/01-infra-hostinger/systemd-automation.md`
 
 Este documento descreve a pipeline ETL Bash da v2.  
 Ele não substitui os documentos de inventário, publicação pública, runbooks ou observabilidade.
+
+---
+
+## Gate mínimo do repositório ETL
+
+Além da leitura host-facing da pipeline, o repositório `hsc-cs2-etl` agora possui um gate mínimo de repositório para reduzir regressões shell triviais antes do merge.
+
+Leitura correta desse gate:
+
+- ele não orquestra a v2 no host
+- ele não substitui a validação via `systemd`
+- ele protege a camada versionada do ETL contra erro óbvio de shell
+
+Contrato atual do gate:
+
+- workflow `.github/workflows/ci-shell.yml`
+- trigger em `push` e `pull_request`
+- cobertura explícita de `bin/*.sh` e `scripts/*.sh`
+- `bash -n` como checagem de sintaxe
+- `shellcheck -S warning` como lint básico
+
+Regra importante:
+
+- `legacy/` e `_reconcile/` permanecem fora da cobertura da CI mínima
+- essa fronteira não deve ser expandida sem nova decisão explícita
 
 ---
 

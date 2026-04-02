@@ -26,6 +26,7 @@ Ela serve para:
 - [2026-03-19 — Auth Admin Magic Link and SQL Migrations Cutover](./2026-03-19-auth-admin-magic-link-and-sql-migrations-cutover.md)
 - [2026-03-24 — Local Auth Users Management Checkpoint](./2026-03-24-local-auth-users-management-checkpoint.md)
 - [2026-04-01 — ETL Runtime Reconciliation, Parameterization and Materialization](./2026-04-01-etl-runtime-reconciliation-parameterization-and-materialization.md)
+- [2026-04-02 — ETL Minimal Shell CI Workflow](./2026-04-02-etl-minimal-shell-ci-workflow.md)
 
 ### Contextos relacionados
 - [Governance](../00-governance/README.md)

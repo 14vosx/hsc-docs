@@ -85,6 +85,7 @@ Ainda restam pendências menores, principalmente ligadas a:
 - expansão controlada do inventário de materialização e release do runtime ETL
 - formalização incremental de variáveis operacionais do ETL além do baseline já parametrizado
 - evolução futura do contrato de deploy sem quebrar o `systemd` atual
+- formalização do gate mínimo de CI do repositório ETL
 
 ---
 
@@ -152,6 +153,7 @@ Este arquivo é complementar a:
 - `docs/03-portal-estatico/portal-estatico-observability-troubleshooting.md`
 - `docs/03-portal-estatico/etl-runtime-reconciliation.md`
 - `docs/03-portal-estatico/etl-runtime-materialization-runbook.md`
+- `docs/03-portal-estatico/etl-repository-minimal-shell-ci.md`
 - `docs/01-infra-hostinger/nginx-static-serving.md`
 - `docs/01-infra-hostinger/infra-hostinger-network-dns-tls.md`
 
@@ -170,6 +172,7 @@ Os documentos abaixo são as principais fontes de extração e reconciliação d
 - blueprint técnico consolidado do HSC
 - documentação específica do Portal Estático
 - documentação específica da Static API v2
+- documentação da CI mínima do repositório ETL
 
 ### Fontes secundárias
 
@@ -264,6 +267,13 @@ Os artefatos reais conhecidos ou esperados deste contexto incluem:
 
 - `scripts/materialize-etl-runtime.sh` no repositório ETL
 
+### Workflow mínimo de CI do repositório ETL
+
+- `.github/workflows/ci-shell.yml` no repositório ETL
+- trigger em `push` e `pull_request`
+- cobertura explícita de `bin/*.sh` e `scripts/*.sh`
+- `bash -n` + `shellcheck -S warning`
+
 ### Fonte de dados principal
 
 - `/home/amp/.ampdata/instances/MixHAXIXE01/counter-strike2/730/game/csgo/addons/counterstrikesharp/plugins/MatchZy/matchzy.db`
@@ -299,6 +309,12 @@ Papel:
 Papel:
 - gerar artefatos públicos a partir da fonte SQLite
 - atualizar a árvore pública da v2
+
+### GitHub Actions do repositório ETL
+
+Papel:
+- aplicar gate mínimo de shell antes do merge
+- reduzir regressão boba na camada versionada do ETL
 
 ### Nginx da Hostinger
 

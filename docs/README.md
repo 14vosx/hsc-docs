@@ -63,6 +63,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
 - [ETL Runtime Reconciliation](./03-portal-estatico/etl-runtime-reconciliation.md)
 - [ETL Runtime Materialization Runbook](./03-portal-estatico/etl-runtime-materialization-runbook.md)
+- [ETL Repository — Minimal Shell CI](./03-portal-estatico/etl-repository-minimal-shell-ci.md)
 - [Data Sources — MatchZy SQLite](./03-portal-estatico/data-sources-matchzy-sqlite.md)
 - [JSON Contracts](./03-portal-estatico/json-contracts.md)
 - [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
@@ -104,6 +105,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [ETL Bash Pipeline](./03-portal-estatico/etl-bash-pipeline.md)
 - [ETL Runtime Reconciliation](./03-portal-estatico/etl-runtime-reconciliation.md)
 - [ETL Runtime Materialization Runbook](./03-portal-estatico/etl-runtime-materialization-runbook.md)
+- [ETL Repository — Minimal Shell CI](./03-portal-estatico/etl-repository-minimal-shell-ci.md)
 - [Static API v2](./03-portal-estatico/static-api-v2.md)
 - [Frontend Structure](./03-portal-estatico/portal-estatico-frontend-structure.md)
 

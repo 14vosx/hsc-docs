@@ -29,6 +29,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [ETL Bash Pipeline](./etl-bash-pipeline.md)
 - [ETL Runtime Reconciliation](./etl-runtime-reconciliation.md)
 - [ETL Runtime Materialization Runbook](./etl-runtime-materialization-runbook.md)
+- [ETL Repository — Minimal Shell CI](./etl-repository-minimal-shell-ci.md)
 - [Data Sources — MatchZy SQLite](./data-sources-matchzy-sqlite.md)
 - [SQL Queries and Views](./sql-queries-and-views.md)
 - [JSON Contracts](./json-contracts.md)
@@ -50,6 +51,7 @@ Este contexto existe para registrar, de forma estável e auditável:
 - [MatchZy](../02-game-panel/matchzy.md)
 - [Nginx Static Serving](../01-infra-hostinger/nginx-static-serving.md)
 - [Systemd Automation](../01-infra-hostinger/systemd-automation.md)
+- [ETL Repository — Minimal Shell CI](./etl-repository-minimal-shell-ci.md)
 - [Filesystem Paths and Permissions](../01-infra-hostinger/filesystem-paths-permissions.md)
 - [Auth API Operations](../04-infra-aws-lightsail/auth-api-operations.md)
 
@@ -102,6 +104,8 @@ O estado operacional conhecido deste contexto é:
 - `bin/` passou a ser a fonte versionada dos scripts ETL
 - `/usr/local/bin/*.sh` passou a ser tratado como runtime materializado no host
 - a materialização live dessa camada já foi validada via `systemd`
+- o repositório ETL agora possui CI mínima de shell via GitHub Actions
+- esse gate cobre `bin/*.sh` e `scripts/*.sh` com `bash -n` e `shellcheck -S warning`
 
 A arquitetura do Portal Estático existe para entregar:
 
