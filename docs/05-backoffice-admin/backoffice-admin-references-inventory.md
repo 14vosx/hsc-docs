@@ -83,6 +83,9 @@ O estado atual conhecido do contexto é:
   - `/dashboard`
 - o backend permanece autoridade final para autenticação, autorização e invariantes
 - `seasons`, `news` e `events` permanecem como domínios iniciais
+- `seasons` já possui listagem administrativa inicial implementada no Backoffice
+- a leitura admin canônica de Seasons já está disponível no backend
+- o lifecycle de Seasons ainda está pendente na UI do Backoffice
 - parte importante da auth base já está reconciliada com runtime real
 - parte da expansão de domínio ainda depende de evolução incremental de contrato e implementação
 
@@ -108,6 +111,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
 - `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
+- `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -122,6 +126,7 @@ Leitura recomendada:
 - `news-admin-integration-and-evolution.md` define uso e expansão disciplinada do domínio `news`
 - `news-admin-feature-implementation-spec.md` traduz o domínio reconciliado em feature implementável no frontend
 - `news-admin-frontend-implementation-runtime.md` registra a implementação real materializada no frontend
+- `seasons-admin-list-functional-smoke-guide.md` registra a listagem administrativa inicial de `seasons`, seu contrato de leitura e o smoke funcional local
 - `operational-runbooks.md` define validação e troubleshooting
 - este arquivo consolida o inventário de referência e dependência
 
@@ -207,6 +212,22 @@ Papel dessas referências:
 - registrar a implementação real do MVP no frontend administrativo
 - registrar a fronteira entre Backoffice, Auth API e mirror público do Portal
 - orientar expansão futura do domínio sem transformar `admin-api-contracts.md` em documento monolítico
+
+---
+
+## Referência canônica inicial do domínio `seasons`
+
+O domínio `seasons` passa a contar com uma referência funcional específica para a listagem administrativa inicial:
+
+- `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
+
+Papel desta referência:
+
+- registrar Season como ciclo competitivo oficial do servidor HSC
+- documentar o contrato admin de leitura de Seasons
+- registrar que `/seasons` já é página real do Backoffice
+- preservar o smoke funcional local
+- distinguir a listagem implementada das lacunas de lifecycle, ranking, partidas, Portal e ETL
 
 ---
 
@@ -368,12 +389,17 @@ Status do domínio no contexto:
 Papel esperado:
 
 - domínio administrativo prioritário do MVP
-- validar listagem, create/edit e lifecycle sensível
-- exercitar activate/close com invariantes de domínio
+- representar ciclos competitivos oficiais do servidor HSC
+- validar listagem administrativa inicial
+- evoluir create/edit e lifecycle sensível em etapas futuras
+- exercitar activate/close com invariantes de domínio quando essas ações entrarem na UI
 
-Superfícies administrativas esperadas:
+Superfícies administrativas disponíveis na UI atual:
 
 - listagem admin
+
+Superfícies administrativas existentes no backend, mas ainda pendentes na UI:
+
 - detail/edit admin
 - create
 - activate
@@ -381,9 +407,11 @@ Superfícies administrativas esperadas:
 
 Status do domínio no contexto:
 
-- mais maduro
-- bom primeiro domínio para implementação
-- ainda pede consolidação fina de leitura admin canônica
+- listagem administrativa inicial implementada
+- leitura admin canônica disponível no backend por `GET /admin/seasons` e `GET /admin/seasons/:slug`
+- rota `/seasons` materializada como página funcional do Backoffice
+- lifecycle ainda pendente na UI do Backoffice
+- ranking por season, partidas associadas, snapshot histórico, Portal e ETL seguem como lacunas futuras
 
 ---
 
