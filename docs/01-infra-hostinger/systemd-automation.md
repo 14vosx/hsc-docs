@@ -9,7 +9,7 @@ Este documento existe para registrar, de forma estável e auditável:
 - quais timers e services realmente existem no host
 - quais automações estão ativas hoje
 - qual é o comando agregador real da pipeline v2
-- quais unidades permanecem instaladas, mas não ativas
+- quais unidades permanecem instaladas, mas não ativas ou não fazem parte da malha principal
 - como locks, working directories e usuários do host entram nessa automação
 - quais riscos existem quando a automação documentada diverge da automação real
 
@@ -75,6 +75,11 @@ O estado operacional conhecido e reconciliado da automação `systemd` do lado H
 - a automação principal da v2 está centrada em:
   - `gen-all-v2.timer`
   - `gen-all-v2.service`
+- a automação dedicada de News está ativa em modo conservador:
+  - `gen-content-news.timer`
+  - `gen-content-news-items.timer`
+  - `gen-content-news.service`
+  - `gen-content-news-items.service`
 - a geração recorrente do `health.json` está centrada em:
   - `gen-health.timer`
   - `gen-health.service`
@@ -84,7 +89,7 @@ O estado operacional conhecido e reconciliado da automação `systemd` do lado H
   - matches
   - content/news
   - content/news items
-- essas units granulares não são hoje a automação principal ativa da v2
+- as units granulares de News foram ativadas de forma conservadora para reduzir latência pública sem priorizar News acima da estabilidade do jogo
 - o comando agregador real da v2 já foi reconciliado como:
   - `/usr/local/bin/gen-all-v2.sh`
 
@@ -92,15 +97,27 @@ Também ficou reconciliado no runtime real que:
 
 - `gen-health.timer` está ativo
 - `gen-all-v2.timer` está ativo
-- os timers granulares de `matches`, `players`, `ranking`, `content/news` e `content/news items` existem, mas não estão ativos no estado atual
+- `gen-content-news.timer` está `enabled/active`
+- `gen-content-news-items.timer` está `enabled/active`
+- os timers granulares de `matches`, `players` e `ranking` existem, mas não estão ativos no estado atual
 - o host possui scripts reais em `/usr/local/bin/`
 - o host possui base operacional do portal em `/opt/cs2-portal/`
+
+Contexto operacional conservador:
+
+- a VPS Hostinger também roda o servidor CS2 via Game Panel/AMP
+- a estabilidade do jogo tem prioridade sobre a latência de News
+- o plano observado no momento da validação era 2 vCPU, cerca de 8 GiB RAM, sem swap e disco em torno de 70%
+- há upgrade previsto em cerca de 20 dias para Game Panel 4, com 4 vCPU, 16 GiB RAM e 200 GB NVMe
+- a decisão atual é não reduzir os timers de News para 60s antes desse upgrade
+- a cadência deve ser reavaliada depois do Game Panel 4
 
 Leitura canônica:
 
 - a v2 hoje é gerada por pipeline agregada
 - a saúde pública da v2 depende principalmente de `gen-all-v2` + `gen-health`
-- units granulares sobrevivem como infraestrutura instalada, mas não como scheduler principal ativo
+- News possui timers dedicados ativos em modo conservador
+- os demais timers granulares sobrevivem como infraestrutura instalada, mas não como scheduler principal ativo
 
 ---
 
@@ -145,16 +162,18 @@ As units reconciliadas no host para a camada portal/v2 são:
 
 - `gen-health.timer`
 - `gen-all-v2.timer`
+- `gen-content-news.timer`
+- `gen-content-news-items.timer`
 
 ### Services principais ativos por ativação indireta
 
 - `gen-health.service`
 - `gen-all-v2.service`
+- `gen-content-news.service`
+- `gen-content-news-items.service`
 
 ### Timers instalados, mas não ativos no estado atual
 
-- `gen-content-news.timer`
-- `gen-content-news-items.timer`
 - `gen-matches.timer`
 - `gen-players.timer`
 - `gen-ranking.timer`
@@ -171,7 +190,8 @@ Leitura canônica:
 
 - a presença dessas units no host está confirmada
 - a ativação principal atual da v2 depende dos timers agregados
-- as units granulares não devem ser tratadas como scheduler principal vivo sem evidência de ativação futura
+- as units granulares de News agora são scheduler dedicado vivo do mirror de News
+- as demais units granulares não devem ser tratadas como scheduler principal vivo sem evidência de ativação futura
 
 ---
 
@@ -210,6 +230,8 @@ Leitura canônica:
 - o heartbeat operacional do portal hoje é:
   - `gen-health` a cada 1 minuto
   - `gen-all-v2` a cada 10 minutos
+  - `gen-content-news` em modo conservador para lista de News
+  - `gen-content-news-items` em modo conservador para detalhes de News
 
 ---
 
@@ -366,16 +388,69 @@ Campos reconciliados:
 
 Leitura canônica:
 - o host já possui automação materializada para o mirror de News
-- porém seus timers não são hoje parte da malha principal ativa reconciliada
+- seus timers dedicados agora estão ativos em modo conservador
+- antes dessa ativação, News dependia do `gen-all-v2.timer` para atualização automática, com latência maior
+
+### `gen-content-news.timer`
+
+Estado reconciliado:
+- `enabled/active`
+
+Configuração conservadora atual:
+- `OnUnitActiveSec=120s`
+- drop-in com `OnActiveSec=120s`
+
+Drop-in reconciliado:
+- `/etc/systemd/system/gen-content-news.timer.d/override.conf`
+
+Papel:
+- atualizar o index público de News
+- reduzir a latência do mirror para até ~2 min para lista
+
+### `gen-content-news-items.timer`
+
+Estado reconciliado:
+- `enabled/active`
+
+Configuração conservadora atual:
+- `OnUnitActiveSec=300s`
+- drop-in com `OnActiveSec=300s`
+
+Drop-in reconciliado:
+- `/etc/systemd/system/gen-content-news-items.timer.d/override.conf`
+
+Papel:
+- atualizar os detalhes públicos de News por `slug`
+- reduzir a latência do mirror para até ~5 min para detalhes
+
+### Motivo dos drop-ins
+
+Após `enable`, os timers dedicados de News ficaram `active elapsed` com `Trigger n/a`.
+
+O uso de `OnActiveSec` nos drop-ins passou a garantir a primeira execução e o reagendamento após restart do timer.
+
+### Validação observada
+
+Validação de execução:
+
+- `gen-content-news.service` medido com elapsed de aproximadamente `0.603s`
+- `gen-content-news-items.service` medido com elapsed de aproximadamente `1.020s`
+- execução automática dos dois timers validada
+- logs com `ok`
+- load após execução observado em `0.02, 0.01, 0.00`
+
+Leitura correta:
+
+- o impacto observado no momento do teste foi baixo
+- isso não deve ser lido como garantia de ausência de impacto no servidor CS2
+- a cadência atual permanece conservadora até o upgrade previsto da VPS
 
 ---
 
-## Timers instalados, mas não ativos
+## Timers granulares instalados, mas não ativos
 
 A fotografia do host confirmou timers existentes, porém não ativos no estado atual:
 
-- `gen-content-news.timer`
-- `gen-content-news-items.timer`
 - `gen-matches.timer`
 - `gen-players.timer`
 - `gen-ranking.timer`
@@ -385,6 +460,10 @@ Leitura canônica:
 - essas units fazem parte da infraestrutura instalada
 - não devem ser tratadas como heartbeat principal atual
 - podem servir como trilha histórica, fallback ou automação reservada, mas isso exigiria reconciliação operacional adicional
+
+Observação:
+
+- `gen-content-news.timer` e `gen-content-news-items.timer` deixaram este grupo após a ativação conservadora validada
 
 ---
 
@@ -475,6 +554,10 @@ A relação operacional correta é:
 - `gen-all-v2.sh` gera os artefatos públicos principais da v2
 - `gen-health.timer` aciona `gen-health.service`
 - `gen-health.service` executa `/usr/local/bin/gen-health.sh`
+- `gen-content-news.timer` aciona `gen-content-news.service`
+- `gen-content-news.service` executa `/opt/cs2-portal/bin/gen-content-news-cache.sh`
+- `gen-content-news-items.timer` aciona `gen-content-news-items.service`
+- `gen-content-news-items.service` executa `/opt/cs2-portal/bin/gen-content-news-items-cache.sh`
 - o Nginx publica os artefatos em `/var/www/api/cs2/v2/`
 
 Leitura canônica:
@@ -524,6 +607,27 @@ systemctl list-unit-files --type=service --no-pager | grep -Ei 'gen|v2|health|hs
 systemctl list-unit-files --type=timer --no-pager | grep -Ei 'gen|v2|health|hsc|portal'
 ```
 
+### Validar timers dedicados de News
+
+```bash
+systemctl status gen-content-news.timer gen-content-news-items.timer --no-pager
+systemctl list-timers --all --no-pager | grep -Ei 'gen-content-news'
+```
+
+### Validar drop-ins dos timers de News
+
+```bash
+systemctl cat gen-content-news.timer
+systemctl cat gen-content-news-items.timer
+```
+
+### Validar services dedicados de News
+
+```bash
+systemctl status gen-content-news.service gen-content-news-items.service --no-pager
+journalctl -u gen-content-news.service -u gen-content-news-items.service --no-pager -n 80
+```
+
 ### Validar localização dos unit files
 
 ```bash
@@ -554,6 +658,61 @@ find /opt/cs2-portal -maxdepth 2 -type f | sort
 ```bash
 grep -RInE 'gen-all|gen-health|gen-ranking|gen-matches|gen-players|gen-maps|health.json|ranking.json|matches.json' /usr/local/bin /opt/cs2-portal 2>/dev/null
 ```
+
+---
+
+## Rollback operacional dos timers dedicados de News
+
+Use este rollback se os timers dedicados de News apresentarem erro recorrente, contenção operacional ou impacto observado indesejado no host.
+
+### Rollback conservador
+
+Desabilita apenas o agendamento dedicado de News e preserva os services para execução manual controlada:
+
+```bash
+sudo systemctl disable --now gen-content-news.timer gen-content-news-items.timer
+sudo systemctl reset-failed gen-content-news.timer gen-content-news-items.timer gen-content-news.service gen-content-news-items.service
+```
+
+Validação após rollback:
+
+```bash
+systemctl list-timers --all --no-pager | grep -Ei 'gen-content-news'
+systemctl is-enabled gen-content-news.timer gen-content-news-items.timer
+systemctl is-active gen-content-news.timer gen-content-news-items.timer
+```
+
+Leitura esperada:
+
+- timers dedicados de News deixam de agendar automaticamente
+- `gen-content-news.service` e `gen-content-news-items.service` continuam disponíveis para execução manual
+- News volta a depender da automação agregada e/ou de execução manual controlada, com latência maior
+
+### Rollback completo dos drop-ins
+
+Remove também os drop-ins de cadência conservadora:
+
+```bash
+sudo systemctl disable --now gen-content-news.timer gen-content-news-items.timer
+sudo rm -f /etc/systemd/system/gen-content-news.timer.d/override.conf
+sudo rm -f /etc/systemd/system/gen-content-news-items.timer.d/override.conf
+sudo systemctl daemon-reload
+sudo systemctl reset-failed gen-content-news.timer gen-content-news-items.timer gen-content-news.service gen-content-news-items.service
+```
+
+Validação após rollback completo:
+
+```bash
+systemctl cat gen-content-news.timer
+systemctl cat gen-content-news-items.timer
+systemctl list-timers --all --no-pager | grep -Ei 'gen-content-news'
+```
+
+Regra operacional:
+
+- não reduzir para 60s antes do upgrade de VPS
+- se houver dúvida entre latência de News e estabilidade do jogo, preservar a estabilidade do Game Panel/AMP
+- reavaliar cadência e necessidade dos drop-ins depois do Game Panel 4
 
 ---
 
@@ -641,6 +800,9 @@ Os invariantes conhecidos desta camada incluem:
 - o heartbeat principal do portal é hoje:
   - `gen-health.timer`
   - `gen-all-v2.timer`
+- o mirror de News possui timers dedicados ativos em modo conservador:
+  - `gen-content-news.timer`
+  - `gen-content-news-items.timer`
 - o comando agregador real da v2 é:
   - `/usr/local/bin/gen-all-v2.sh`
 - o lock principal do agregador é:
@@ -648,8 +810,10 @@ Os invariantes conhecidos desta camada incluem:
 - a base operacional do pipeline vive em:
   - `/opt/cs2-portal/`
 - os scripts `gen-*` existem materialmente em `/usr/local/bin/`
-- as units granulares existem, mas não são o scheduler principal ativo reconciliado
+- as units granulares de News estão ativas para reduzir latência pública do mirror de News
+- as demais units granulares existem, mas não são o scheduler principal ativo reconciliado
 - o host ainda possui drift residual de `hsc-auth-api.service`, que não deve ser tratado como runtime canônico atual
+- a estabilidade do Game Panel/AMP tem prioridade sobre reduzir latência de News
 
 Esses invariantes ajudam a preservar a leitura correta da automação do host.
 
@@ -664,7 +828,8 @@ Este documento não detalha:
 - troubleshooting profundo de cada generator
 - política completa de retry/alerta da automação
 - cleanup operacional da Auth API residual na Hostinger
-- política futura para reativação de timers granulares
+- política futura para reativação dos timers granulares que não são News
+- decisão pós-upgrade sobre reduzir ou não a cadência de News
 
 Esses tópicos pertencem a documentos complementares ou a futuras reconciliações finas.
 
@@ -711,4 +876,4 @@ Leitura canônica:
 - Status: ativo
 - Classificação: canônico
 - Contexto: infra-hostinger / systemd
-- Última revisão: 2026-04-01
+- Última revisão: 2026-05-04

@@ -232,8 +232,14 @@ Services validados:
 
 Automação relacionada:
 
-- `gen-all-v2.timer` está ativo e roda a cada 30 minutos
-- timers dedicados de News existem, mas estavam `disabled/inactive` no diagnóstico validado
+- `gen-all-v2.timer` segue ativo como automação agregada da v2
+- antes da ativação dedicada, News dependia do `gen-all-v2.timer` para atualização automática, com latência maior
+- `gen-content-news.timer` está `enabled/active`
+- `gen-content-news-items.timer` está `enabled/active`
+- `gen-content-news.timer` usa `OnUnitActiveSec=120s` e drop-in `OnActiveSec=120s`
+- `gen-content-news-items.timer` usa `OnUnitActiveSec=300s` e drop-in `OnActiveSec=300s`
+- a expectativa operacional conservadora é de até ~2 min para lista e até ~5 min para detalhes
+- a cadência não deve ser reduzida para 60s antes do upgrade previsto da VPS
 
 Smoke público validado:
 
@@ -241,11 +247,14 @@ Smoke público validado:
 - JSON público item acessível
 - Portal Estático mostrou a notícia publicada
 - console do browser sem erro
+- execução automática dos dois timers dedicados de News validada
+- impacto observado no momento do teste foi baixo, com load após execução em `0.02, 0.01, 0.00`
 
 Regra importante:
 - esse espelho não transforma o portal em backend dinâmico
 - ele continua sendo parte da camada de publicação pública estática / semi-estática do ecossistema
 - a fonte dinâmica canônica de News continua sendo a Auth API em `/content/news`
+- a VPS Hostinger também sustenta o servidor CS2 via Game Panel/AMP; estabilidade do jogo tem prioridade sobre latência de News
 
 ---
 
