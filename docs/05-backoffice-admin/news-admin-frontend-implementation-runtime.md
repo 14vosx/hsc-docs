@@ -11,7 +11,7 @@ Este documento existe para:
 - descrever as rotas reais, a topologia de arquivos e a modelagem frontend aplicada no runtime
 - registrar a integração HTTP real da feature com a Auth API administrativa
 - consolidar a estratégia implementada para estado local, edição e lifecycle do recurso
-- registrar a validação funcional mínima já executada no ambiente local
+- registrar a validação funcional já executada em produção
 - orientar manutenção futura da feature sem depender de memória informal
 
 ---
@@ -29,6 +29,7 @@ Este documento existe para:
 - [News Admin API Contracts](./news-admin-api-contracts.md)
 - [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
 - [News Admin Feature Implementation Spec](./news-admin-feature-implementation-spec.md)
+- [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Backoffice Admin References Inventory](./backoffice-admin-references-inventory.md)
 - [Backoffice Admin Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 
@@ -49,9 +50,9 @@ Este documento cobre:
 - a estrutura de arquivos criada em `src/app/features/news`
 - a estratégia implementada de `data-access`, `store`, componentes e páginas
 - a integração HTTP real com a Auth API administrativa
-- a estratégia efetivamente aplicada para edição sem depender de `GET /admin/news/:id`
+- a estratégia efetivamente aplicada para edição usando `GET /admin/news/:id`
 - os estados de loading, erro, vazio e mutação já implementados
-- a validação funcional local concluída para o lifecycle do recurso
+- a validação funcional em produção concluída para o lifecycle do recurso
 
 Este documento não cobre em profundidade:
 
@@ -74,9 +75,11 @@ O estado atual reconciliado desta implementação é:
 - a integração com a Auth API usa `withCredentials: true` em todas as mutações e leituras do domínio
 - a feature foi organizada sob `src/app/features/news`
 - a camada de IO foi separada em models, serviço HTTP e store local
-- a edição foi implementada sem assumir `GET /admin/news/:id` como superfície canônica disponível
-- a estratégia adotada para edição depende de listagem administrativa + snapshot local editável
-- o ciclo funcional local já foi validado para listar, criar draft, editar, publicar, despublicar e remover
+- a edição usa `GET /admin/news/:id` como superfície canônica publicada para carregar detalhe completo com `content`
+- refresh em `/news/:id/edit` funciona
+- deep link ou nova aba para `/news/:id/edit` funciona
+- o ciclo funcional PROD foi validado para carregar edição, editar, publicar, despublicar e remover
+- a Auth API PROD real está na AWS Lightsail e foi atualizada para o commit `728299e`
 
 Regra importante:
 
@@ -92,8 +95,8 @@ Este documento é canônico para:
 - a implementação real do MVP de `news` no frontend do Backoffice
 - a estrutura de arquivos materializada na feature
 - a modelagem real aplicada no runtime administrativo
-- a forma como o frontend resolveu a lacuna de leitura por `id` neste checkpoint
-- a validação funcional mínima já executada sobre a feature
+- a forma como o frontend usa a leitura por `id` reconciliada neste checkpoint
+- a validação funcional executada em PROD sobre a feature
 
 A fonte de verdade deste documento é composta por:
 
@@ -102,7 +105,7 @@ A fonte de verdade deste documento é composta por:
 - os contratos canônicos já documentados em `news-admin-api-contracts.md`
 - a especificação canônica de implementação em `news-admin-feature-implementation-spec.md`
 - a regra de integração e evolução em `news-admin-integration-and-evolution.md`
-- a validação local já executada sobre build, navegação e lifecycle funcional do domínio
+- a validação PROD já executada sobre navegação, deep link e lifecycle funcional do domínio
 
 ---
 
@@ -137,6 +140,7 @@ As seguintes ações já estão materializadas no frontend:
 - publicar
 - despublicar
 - remover
+- carregar detalhe administrativo por `GET /admin/news/:id`
 
 A implementação não materializa, neste checkpoint:
 
@@ -148,7 +152,6 @@ A implementação não materializa, neste checkpoint:
 - mutação forte de `slug`
 - edição de `excerpt`
 - edição de `image_url`
-- leitura dedicada `GET /admin/news/:id`
 
 ---
 
@@ -219,6 +222,7 @@ src/app/features/news/data-access/news-admin-api.service.ts
 Operações implementadas no serviço:
 
 * `list()`
+* `detail(id)`
 * `create(payload)`
 * `update(id, payload)`
 * `publish(id)`
@@ -229,6 +233,7 @@ Endpoints consumidos:
 
 ```http
 GET    /admin/news
+GET    /admin/news/:id
 POST   /admin/news
 PATCH  /admin/news/:id
 POST   /admin/news/:id/publish
@@ -242,6 +247,7 @@ Invariantes adotados na implementação:
 * a URL base do backend permanece centralizada em `API_BASE_URL`
 * a UI não espalha endpoints diretamente em componentes de página
 * publish e unpublish permanecem mutações explícitas, não patch de `status`
+* a edição carrega `content` via detalhe administrativo por `id`
 
 ---
 
@@ -258,15 +264,16 @@ CreateNewsResponse
 AdminNewsMutationResponse
 AdminNewsDeleteResponse
 NewsFormValue
-AdminNewsEditableDraft
+AdminNewsDetailItem
+AdminNewsDetailResponse
 ```
 
 Leitura importante:
 
 * `AdminNewsListItem` representa a leitura administrativa de lista
+* `AdminNewsDetailItem` representa a leitura administrativa completa com `content`
 * `NewsFormValue` representa o formulário mínimo do domínio no frontend
-* `AdminNewsEditableDraft` foi introduzido para sustentar edição com `content` local
-* `UpdateNewsPayload` ficou limitado a `title` e `content`, em linha com o checkpoint canônico atual
+* `UpdateNewsPayload` permanece limitado a `title` e `content`, em linha com o checkpoint canônico atual
 
 Regra importante:
 
@@ -285,15 +292,15 @@ src/app/features/news/data-access/news-admin.store.ts
 Estratégia aplicada:
 
 * Signals como mecanismo de estado local da feature
-* lista administrativa como leitura base do domínio
+* lista administrativa como leitura de coleção do domínio
+* detalhe administrativo por `id` como leitura primária da edição
 * sincronização imediata do item mutado quando a resposta traz `item`
 * revalidação da lista após criação
-* retenção local de snapshots editáveis por `id`
 
 Sinais principais materializados:
 
 * `items`
-* `editableDrafts`
+* detalhe ativo ou estado equivalente de detalhe por `id`
 * `loading`
 * `loaded`
 * `error`
@@ -304,49 +311,50 @@ Derivações principais materializadas:
 * `count`
 * `isEmpty`
 * resolução de item por `id`
-* resolução de draft editável por `id`
+* resolução de detalhe por `id`
 
 Operações principais da store:
 
 * `load()`
 * `refresh()`
 * `ensureLoaded()`
+* `loadDetail(id)` ou operação equivalente de detalhe
 * `ensureItem(id)`
 * `create(value)`
 * `update(id, payload, formValue?)`
 * `publish(id)`
 * `unpublish(id)`
 * `remove(id)`
-* `seedEditableDraft(...)`
-* `seedEditableDraftFromForm(...)`
 
 ---
 
-## Estratégia real para edição sem `GET /admin/news/:id`
+## Estratégia real para edição com `GET /admin/news/:id`
 
-A implementação precisou respeitar a restrição documental do checkpoint atual:
+A implementação foi reconciliada com o contrato PROD atual:
 
-* a leitura dedicada `GET /admin/news/:id` não foi promovida como superfície canônica reconciliada
-* ao mesmo tempo, a tela `/news/:id/edit` precisava editar `title` e `content`
+* a leitura dedicada `GET /admin/news/:id` está publicada e reconciliada
+* a tela `/news/:id/edit` usa essa superfície para carregar `content`
+* refresh direto na rota funciona
+* deep link ou abertura em nova aba funciona
 
-A solução materializada no frontend foi:
+A solução materializada no frontend é:
 
-1. tratar `GET /admin/news` como leitura base do domínio
-2. manter `items` administrativos em store local
-3. manter `editableDrafts` por `id` para reter `content` conhecido no fluxo do frontend
-4. semear o draft local imediatamente após `POST /admin/news`
-5. reconciliar metadados do draft local com o item administrativo retornado por listagem, `update`, `publish` e `unpublish`
+1. tratar `GET /admin/news` como leitura de coleção
+2. tratar `GET /admin/news/:id` como fonte primária de detalhe
+3. renderizar o formulário de edição apenas após carregar o detalhe completo
+4. usar `PATCH /admin/news/:id` para persistir `title` e `content`
+5. reconciliar metadados retornados por `update`, `publish` e `unpublish`
 
 Consequência prática:
 
-* a edição completa fica disponível quando o frontend conhece o `content` localmente
-* se a tela resolver o item pela lista mas não possuir draft editável local, a UI falha de forma legível
-* mesmo nesse caso, as ações de lifecycle continuam disponíveis quando o item administrativo é resolvido
+* a edição completa não depende mais de estado local previamente semeado
+* refresh e deep link preservam a experiência funcional
+* o estado antigo de `missing-draft` não é comportamento esperado no runtime atual
 
 Regra importante:
 
-* a implementação não finge a existência de leitura dedicada por `id`
-* a feature opera de forma disciplinada dentro da lacuna canônica atual
+* `editableDrafts`, cache da listagem ou estado roteado não devem voltar a ser fonte primária de edição
+* a feature opera sobre o contrato real publicado em PROD
 
 ---
 
@@ -448,7 +456,7 @@ Comportamento implementado:
 Leitura importante:
 
 * o backend continua autoridade final de validação
-* a continuidade para edição depende do `id` retornado e do snapshot local editável semeado na store
+* a continuidade para edição depende do `id` retornado e da leitura de detalhe por `GET /admin/news/:id`
 
 ---
 
@@ -464,10 +472,10 @@ Responsabilidades implementadas:
 
 * resolver `id` da rota
 * validar `id` inválido
-* reidratar o contexto a partir da store e da listagem administrativa
-* renderizar `news-form` em modo `edit` quando houver draft editável local
-* manter ações de lifecycle disponíveis quando o item administrativo for conhecido
-* falhar de forma legível quando o draft editável não existir localmente
+* carregar detalhe por `GET /admin/news/:id`
+* renderizar `news-form` em modo `edit` quando houver detalhe administrativo com `content`
+* manter ações de lifecycle disponíveis com base no item administrativo carregado
+* tratar erro de detalhe indisponível ou item inexistente de forma legível
 
 Estados de resolução implementados:
 
@@ -475,7 +483,6 @@ Estados de resolução implementados:
 * `ready`
 * `invalid-id`
 * `not-found`
-* `missing-draft`
 
 Ações implementadas na página:
 
@@ -533,34 +540,32 @@ A implementação já materializa tratamento operacional dos seguintes estados:
 ### Estados da edição
 
 * carregamento de contexto
-* item não encontrado pela listagem
-* item conhecido sem `content` local suficiente para edição completa
+* detalhe carregado
+* item inexistente ou detalhe indisponível
 
 ---
 
 ## Fluxo funcional efetivamente validado
 
-A implementação foi validada localmente com o backend local ativo.
+A implementação foi validada no Backoffice Admin PROD com a Auth API PROD publicada na AWS Lightsail.
 
 Fluxo validado:
 
-1. acesso a `/news`
-2. leitura de `GET /admin/news`
-3. renderização de empty state quando `count = 0`
-4. acesso a `/news/new`
-5. criação de draft via `POST /admin/news`
-6. navegação automática para `/news/:id/edit`
-7. edição via `PATCH /admin/news/:id`
-8. publicação via `POST /admin/news/:id/publish`
-9. despublicação via `POST /admin/news/:id/unpublish`
-10. remoção via `DELETE /admin/news/:id`
-11. retorno de `/news` para estado vazio após exclusão
+1. edição carrega conteúdo por `GET /admin/news/:id`
+2. refresh em `/news/:id/edit` funciona
+3. deep link ou nova aba para `/news/:id/edit` funciona
+4. edição persiste via `PATCH /admin/news/:id`
+5. publicação funciona via `POST /admin/news/:id/publish`
+6. despublicação funciona via `POST /admin/news/:id/unpublish`
+7. remoção funciona via `DELETE /admin/news/:id`
+8. CORS administrativo permite `DELETE`
 
 Também foi validado:
 
-* build do app concluída com sucesso
-* lazy chunks específicos das páginas de `news` materializados na build
-* shell administrativo e sidebar integrando a nova feature
+* `Access-Control-Allow-Methods: GET,POST,PATCH,DELETE,OPTIONS`
+* a superfície pública `/content/news` refletiu a publicação na Auth API
+* o fluxo público via ETL Hostinger e Portal Estático exibiu a notícia
+* console do Portal Estático sem erro no smoke validado
 
 ---
 
@@ -571,8 +576,8 @@ Neste checkpoint, está confirmado que:
 * a feature `news` já existe como superfície funcional real no Backoffice
 * o placeholder anterior foi removido do roteamento para `news`
 * a integração administrativa principal do domínio está operando no frontend
-* o MVP local já é operacional para o lifecycle completo do recurso
-* a solução implementada para edição respeita a lacuna canônica atual sobre leitura dedicada por `id`
+* o MVP PROD já é operacional para o lifecycle completo do recurso
+* a solução implementada para edição usa a leitura dedicada por `id` reconciliada
 
 ---
 
@@ -580,7 +585,6 @@ Neste checkpoint, está confirmado que:
 
 Este documento deliberadamente não promove como verdade canônica consolidada:
 
-* existência de `GET /admin/news/:id` como endpoint disponível no runtime administrativo
 * mutabilidade de `slug`
 * mutabilidade de `excerpt`
 * mutabilidade de `image_url`
@@ -620,7 +624,7 @@ Este documento deve ser revisado quando houver mudança relevante em pelo menos 
 * topologia de arquivos de `news`
 * payloads efetivamente usados pela UI
 * estratégia de store local ou edição
-* introdução de leitura dedicada por `id`
+* mudança relevante na leitura dedicada por `id`
 * expansão forte para novos campos administrativos
 * mudança relevante no ciclo de validação funcional do MVP
 
@@ -635,8 +639,8 @@ Este documento pode ser considerado saudável quando:
 * registra a implementação real da feature sem depender de memória informal
 * explica claramente como a feature foi materializada no frontend
 * distingue corretamente contrato, spec e runtime implementado
-* deixa explícita a estratégia usada para contornar a ausência de `GET /admin/news/:id`
-* registra o ciclo funcional mínimo já validado no ambiente local
+* deixa explícita a estratégia usada com `GET /admin/news/:id`
+* registra o ciclo funcional mínimo já validado no ambiente PROD
 * reduz ambiguidade operacional para manutenção futura da feature
 
 ---
@@ -646,5 +650,4 @@ Este documento pode ser considerado saudável quando:
 * Status: ativo
 * Classificação: canônico
 * Contexto: `05-backoffice-admin` / implementação real do MVP de `news`
-* Última revisão: 2026-03-26
-
+* Última revisão: 2026-05-04

@@ -38,8 +38,10 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
   - [ETL Repository — Minimal Shell CI](../03-portal-estatico/etl-repository-minimal-shell-ci.md)
 - [04 — Infra AWS Lightsail](../04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](../05-backoffice-admin/README.md)
+  - [News Admin API Contracts](../05-backoffice-admin/news-admin-api-contracts.md)
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
   - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
+  - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
@@ -209,6 +211,7 @@ Arquivos principais:
 - [News Admin API Contracts](../05-backoffice-admin/news-admin-api-contracts.md)
 - [News Admin Integration and Evolution](../05-backoffice-admin/news-admin-integration-and-evolution.md)
 - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
+- [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 - [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
@@ -292,7 +295,9 @@ Status:
 
 Leitura sintética:
 - shell administrativo, auth frontend e contratos iniciais já existem
-- a tendência agora é expansão por features e superfícies de produto
+- News já possui ciclo PROD validado atravessando Backoffice Admin, Auth API, ETL Hostinger e Portal Estático
+- `GET /admin/news/:id` já é contrato admin real para edição com `content`
+- a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---
 

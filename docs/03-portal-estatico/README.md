@@ -201,7 +201,7 @@ Princípios operacionais dessa relação:
 
 ## Relação com News same-origin
 
-O contexto do Portal Estático pode operar com espelhamento same-origin de conteúdo de News.
+O contexto do Portal Estático opera com espelhamento same-origin de conteúdo de News no fluxo público validado.
 
 Esse espelhamento existe para:
 
@@ -209,9 +209,43 @@ Esse espelhamento existe para:
 - reduzir atrito entre camadas
 - manter integração pública previsível quando a origem dinâmica do conteúdo pertence a outra camada do ecossistema
 
+Fluxo validado:
+
+```text
+Backoffice Admin PROD
+→ Auth API PROD /content/news
+→ ETL Hostinger
+→ /var/www/api/cs2/v2/content/news
+→ Nginx
+→ Portal Estático
+```
+
+Scripts ETL validados para News:
+
+- `/opt/cs2-portal/bin/gen-content-news-cache.sh`
+- `/opt/cs2-portal/bin/gen-content-news-items-cache.sh`
+
+Services validados:
+
+- `gen-content-news.service`
+- `gen-content-news-items.service`
+
+Automação relacionada:
+
+- `gen-all-v2.timer` está ativo e roda a cada 30 minutos
+- timers dedicados de News existem, mas estavam `disabled/inactive` no diagnóstico validado
+
+Smoke público validado:
+
+- JSON público index acessível
+- JSON público item acessível
+- Portal Estático mostrou a notícia publicada
+- console do browser sem erro
+
 Regra importante:
 - esse espelho não transforma o portal em backend dinâmico
 - ele continua sendo parte da camada de publicação pública estática / semi-estática do ecossistema
+- a fonte dinâmica canônica de News continua sendo a Auth API em `/content/news`
 
 ---
 
@@ -386,4 +420,4 @@ Este contexto poderá ser considerado formalmente migrado quando:
 - Status: ativo
 - Classificação: canônico
 - Contexto: portal estático / porta de entrada do contexto
-- Última revisão: 2026-03-18
+- Última revisão: 2026-05-04

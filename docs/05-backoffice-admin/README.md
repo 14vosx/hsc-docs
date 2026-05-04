@@ -31,6 +31,7 @@ Este documento existe para:
 - [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
 - [News Admin Feature Implementation Spec](./news-admin-feature-implementation-spec.md)
 - [News Admin Frontend Implementation Runtime](./news-admin-frontend-implementation-runtime.md)
+- [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 - [References and Inventory](./backoffice-admin-references-inventory.md)
 
@@ -84,6 +85,10 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
   - `/dashboard`
 - a sessão administrativa publicada já é cookie-based e cross-subdomain
 - o frontend administrativo já opera com sessão real e guards assíncronos
+- o domínio `news` atravessa Backoffice Admin, Auth API, ETL Hostinger e Portal Estático
+- `GET /admin/news/:id` já é superfície admin real, publicada e reconciliada para edição
+- a edição de News usa detalhe administrativo com `content` como fonte primária
+- o lifecycle PROD de News já foi validado para edição, refresh/deep link, publish, unpublish e delete
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais
 - o contexto já não deve ser tratado como “pré-implementação pura”
 
@@ -199,6 +204,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
 - `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
+- `docs/05-backoffice-admin/news-functional-smoke-guide.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -219,8 +225,9 @@ A ordem recomendada de leitura é:
 7. `docs/05-backoffice-admin/news-admin-integration-and-evolution.md`
 8. `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 9. `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
-10. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-11. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+10. `docs/05-backoffice-admin/news-functional-smoke-guide.md`
+11. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+12. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 

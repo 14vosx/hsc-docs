@@ -25,6 +25,7 @@ Este documento existe para:
 ### Documentos diretamente relacionados
 - [News Admin API Contracts](./news-admin-api-contracts.md)
 - [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
+- [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Admin API Contracts](./admin-api-contracts.md)
@@ -84,6 +85,7 @@ Regra importante:
 No checkpoint atual, o runtime real já confirmou:
 
 - `GET /admin/news` protegido por sessão administrativa válida
+- `GET /admin/news/:id` protegido por sessão administrativa válida, com detalhe completo e `content`
 - `POST /admin/news` com body mínimo `slug`, `title`, `content`
 - `PATCH /admin/news/:id`
 - `POST /admin/news/:id/publish`
@@ -101,8 +103,10 @@ Também já está reconciliado que:
 
 Restrições relevantes para a implementação:
 
-- a leitura dedicada `GET /admin/news/:id` não está documentada como superfície canônica reconciliada neste checkpoint
-- o frontend não deve depender desse endpoint até que ele exista e seja documentado
+- a Auth API PROD real está publicada na AWS Lightsail e foi atualizada para o commit `728299e`
+- a edição do Backoffice deve usar `GET /admin/news/:id` como fonte primária de detalhe
+- a edição não deve depender de `editableDrafts`, cache da listagem ou estado roteado como fonte primária
+- refresh em `/news/:id/edit` e deep link em nova aba devem funcionar sem estado local prévio
 
 ---
 
@@ -172,14 +176,15 @@ Função:
 
 Função:
 
-- editar um item já conhecido pelo frontend
+- carregar por `GET /admin/news/:id` e editar um item existente
 - permitir update de `title` e `content`
 - permitir publish, unpublish e delete no contexto do item, se a UX local fizer sentido
 
 Leitura importante:
 
-- a existência da rota `/news/:id/edit` não implica a existência de `GET /admin/news/:id`
-- a tela de edição precisa ser compatível com hidratação por estado roteado, cache da listagem ou resultado de mutação anterior
+- `GET /admin/news/:id` é a fonte primária de hidratação da tela
+- a listagem pode acelerar navegação ou atualizar metadados, mas não deve substituir o detalhe completo com `content`
+- `missing-draft` não é comportamento esperado para refresh ou deep link
 
 ---
 
@@ -189,6 +194,7 @@ Leitura importante:
 |---|---|---|
 | `/news` abrir | `GET /admin/news` | lista administrativa carregada |
 | `/news/new` salvar | `POST /admin/news` | draft criado |
+| `/news/:id/edit` abrir | `GET /admin/news/:id` | detalhe administrativo completo carregado |
 | `/news/:id/edit` salvar | `PATCH /admin/news/:id` | item atualizado |
 | publicar item | `POST /admin/news/:id/publish` | `status = published` e `published_at` preenchido |
 | despublicar item | `POST /admin/news/:id/unpublish` | `status = draft` e `published_at = null` |
@@ -212,6 +218,23 @@ export type AdminNewsListItem = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+};
+```
+
+### DTO de detalhe administrativo
+
+```ts
+export type AdminNewsDetailItem = AdminNewsListItem & {
+  content: string;
+};
+```
+
+### Envelope do detalhe administrativo
+
+```ts
+export type AdminNewsDetailResponse = {
+  ok: true;
+  item: AdminNewsDetailItem;
 };
 ```
 
@@ -347,6 +370,7 @@ Operações mínimas:
 
 ```ts
 list(): Observable<AdminNewsListResponse>
+detail(id: number): Observable<AdminNewsDetailResponse>
 create(payload: CreateNewsPayload): Observable<CreateNewsResponse>
 update(id: number, payload: UpdateNewsPayload): Observable<AdminNewsMutationResponse>
 publish(id: number): Observable<AdminNewsMutationResponse>
@@ -365,35 +389,34 @@ Regras de implementação:
 
 ## Estratégia de estado local da feature
 
-A feature deve tratar `GET /admin/news` como leitura base do domínio.
+A feature deve separar leitura de coleção e leitura de detalhe.
 
 Estratégia recomendada:
 
 - manter uma store local da feature com a lista administrativa já carregada
+- carregar `/news/:id/edit` por `GET /admin/news/:id`
 - derivar seletores simples para loading, empty state e item por `id`
 - após mutações, revalidar a lista ou sincronizar o item mutado de forma explícita
 
-### Fonte primária de leitura
+### Fontes primárias de leitura
 
-A leitura primária canônica da feature no checkpoint atual é:
+Para coleção administrativa:
 
 ```http
 GET /admin/news
 ```
 
-### Consequência prática para `/news/:id/edit`
+Para detalhe administrativo:
 
-Como `GET /admin/news/:id` ainda não está reconciliado, a tela de edição deve seguir uma destas abordagens disciplinadas:
-
-1. usar o item já existente na store da listagem
-2. usar o resultado retornado pelo `POST /admin/news`
-3. usar estado de navegação ao sair da tabela para edição
-4. revalidar a listagem e resolver o item por `id`
+```http
+GET /admin/news/:id
+```
 
 Regra importante:
 
-- não bloquear a feature esperando um endpoint individual ainda não canônico
-- também não fingir que esse endpoint existe
+- a listagem não deve ser a fonte primária de `content` na edição
+- `editableDrafts`, cache da listagem e estado roteado podem existir como otimização local, mas não como contrato funcional necessário
+- refresh em `/news/:id/edit` e deep link em nova aba devem carregar o detalhe por `id`
 
 ---
 
@@ -471,7 +494,7 @@ Criar um novo draft de notícia com o menor atrito operacional possível.
 
 ## Objetivo funcional
 
-Editar um item conhecido pelo frontend e permitir operações de lifecycle do recurso.
+Carregar o detalhe administrativo completo por `id`, editar o conteúdo e permitir operações de lifecycle do recurso.
 
 ## Campos mínimos deste checkpoint
 
@@ -488,9 +511,10 @@ Editar um item conhecido pelo frontend e permitir operações de lifecycle do re
 
 ## Regras importantes
 
-- a tela não deve depender de `GET /admin/news/:id`
-- a tela deve falhar de modo legível quando o item não puder ser resolvido localmente
-- a UI deve preferir reidratação via store da listagem antes de concluir que o item “não existe”
+- a tela deve depender de `GET /admin/news/:id` para carregar `content`
+- a tela deve tratar erro real de detalhe indisponível ou item inexistente de modo legível
+- a UI não deve mostrar `missing-draft` como estado esperado de refresh ou deep link
+- a listagem local não deve substituir o contrato de detalhe
 
 ## Ações possíveis na tela
 
@@ -633,12 +657,15 @@ A feature `news` no Backoffice deve ser considerada pronta neste estágio quando
 
 1. `/news` lista corretamente itens de `GET /admin/news`
 2. `/news/new` cria item com `slug`, `title` e `content`
-3. o item criado pode ser editado via `/news/:id/edit`
-4. `publish` altera o estado administrativo para `published`
-5. `unpublish` retorna o item para `draft`
-6. `delete` remove o item e a UI reflete isso sem inconsistência operacional
-7. a feature trata sessão expirada e erro de validação de forma legível
-8. a implementação não depende de contratos não reconciliados
+3. `/news/:id/edit` carrega detalhe completo por `GET /admin/news/:id`
+4. refresh em `/news/:id/edit` funciona
+5. deep link em nova aba para `/news/:id/edit` funciona
+6. o item pode ser editado via `PATCH /admin/news/:id`
+7. `publish` altera o estado administrativo para `published`
+8. `unpublish` retorna o item para `draft`
+9. `delete` remove o item e a UI reflete isso sem inconsistência operacional
+10. a feature trata sessão expirada e erro de validação de forma legível
+11. a implementação não depende de cache/listagem/editable drafts como fonte primária de edição
 
 ---
 
@@ -665,7 +692,6 @@ A evolução do domínio deve seguir ordem disciplinada.
 
 Exemplos:
 
-- `GET /admin/news/:id`
 - mutação explícita de `slug`
 - suporte a `excerpt`
 - suporte a `image_url`
@@ -708,12 +734,13 @@ Ele existe para fazer a ponte entre:
 
 ## Resumo executivo
 
-A feature `news` do Backoffice Admin já possui base contratual suficiente para entrar em implementação MVP.
+A feature `news` do Backoffice Admin já possui base contratual suficiente para operar o MVP administrativo.
 
 A forma correta de implementá-la neste checkpoint é:
 
-- usar `GET /admin/news` como leitura base
+- usar `GET /admin/news` como leitura de coleção
+- usar `GET /admin/news/:id` como leitura primária da tela de edição
 - criar a feature com rotas `/news`, `/news/new` e `/news/:id/edit`
 - tratar `create`, `update`, `publish`, `unpublish` e `delete` como operações explícitas de domínio
-- não depender de superfícies ainda não reconciliadas, especialmente `GET /admin/news/:id`
+- não depender de cache/listagem/editable drafts como fonte primária de edição
 - manter a implementação pequena, operacional e rigidamente alinhada aos contratos canônicos já confirmados
