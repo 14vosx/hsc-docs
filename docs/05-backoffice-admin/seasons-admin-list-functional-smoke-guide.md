@@ -1,15 +1,15 @@
-# Seasons Admin List Functional Smoke Guide
+# Seasons Admin Functional Smoke Guide
 
 ## Objetivo
 
-Documentar o estado canônico da listagem administrativa inicial de `seasons` no Backoffice Admin do HSC.
+Documentar o estado canônico da administração inicial de `seasons` no Backoffice Admin do HSC.
 
 Este documento existe para:
 
 - registrar a definição de produto de Season como ciclo competitivo oficial
-- documentar a leitura administrativa real disponível na Auth API
-- registrar o comportamento atual da tela `/seasons`
-- preservar o smoke funcional local da listagem
+- documentar a leitura e criação administrativa reais disponíveis na Auth API
+- registrar o comportamento atual das telas `/seasons` e `/seasons/new`
+- preservar o smoke funcional local de listagem e criação
 - separar estado implementado, intenção de produto e lacunas futuras
 
 ---
@@ -34,16 +34,18 @@ Este documento existe para:
 Este guia cobre:
 
 - definição funcional de Season no HSC
-- contrato administrativo de leitura de `seasons`
+- contratos administrativos de leitura e criação de `seasons`
 - tela administrativa `/seasons`
+- tela administrativa `/seasons/new`
 - estados de loading, erro, vazio e tabela
-- smoke local com Auth API, sessão dev e Backoffice
+- smoke local com Auth API, sessão dev, Backoffice e criação de dado draft
 - decisão de timezone adotada no backend e na UI
+- adoção de Angular Material/CDK como base gradual de UI no Backoffice
 - lacunas futuras conhecidas
 
 Este guia não cobre:
 
-- criação, edição, ativação ou fechamento pela UI do Backoffice
+- edição, ativação ou fechamento pela UI do Backoffice
 - ranking por season
 - associação automática de partidas à season
 - snapshot histórico ou hall of fame
@@ -65,7 +67,7 @@ Leitura correta:
 
 - a Season organiza uma janela competitiva oficial
 - a Auth API governa os metadados e o lifecycle da Season
-- o Backoffice apresenta a superfície administrativa inicial de leitura
+- o Backoffice apresenta as superfícies administrativas iniciais de leitura e criação
 - ranking, partidas por season e fechamento histórico ainda não existem no estado atual documentado
 
 ---
@@ -74,8 +76,9 @@ Leitura correta:
 
 O estado funcional documentado é:
 
-- a Auth API expõe leitura administrativa de Seasons
+- a Auth API expõe leitura e criação administrativa de Seasons
 - o Backoffice Admin possui página funcional em `/seasons`
+- o Backoffice Admin possui página funcional de criação em `/seasons/new`
 - `/seasons` deixou de redirecionar para `/dashboard`
 - a tela carrega dados da Auth API por contrato administrativo
 - a tela possui estados de loading, erro, vazio e tabela
@@ -87,22 +90,24 @@ O estado funcional documentado é:
   - Fim
   - Atualizado em
 - a tela posiciona Seasons como ciclos competitivos oficiais do servidor HSC
+- `/seasons/new` cria uma Season em `draft` por `POST /admin/seasons`
+- ao criar com sucesso, a UI navega de volta para `/seasons`
+- a Season criada aparece na listagem com status `Draft`
 
 Lacunas da UI atual:
 
-- create pela UI
 - edit pela UI
 - activate pela UI
 - close pela UI
 - ações de lifecycle na tela
-- rota `/seasons/new`
 - rota `/seasons/:slug/edit`
 
 Observação sobre mutações:
 
 - `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já existiam previamente no contrato administrativo
-- este documento descreve a leitura admin e a listagem no Backoffice
-- a UI atual não expõe essas mutações
+- este documento descreve a leitura admin, a listagem e a criação em `draft` no Backoffice
+- a UI atual expõe `POST /admin/seasons` pela rota `/seasons/new`
+- a UI atual não expõe edit, activate ou close
 
 ---
 
@@ -161,6 +166,47 @@ Resposta esperada:
 }
 ```
 
+### `POST /admin/seasons`
+
+Objetivo:
+
+- criar uma Season administrativa em estado `draft`
+
+Payload esperado:
+
+```json
+{
+  "slug": "season-junho-2026",
+  "name": "Season Junho 2026",
+  "description": "Ciclo competitivo oficial de junho de 2026.",
+  "start_at": "2026-06-01T03:00:00.000Z",
+  "end_at": "2026-07-01T02:59:00.000Z"
+}
+```
+
+Resposta esperada:
+
+```json
+{
+  "ok": true,
+  "id": 1,
+  "slug": "season-junho-2026",
+  "status": "draft"
+}
+```
+
+Campos do payload:
+
+- `slug`: obrigatório
+- `name`: obrigatório
+- `description`: texto opcional ou `null`
+- `start_at`: data/hora UTC em ISO com `Z`
+- `end_at`: data/hora UTC em ISO com `Z`
+
+Regra importante:
+
+- o backend continua sendo a fonte final de validação e invariantes de domínio
+
 ### Campos do item administrativo
 
 O item administrativo real é:
@@ -212,9 +258,61 @@ Leitura de produto da tela:
 
 ---
 
+## Comportamento atual da tela `/seasons/new`
+
+A rota protegida `/seasons/new` permite criar uma Season administrativa em estado `draft`.
+
+Comportamentos esperados:
+
+- a tela apresenta formulário baseado em Angular Material
+- o formulário envia `POST /admin/seasons`
+- a entrada de data usa `MatDatepicker`
+- a entrada de hora usa campo textual `HH:mm`
+- a tela não usa `input type="datetime-local"`
+- a combinação de data + `HH:mm` usa o horário local do operador
+- o payload enviado para a Auth API usa UTC ISO com `Z`
+- ao criar com sucesso, a UI navega de volta para `/seasons`
+- a Season criada aparece na listagem com status `Draft`
+
+Motivo da entrada separada de data e hora:
+
+- o controle nativo `datetime-local` mostrou experiência ruim no Firefox/Linux
+- `MatDatepicker` + campo textual `HH:mm` mantém a UI alinhada ao Angular Material e deixa o comportamento de timezone explícito
+
+Validações de UI:
+
+- `slug` obrigatório
+- nome obrigatório
+- data de início obrigatória
+- hora de início obrigatória
+- data de fim obrigatória
+- hora de fim obrigatória
+- hora em formato `HH:mm`, entre `00:00` e `23:59`
+- fim precisa ser depois do início
+
+Regra importante:
+
+- as validações de UI ajudam a experiência do operador
+- o backend continua sendo a fonte final de validação
+
+---
+
+## Base de UI do Backoffice
+
+Angular Material/CDK foi adotado como base de UI do Backoffice.
+
+Leitura correta:
+
+- Seasons Create já usa Angular Material como base visual e interativa
+- essa adoção orienta a evolução gradual das telas administrativas
+- este documento não é um guia de design system completo
+- este documento não promete migração visual completa de todas as telas
+
+---
+
 ## Smoke funcional local
 
-O smoke funcional local exercita a integração entre Auth API local e Backoffice local.
+O smoke funcional local exercita a integração entre Auth API local e Backoffice local para listagem e criação.
 
 Ambiente do smoke:
 
@@ -230,18 +328,21 @@ Fluxo de validação funcional:
 3. iniciar o Backoffice Admin com `npm run start:dev`
 4. abrir `/seasons`
 5. confirmar empty state quando não há Seasons locais
-6. criar uma Season local temporária via `POST /admin/seasons`
-7. recarregar `/seasons`
-8. confirmar tabela renderizando o item criado
-9. limpar o dado local temporário ao final do smoke por mecanismo local seguro
+6. abrir `/seasons/new`
+7. preencher `slug`, nome, descrição opcional, data/hora de início e data/hora de fim
+8. criar a Season em `draft`
+9. confirmar navegação de volta para `/seasons`
+10. confirmar tabela renderizando o item criado com status `Draft`
+11. limpar o dado local temporário ao final do smoke por mecanismo local seguro
 
 Observações:
 
 - este smoke é local/dev
 - este smoke é uma validação funcional local
-- a criação temporária usa mutação administrativa preexistente apenas para preparar dado local de smoke
+- a criação temporária exercita a tela `/seasons/new` e a mutação administrativa `POST /admin/seasons`
 - este guia não assume endpoint de delete de Season
-- dados temporários de smoke devem usar `slug` claramente descartável
+- dados temporários de smoke devem usar `slug` claramente descartável e ser removidos após validação
+- o dado de smoke local validado foi removido após a validação
 - cookies, tokens, chaves e secrets não devem ser registrados na documentação
 
 Exemplo de nomenclatura segura para dado temporário:
@@ -259,7 +360,9 @@ A decisão funcional documentada é:
 - o backend trafega datas em UTC
 - a configuração `mysql2` usa `timezone: "Z"`
 - `timezone: "Z"` evita deslocamento indevido ao ler `DATETIME`
-- Backoffice e Portal exibem datas para o usuário em horário local
+- o Backoffice combina data + `HH:mm` no horário local do operador ao criar Seasons
+- o Backoffice envia datas de criação para a Auth API como UTC ISO com `Z`
+- o Backoffice exibe datas para o usuário em horário local
 - para operação humana do HSC, a referência usual é `America/Sao_Paulo`
 
 Leitura correta:
@@ -269,13 +372,19 @@ Leitura correta:
 - a apresentação local deve respeitar o navegador do usuário
 - em comunicação operacional humana do HSC, usar São Paulo como referência explícita quando necessário
 
+Exemplo validado:
+
+- operador em São Paulo informa início `01/06/2026 00:00`
+- payload/banco registra `start_at = 2026-06-01 03:00:00`
+- operador em São Paulo informa fim `30/06/2026 23:59`
+- payload/banco registra `end_at = 2026-07-01 02:59:00`
+
 ---
 
 ## Lacunas explícitas
 
 Lacunas futuras conhecidas:
 
-- o Backoffice ainda não cria Seasons pela UI
 - o Backoffice ainda não edita Seasons pela UI
 - o Backoffice ainda não ativa Seasons pela UI
 - o Backoffice ainda não fecha Seasons pela UI
@@ -298,8 +407,9 @@ Regra importante:
 Este documento está pronto quando:
 
 - a definição de produto de Season estiver explícita
-- a leitura administrativa real estiver documentada
+- a leitura e a criação administrativa reais estiverem documentadas
 - a tela `/seasons` estiver descrita sem prometer CRUD completo
+- a tela `/seasons/new` estiver descrita como criação em `draft`
 - o smoke local estiver registrado como local/dev
 - a decisão de timezone estiver registrada
 - lacunas futuras estiverem separadas do estado atual
