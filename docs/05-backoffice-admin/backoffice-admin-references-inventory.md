@@ -85,9 +85,11 @@ O estado atual conhecido do contexto é:
 - `seasons`, `news` e `events` permanecem como domínios iniciais
 - `seasons` já possui listagem administrativa inicial implementada no Backoffice
 - `seasons` já possui criação administrativa em `draft` implementada no Backoffice
+- `seasons` já possui edição administrativa de metadados implementada no Backoffice
 - a leitura admin canônica de Seasons já está disponível no backend
 - a criação admin canônica de Seasons já está disponível no backend por `POST /admin/seasons`
-- o lifecycle de Seasons ainda está pendente na UI do Backoffice
+- a edição admin canônica de Seasons já está disponível no backend por `PATCH /admin/seasons/:slug`
+- activate e close de Seasons ainda estão pendentes na UI do Backoffice
 - parte importante da auth base já está reconciliada com runtime real
 - parte da expansão de domínio ainda depende de evolução incremental de contrato e implementação
 
@@ -128,7 +130,7 @@ Leitura recomendada:
 - `news-admin-integration-and-evolution.md` define uso e expansão disciplinada do domínio `news`
 - `news-admin-feature-implementation-spec.md` traduz o domínio reconciliado em feature implementável no frontend
 - `news-admin-frontend-implementation-runtime.md` registra a implementação real materializada no frontend
-- `seasons-admin-list-functional-smoke-guide.md` registra a administração inicial de `seasons`, seus contratos de leitura/criação e o smoke funcional local
+- `seasons-admin-list-functional-smoke-guide.md` registra a administração funcional de `seasons`, seus contratos de leitura/criação/edição e o smoke funcional local
 - `operational-runbooks.md` define validação e troubleshooting
 - este arquivo consolida o inventário de referência e dependência
 
@@ -395,17 +397,18 @@ Papel esperado:
 - representar ciclos competitivos oficiais do servidor HSC
 - validar listagem administrativa inicial
 - validar criação administrativa inicial em `draft`
-- evoluir edit e lifecycle sensível em etapas futuras
+- validar edição administrativa inicial de metadados
+- evoluir lifecycle sensível em etapas futuras
 - exercitar activate/close com invariantes de domínio quando essas ações entrarem na UI
 
 Superfícies administrativas disponíveis na UI atual:
 
 - listagem admin
 - criação admin em `draft`
+- edição admin de metadados
 
 Superfícies administrativas existentes no backend, mas ainda pendentes na UI:
 
-- detail/edit admin
 - activate
 - close
 
@@ -413,11 +416,14 @@ Status do domínio no contexto:
 
 - listagem administrativa inicial implementada
 - criação administrativa em `/seasons/new` implementada
+- edição administrativa em `/seasons/:slug/edit` implementada
 - leitura admin canônica disponível no backend por `GET /admin/seasons` e `GET /admin/seasons/:slug`
 - criação admin canônica disponível no backend por `POST /admin/seasons`
+- edição admin canônica disponível no backend por `PATCH /admin/seasons/:slug`
 - rota `/seasons` materializada como página funcional do Backoffice
 - rota `/seasons/new` materializada como página funcional do Backoffice
-- lifecycle ainda pendente na UI do Backoffice
+- rota `/seasons/:slug/edit` materializada como página funcional do Backoffice
+- activate e close ainda pendentes na UI do Backoffice
 - ranking por season, partidas associadas, snapshot histórico, Portal e ETL seguem como lacunas futuras
 
 ---
