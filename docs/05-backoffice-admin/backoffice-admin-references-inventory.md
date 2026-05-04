@@ -86,10 +86,11 @@ O estado atual conhecido do contexto é:
 - `seasons` já possui listagem administrativa inicial implementada no Backoffice
 - `seasons` já possui criação administrativa em `draft` implementada no Backoffice
 - `seasons` já possui edição administrativa de metadados implementada no Backoffice
+- `seasons` já possui ações administrativas de lifecycle implementadas na listagem do Backoffice
 - a leitura admin canônica de Seasons já está disponível no backend
 - a criação admin canônica de Seasons já está disponível no backend por `POST /admin/seasons`
 - a edição admin canônica de Seasons já está disponível no backend por `PATCH /admin/seasons/:slug`
-- activate e close de Seasons ainda estão pendentes na UI do Backoffice
+- activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
 - parte importante da auth base já está reconciliada com runtime real
 - parte da expansão de domínio ainda depende de evolução incremental de contrato e implementação
 
@@ -130,7 +131,7 @@ Leitura recomendada:
 - `news-admin-integration-and-evolution.md` define uso e expansão disciplinada do domínio `news`
 - `news-admin-feature-implementation-spec.md` traduz o domínio reconciliado em feature implementável no frontend
 - `news-admin-frontend-implementation-runtime.md` registra a implementação real materializada no frontend
-- `seasons-admin-list-functional-smoke-guide.md` registra a administração funcional de `seasons`, seus contratos de leitura/criação/edição e o smoke funcional local
+- `seasons-admin-list-functional-smoke-guide.md` registra a administração funcional de `seasons`, seus contratos de leitura/criação/edição/lifecycle e o smoke funcional
 - `operational-runbooks.md` define validação e troubleshooting
 - este arquivo consolida o inventário de referência e dependência
 
@@ -398,17 +399,14 @@ Papel esperado:
 - validar listagem administrativa inicial
 - validar criação administrativa inicial em `draft`
 - validar edição administrativa inicial de metadados
-- evoluir lifecycle sensível em etapas futuras
-- exercitar activate/close com invariantes de domínio quando essas ações entrarem na UI
+- operar lifecycle administrativo básico de ativação e fechamento
+- manter invariantes de domínio sob autoridade do backend
 
 Superfícies administrativas disponíveis na UI atual:
 
 - listagem admin
 - criação admin em `draft`
 - edição admin de metadados
-
-Superfícies administrativas existentes no backend, mas ainda pendentes na UI:
-
 - activate
 - close
 
@@ -420,10 +418,11 @@ Status do domínio no contexto:
 - leitura admin canônica disponível no backend por `GET /admin/seasons` e `GET /admin/seasons/:slug`
 - criação admin canônica disponível no backend por `POST /admin/seasons`
 - edição admin canônica disponível no backend por `PATCH /admin/seasons/:slug`
+- lifecycle admin canônico disponível no backend por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
 - rota `/seasons` materializada como página funcional do Backoffice
 - rota `/seasons/new` materializada como página funcional do Backoffice
 - rota `/seasons/:slug/edit` materializada como página funcional do Backoffice
-- activate e close ainda pendentes na UI do Backoffice
+- ações `Ativar` e `Fechar` materializadas na listagem `/seasons`
 - ranking por season, partidas associadas, snapshot histórico, Portal e ETL seguem como lacunas futuras
 
 ---
@@ -588,7 +587,7 @@ Objetivo:
 Status:
 
 - `news` e parte de `seasons` têm base mais madura
-- leituras admin completas ainda podem exigir confirmação por release
+- leituras admin completas ainda podem exigir confirmação por evidência funcional
 
 ---
 
@@ -785,15 +784,15 @@ Exemplos:
 - `GET /auth/session`
 - `POST /auth/magic-link/request`
 - trilha administrativa de `news`
-- listagem e criação administrativa de `seasons`
+- listagem, criação, edição e lifecycle básico administrativo de `seasons`
 
 ### Superfícies-alvo
 
-Superfícies necessárias para o Backoffice operar bem, mas ainda sujeitas a reconciliação fina por release.
+Superfícies necessárias para o Backoffice operar bem, mas ainda sujeitas a reconciliação fina por evidência funcional.
 
 Exemplos:
 
-- edit e lifecycle administrativo de `seasons`
+- ranking, partidas e integrações futuras de `seasons`
 - leitura admin canônica de `events`
 - lifecycle final de `events` no admin
 - refinamento final da fronteira entre staff flow e user flow em `events`
@@ -808,7 +807,7 @@ Regra importante:
 
 Os principais gaps atuais do contexto são:
 
-- edit e lifecycle administrativo de `seasons` ainda pedem consolidação contratual fina na UI
+- ranking, partidas e integrações futuras de `seasons` ainda pedem reconciliação própria
 - leituras admin completas de `events` ainda pedem consolidação contratual fina
 - `events` ainda exige reconciliação melhor entre fluxo administrativo e fluxo público
 - troubleshooting de frontend ainda depende fortemente de console/network + logs da Auth API
