@@ -42,6 +42,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
   - [News Admin Feature Implementation Spec](../05-backoffice-admin/news-admin-feature-implementation-spec.md)
   - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
   - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
+  - [Seasons Admin List Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
@@ -73,6 +74,7 @@ Leitura correta do estado atual:
 - o repositório já pode ser tratado como **base canônica viva**
 - a maior parte das pendências críticas de realidade operacional dos contextos de infraestrutura já foi fechada
 - o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
+- Seasons já possui listagem administrativa inicial funcional no Backoffice, com leitura admin canônica disponível na Auth API
 - o contexto `02-game-panel` agora também possui trilha administrativa explícita, com autoridade centralizada no CounterStrikeSharp e runbooks próprios de manutenção
 - o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e evolução sustentável das superfícies administrativas**
 
@@ -212,6 +214,7 @@ Arquivos principais:
 - [News Admin Integration and Evolution](../05-backoffice-admin/news-admin-integration-and-evolution.md)
 - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
 - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
+- [Seasons Admin List Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 - [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
@@ -297,6 +300,9 @@ Leitura sintética:
 - shell administrativo, auth frontend e contratos iniciais já existem
 - News já possui ciclo PROD validado atravessando Backoffice Admin, Auth API, ETL Hostinger e Portal Estático
 - `GET /admin/news/:id` já é contrato admin real para edição com `content`
+- Seasons já possui listagem administrativa inicial em `/seasons`
+- `GET /admin/seasons` e `GET /admin/seasons/:slug` já são leituras admin reais consumidas pelo Backoffice
+- lifecycle, ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin List
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---

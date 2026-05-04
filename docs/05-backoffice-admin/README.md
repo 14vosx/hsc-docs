@@ -32,6 +32,7 @@ Este documento existe para:
 - [News Admin Feature Implementation Spec](./news-admin-feature-implementation-spec.md)
 - [News Admin Frontend Implementation Runtime](./news-admin-frontend-implementation-runtime.md)
 - [News Functional Smoke Guide](./news-functional-smoke-guide.md)
+- [Seasons Admin List Functional Smoke Guide](./seasons-admin-list-functional-smoke-guide.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 - [References and Inventory](./backoffice-admin-references-inventory.md)
 
@@ -89,6 +90,9 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
 - `GET /admin/news/:id` já é superfície admin real, publicada e reconciliada para edição
 - a edição de News usa detalhe administrativo com `content` como fonte primária
 - o lifecycle PROD de News já foi validado para edição, refresh/deep link, publish, unpublish e delete
+- `seasons` já possui listagem administrativa inicial funcional em `/seasons`
+- a leitura admin canônica de Seasons já está disponível na Auth API por `GET /admin/seasons` e `GET /admin/seasons/:slug`
+- lifecycle de Seasons ainda não está implementado na UI do Backoffice
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais
 - o contexto já não deve ser tratado como “pré-implementação pura”
 
@@ -205,6 +209,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 - `docs/05-backoffice-admin/news-functional-smoke-guide.md`
+- `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -226,8 +231,9 @@ A ordem recomendada de leitura é:
 8. `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 9. `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 10. `docs/05-backoffice-admin/news-functional-smoke-guide.md`
-11. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-12. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+11. `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
+12. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+13. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 
@@ -236,7 +242,7 @@ A ordem recomendada de leitura é:
 A próxima fase natural deste contexto é:
 
 - expandir implementação administrativa por domínio
-- consolidar leituras administrativas canônicas de `seasons`
+- evoluir lifecycle administrativo de `seasons` na UI sem tratar a listagem atual como CRUD completo
 - consolidar leituras administrativas canônicas de `events`
 - amadurecer superfícies e lifecycle de `events`
 - manter auth, guards e callback publicados como espinha dorsal estável

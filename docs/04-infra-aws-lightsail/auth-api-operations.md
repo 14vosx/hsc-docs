@@ -98,7 +98,8 @@ O estado operacional reconciliado desta camada inclui:
 
 **Superfícies da API e Integração**
 - superfícies públicas de conteúdo ativas (`health`, `content/news`, `content/seasons`);
-- superfícies administrativas protegidas funcionais, incluindo `admin/schema` e mutações de `news` e `seasons`;
+- superfícies administrativas protegidas funcionais, incluindo `admin/schema`, mutações de `news` e `seasons`, e leitura admin de `seasons`;
+- leitura administrativa de Seasons disponível por `GET /admin/seasons` e `GET /admin/seasons/:slug`;
 - **CRUD administrativo básico de usuários publicado e funcional**, expondo:
   - `GET /admin/users`
   - `POST /admin/users`
@@ -108,6 +109,7 @@ O estado operacional reconciliado desta camada inclui:
 **Banco de Dados e Evolução**
 - `schema.js` tratado como compatibilidade legada e não como mecanismo principal de evolução do banco;
 - migrations SQL explícitas executadas no deploy antes do restart do serviço;
+- configuração `mysql2` de timezone em UTC (`timezone: "Z"`) para evitar deslocamento indevido de `DATETIME`;
 - a reconciliação de produção desta linha já incluiu as execuções de:
   - `0003_admin_audit_log.sql`
   - `0004_users_role_enum_reconcile.sql`
@@ -293,6 +295,8 @@ Superfícies administrativas relevantes no estado atual:
 - `GET /admin/schema`
 - endpoints administrativos de `news`
 - endpoints administrativos de `seasons`
+- `GET /admin/seasons`
+- `GET /admin/seasons/:slug`
 - `GET /auth/session`
 - `POST /auth/magic-link/request`
 - `GET /auth/magic-link/consume`
@@ -302,6 +306,13 @@ Regra importante:
 
 - superfícies administrativas não pertencem ao portal público
 - toda mutação administrativa deve ser tratada como operação autenticada e auditável
+
+Nota operacional de Seasons:
+
+- `GET /admin/seasons` lista Seasons para consumo administrativo do Backoffice
+- `GET /admin/seasons/:slug` retorna o detalhe administrativo por `slug`
+- a configuração `mysql2` com `timezone: "Z"` mantém o tráfego do backend em UTC e evita deslocamento indevido ao ler `DATETIME`
+- a apresentação para o operador fica a cargo da UI em horário local do navegador, com `America/Sao_Paulo` como referência humana usual do HSC quando for necessário explicitar timezone
 
 ---
 
