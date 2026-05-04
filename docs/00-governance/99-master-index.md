@@ -74,7 +74,7 @@ Leitura correta do estado atual:
 - o repositório já pode ser tratado como **base canônica viva**
 - a maior parte das pendências críticas de realidade operacional dos contextos de infraestrutura já foi fechada
 - o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
-- Seasons já possui listagem administrativa, criação em `draft` e edição de metadados funcionais no Backoffice, com leitura, criação e edição admin canônicas disponíveis na Auth API
+- Seasons já possui listagem administrativa, criação em `draft`, edição de metadados e lifecycle básico de ativar/fechar funcionais no Backoffice, com contratos admin canônicos disponíveis na Auth API
 - o contexto `02-game-panel` agora também possui trilha administrativa explícita, com autoridade centralizada no CounterStrikeSharp e runbooks próprios de manutenção
 - o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e evolução sustentável das superfícies administrativas**
 
@@ -303,8 +303,9 @@ Leitura sintética:
 - Seasons já possui listagem administrativa em `/seasons`
 - Seasons já possui criação administrativa em `draft` por `/seasons/new`
 - Seasons já possui edição administrativa de metadados por `/seasons/:slug/edit`
-- `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons` e `PATCH /admin/seasons/:slug` já são contratos admin reais consumidos pelo Backoffice
-- activate, close, ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin
+- Seasons já possui ações administrativas de lifecycle em `/seasons` para ativar e fechar
+- `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já são contratos admin reais consumidos pelo Backoffice
+- ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---

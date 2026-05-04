@@ -7,9 +7,9 @@ Documentar o estado canônico da administração funcional de `seasons` no Backo
 Este documento existe para:
 
 - registrar a definição de produto de Season como ciclo competitivo oficial
-- documentar a leitura, criação e edição administrativa reais disponíveis na Auth API
+- documentar a leitura, criação, edição e lifecycle administrativo básico disponíveis na Auth API
 - registrar o comportamento atual das telas `/seasons`, `/seasons/new` e `/seasons/:slug/edit`
-- preservar o smoke funcional local de listagem, criação e edição
+- preservar o smoke funcional local de listagem, criação, edição, ativação e fechamento
 - separar estado implementado, intenção de produto e lacunas futuras
 
 ---
@@ -34,19 +34,19 @@ Este documento existe para:
 Este guia cobre:
 
 - definição funcional de Season no HSC
-- contratos administrativos de leitura, criação e edição de `seasons`
+- contratos administrativos de leitura, criação, edição, ativação e fechamento de `seasons`
 - tela administrativa `/seasons`
 - tela administrativa `/seasons/new`
 - tela administrativa `/seasons/:slug/edit`
+- ações administrativas de lifecycle na listagem: `Editar`, `Ativar` e `Fechar`
 - estados de loading, erro, vazio e tabela
-- smoke local com Auth API, sessão dev, Backoffice, criação de dado draft e edição validada
+- smoke local com Auth API, sessão dev, Backoffice, criação de dados `draft`, edição, ativação e fechamento validados
 - decisão de timezone adotada no backend e na UI
 - adoção de Angular Material/CDK como base gradual de UI no Backoffice
 - lacunas futuras conhecidas
 
 Este guia não cobre:
 
-- ativação ou fechamento pela UI do Backoffice
 - ranking por season
 - associação automática de partidas à season
 - snapshot histórico ou hall of fame
@@ -77,7 +77,7 @@ Leitura correta:
 
 O estado funcional documentado é:
 
-- a Auth API expõe leitura, criação e edição administrativa de Seasons
+- a Auth API expõe leitura, criação, edição, ativação e fechamento administrativo de Seasons
 - o Backoffice Admin possui página funcional em `/seasons`
 - o Backoffice Admin possui página funcional de criação em `/seasons/new`
 - o Backoffice Admin possui página funcional de edição em `/seasons/:slug/edit`
@@ -95,7 +95,11 @@ O estado funcional documentado é:
 - `/seasons/new` cria uma Season em `draft` por `POST /admin/seasons`
 - ao criar com sucesso, a UI navega de volta para `/seasons`
 - a Season criada aparece na listagem com status `Draft`
-- a listagem `/seasons` possui ação `Editar`
+- a listagem `/seasons` possui ações condicionais de lifecycle
+- a ação `Editar` aparece para Seasons que não estão `closed`
+- a ação `Ativar` aparece para Seasons que não estão `active` nem `closed`
+- a ação `Fechar` aparece para Seasons `active`
+- Seasons `closed` não apresentam ações úteis de lifecycle
 - `/seasons/:slug/edit` carrega o detalhe por `GET /admin/seasons/:slug`
 - `/seasons/:slug/edit` salva alterações por `PATCH /admin/seasons/:slug`
 - o formulário é reutilizado em modo de edição
@@ -103,21 +107,23 @@ O estado funcional documentado é:
 - a edição permite alterar `name`, `description`, `start_at` e `end_at`
 - a edição não altera o `slug`
 - a UI trata Season inexistente como not-found
-- a UI mapeia erro `season_closed` como `Season fechada não pode ser alterada.`
-
-Lacunas da UI atual:
-
-- activate pela UI
-- close pela UI
-- ações de lifecycle na tela
+- `POST /admin/seasons/:slug/activate` é exposto pela ação `Ativar`
+- `POST /admin/seasons/:slug/close` é exposto pela ação `Fechar`
+- a UI confirma antes de ativar ou fechar
+- após `activate` ou `close`, a listagem é atualizada
+- a UI mapeia erros administrativos conhecidos de Seasons:
+  - `season_already_active`
+  - `no_active_season`
+  - `season_closed`
+  - `season_not_found`
 
 Observação sobre mutações:
 
-- `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já existiam previamente no contrato administrativo
-- este documento descreve a leitura admin, a listagem, a criação em `draft` e a edição inicial no Backoffice
+- `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` existem no contrato administrativo
+- este documento descreve a leitura admin, a listagem, a criação em `draft`, a edição inicial e o lifecycle básico no Backoffice
 - a UI atual expõe `POST /admin/seasons` pela rota `/seasons/new`
 - a UI atual expõe `PATCH /admin/seasons/:slug` pela rota `/seasons/:slug/edit`
-- a UI atual não expõe activate ou close
+- a UI atual expõe `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` pela listagem `/seasons`
 
 ---
 
@@ -255,8 +261,62 @@ Regras importantes:
 
 - o endpoint é endereçado pelo `slug`
 - o payload de edição não altera o `slug`
+- Season `closed` é estado terminal no backend atual e não pode ser editada
 - o backend continua sendo a fonte final de validação e invariantes de domínio
 - quando o backend retorna erro `season_closed`, a UI apresenta `Season fechada não pode ser alterada.`
+
+### `POST /admin/seasons/:slug/activate`
+
+Objetivo:
+
+- ativar uma Season administrativa como ciclo competitivo oficial em andamento
+
+Payload esperado:
+
+- sem corpo relevante
+
+Resposta esperada:
+
+```json
+{
+  "ok": true,
+  "slug": "season-junho-2026",
+  "status": "active"
+}
+```
+
+Regras importantes:
+
+- o endpoint é endereçado pelo `slug`
+- a ativação pode rebaixar outra Season `active` para `draft`
+- o backend continua sendo a fonte final de validação, autorização e invariantes de domínio
+
+### `POST /admin/seasons/:slug/close`
+
+Objetivo:
+
+- fechar uma Season administrativa ativa
+
+Payload esperado:
+
+- sem corpo relevante
+
+Resposta esperada:
+
+```json
+{
+  "ok": true,
+  "slug": "season-junho-2026",
+  "status": "closed"
+}
+```
+
+Regras importantes:
+
+- o endpoint é endereçado pelo `slug`
+- Season `closed` é estado terminal no backend atual
+- uma Season fechada não pode mais ser editada
+- o backend continua sendo a fonte final de validação, autorização e invariantes de domínio
 
 ### Campos do item administrativo
 
@@ -283,8 +343,8 @@ Status administrativos reconhecidos:
 Regra importante:
 
 - estes status já existem no contrato
-- a tela atual apenas exibe o status
-- a tela atual não executa transições de lifecycle
+- a tela atual exibe o status e apresenta ações condicionais de lifecycle
+- transições de lifecycle continuam governadas pelo backend
 
 ---
 
@@ -300,12 +360,30 @@ Comportamentos esperados:
 - quando a lista vem vazia, exibe empty state
 - quando há itens, exibe tabela com dados administrativos
 - datas são apresentadas ao usuário em horário local do navegador
+- a tabela apresenta ações condicionais por status:
+  - `Editar` para Seasons que não estão `closed`
+  - `Ativar` para Seasons que não estão `active` nem `closed`
+  - `Fechar` para Seasons `active`
+  - nenhuma ação útil de lifecycle para Seasons `closed`
+- antes de ativar, a UI solicita confirmação com o texto:
+
+```text
+Ativar esta season como ciclo competitivo oficial em andamento? Se houver outra season ativa, ela poderá deixar de ser ativa.
+```
+
+- antes de fechar, a UI solicita confirmação com o texto:
+
+```text
+Fechar esta season? Seasons fechadas não podem mais ser editadas.
+```
+
+- após ativar ou fechar, a listagem é carregada novamente
 
 Leitura de produto da tela:
 
 - a tela existe para dar visibilidade administrativa ao ciclo competitivo oficial
 - ela oferece entrada para criação e edição inicial de metadados
-- ela não deve ser interpretada como lifecycle completo de Season
+- ela oferece lifecycle administrativo básico para ativar e fechar Seasons
 - ela é a superfície de administração funcional de Seasons no Backoffice
 
 ---
@@ -355,7 +433,7 @@ A rota protegida `/seasons/:slug/edit` permite editar metadados administrativos 
 
 Comportamentos esperados:
 
-- a listagem `/seasons` apresenta ação `Editar` para cada item
+- a listagem `/seasons` apresenta ação `Editar` para Seasons que não estão `closed`
 - a tela de edição carrega o detalhe por `GET /admin/seasons/:slug`
 - a tela reutiliza o formulário de Season em modo edit
 - o campo `slug` é apresentado como somente leitura
@@ -376,10 +454,9 @@ Comportamentos esperados:
 
 Fronteiras explícitas:
 
-- a edição não implementa activate
-- a edição não implementa close
 - a edição não altera lifecycle
 - a edição não associa partidas, ranking, Portal ou ETL à Season
+- activate e close ficam na listagem `/seasons`, não no formulário de edição
 
 Regra importante:
 
@@ -395,51 +472,53 @@ Leitura correta:
 
 - Seasons Create já usa Angular Material como base visual e interativa
 - Seasons Edit reutiliza a mesma base de formulário com `slug` somente leitura
+- a listagem de Seasons usa ações administrativas condicionais com confirmação para mutações de lifecycle
 - essa adoção orienta a evolução gradual das telas administrativas
 - este documento não é um guia de design system completo
 - este documento não promete migração visual completa de todas as telas
 
 ---
 
-## Smoke funcional local
+## Smoke funcional
 
-O smoke funcional local exercita a integração entre Auth API local e Backoffice local para listagem, criação e edição.
+O smoke funcional preserva a cobertura de listagem, criação e edição já documentada e registra a validação de lifecycle para ativação e fechamento.
 
 Ambiente do smoke:
 
-- Auth API local
-- sessão administrativa local via dev bootstrap session
-- Backoffice Admin com `npm run start:dev`
-- navegação local até `/seasons`
+- Auth API acessível ao Backoffice no ambiente validado
+- sessão administrativa válida
+- Backoffice Admin aberto na rota `/seasons`
 
 Fluxo de validação funcional:
 
-1. iniciar a Auth API local
-2. criar sessão administrativa local pelo endpoint de dev bootstrap
-3. iniciar o Backoffice Admin com `npm run start:dev`
-4. abrir `/seasons`
-5. confirmar empty state quando não há Seasons locais
-6. abrir `/seasons/new`
-7. preencher `slug`, nome, descrição opcional, data/hora de início e data/hora de fim
-8. criar a Season em `draft`
-9. confirmar navegação de volta para `/seasons`
-10. confirmar tabela renderizando o item criado com status `Draft`
-11. acionar `Editar` na listagem
-12. confirmar carregamento de detalhe por `GET /admin/seasons/:slug`
-13. alterar campos editáveis de metadados, mantendo `slug` somente leitura
-14. salvar a edição por `PATCH /admin/seasons/:slug`
-15. confirmar retorno/atualização da listagem com os dados alterados
-16. limpar o dado local temporário ao final do smoke por mecanismo local seguro
+1. abrir `/seasons`
+2. criar duas Seasons temporárias em `/seasons/new`
+3. confirmar que ambas começam como `draft`
+4. acionar `Ativar` na primeira Season temporária
+5. confirmar que a UI solicita confirmação antes da ativação
+6. confirmar refresh da listagem após ativação
+7. confirmar que a primeira Season temporária fica `active`
+8. acionar `Ativar` na segunda Season temporária
+9. confirmar que a UI solicita confirmação antes da ativação
+10. confirmar refresh da listagem após ativação
+11. confirmar que a segunda Season temporária fica `active`
+12. confirmar que a primeira Season temporária volta para `draft`
+13. acionar `Fechar` na segunda Season temporária
+14. confirmar que a UI solicita confirmação antes do fechamento
+15. confirmar refresh da listagem após fechamento
+16. confirmar que a segunda Season temporária fica `closed`
+17. confirmar que a Season `closed` perde ações úteis de lifecycle
+18. validar o estado final dos dados temporários
+19. limpar os dados temporários ao final do smoke por mecanismo seguro
 
 Observações:
 
-- este smoke é local/dev
-- este smoke é uma validação funcional local
 - a criação temporária exercita a tela `/seasons/new` e a mutação administrativa `POST /admin/seasons`
-- a edição temporária exercita a tela `/seasons/:slug/edit` e a mutação administrativa `PATCH /admin/seasons/:slug`
+- a edição administrativa segue documentada na tela `/seasons/:slug/edit` e na mutação `PATCH /admin/seasons/:slug`
+- a ativação temporária exercita a ação `Ativar` e a mutação administrativa `POST /admin/seasons/:slug/activate`
+- o fechamento temporário exercita a ação `Fechar` e a mutação administrativa `POST /admin/seasons/:slug/close`
 - este guia não assume endpoint de delete de Season
 - dados temporários de smoke devem usar `slug` claramente descartável e ser removidos após validação
-- o dado de smoke local validado foi removido após a validação
 - cookies, tokens, chaves e secrets não devem ser registrados na documentação
 
 Exemplo de nomenclatura segura para dado temporário:
@@ -447,6 +526,23 @@ Exemplo de nomenclatura segura para dado temporário:
 ```text
 season-smoke-local-YYYYMMDD-HHMM
 ```
+
+Smoke funcional validado:
+
+- foram criadas duas Seasons temporárias:
+  - `hsc-ui-lifecycle-a`
+  - `hsc-ui-lifecycle-b`
+- ambas começaram como `draft`
+- `hsc-ui-lifecycle-a` foi ativada
+- `hsc-ui-lifecycle-b` foi ativada em seguida
+- a listagem foi atualizada após as mutações
+- `hsc-ui-lifecycle-a` voltou para `draft` quando `hsc-ui-lifecycle-b` ficou `active`
+- `hsc-ui-lifecycle-b` foi fechada
+- `hsc-ui-lifecycle-b` ficou `closed` e perdeu ações úteis de lifecycle
+- estado final validado no banco:
+  - `hsc-ui-lifecycle-a = draft`
+  - `hsc-ui-lifecycle-b = closed`
+- os dados temporários foram removidos após a validação
 
 ---
 
@@ -491,9 +587,6 @@ Exemplo validado de edição:
 
 Lacunas futuras conhecidas:
 
-- o Backoffice ainda não ativa Seasons pela UI
-- o Backoffice ainda não fecha Seasons pela UI
-- não há ações de lifecycle na listagem
 - não há ranking por season
 - não há associação automática de partidas à season
 - não há snapshot histórico ou hall of fame
@@ -512,10 +605,10 @@ Regra importante:
 Este documento está pronto quando:
 
 - a definição de produto de Season estiver explícita
-- a leitura, criação e edição administrativa reais estiverem documentadas
-- a tela `/seasons` estiver descrita sem prometer lifecycle completo
+- a leitura, criação, edição e lifecycle administrativo básico estiverem documentados
+- a tela `/seasons` estiver descrita com ações condicionais de lifecycle
 - a tela `/seasons/new` estiver descrita como criação em `draft`
 - a tela `/seasons/:slug/edit` estiver descrita como edição inicial de metadados
-- o smoke local estiver registrado como local/dev
+- o smoke funcional de activate/close estiver registrado sem expor dados sensíveis
 - a decisão de timezone estiver registrada
 - lacunas futuras estiverem separadas do estado atual
