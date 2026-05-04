@@ -102,8 +102,16 @@ ETL validado:
 - `/opt/cs2-portal/bin/gen-content-news-items-cache.sh`
 - `gen-content-news.service`
 - `gen-content-news-items.service`
-- `gen-all-v2.timer` ativo, com execução a cada 30 minutos
-- timers dedicados de News existem, mas estavam `disabled/inactive` no diagnóstico validado
+- `gen-all-v2.timer` segue ativo como automação agregada da v2
+- antes da ativação dedicada, News dependia do `gen-all-v2.timer` para atualização automática, com latência maior
+- `gen-content-news.timer` `enabled/active`
+- `gen-content-news-items.timer` `enabled/active`
+- `gen-content-news.timer` usa `OnUnitActiveSec=120s` e drop-in `OnActiveSec=120s`
+- `gen-content-news-items.timer` usa `OnUnitActiveSec=300s` e drop-in `OnActiveSec=300s`
+- expectativa conservadora: até ~2 min para lista e até ~5 min para detalhes
+- os drop-ins existem em:
+  - `/etc/systemd/system/gen-content-news.timer.d/override.conf`
+  - `/etc/systemd/system/gen-content-news-items.timer.d/override.conf`
 
 Smoke público validado:
 
@@ -111,6 +119,15 @@ Smoke público validado:
 - JSON público item acessível
 - Portal Estático mostrou a notícia
 - console do browser sem erro
+- execução automática dos dois timers dedicados de News validada
+- impacto observado no momento do teste foi baixo, com load após execução em `0.02, 0.01, 0.00`
+
+Decisão operacional:
+
+- a VPS Hostinger também roda o servidor CS2 via Game Panel/AMP
+- estabilidade do jogo tem prioridade sobre latência de News
+- não reduzir para 60s antes do upgrade previsto da VPS
+- reavaliar a cadência depois do Game Panel 4
 
 ---
 
@@ -303,7 +320,13 @@ Critério esperado:
 
 ## Smoke controlado na Hostinger
 
-Use esta etapa quando o teste for controlado e houver intenção explícita de materializar o cache público imediatamente, sem esperar o próximo ciclo de `gen-all-v2.timer`.
+Use esta etapa quando o teste for controlado e houver intenção explícita de materializar o cache público imediatamente, sem esperar a execução automática dos timers dedicados.
+
+Leitura atual:
+
+- `gen-content-news.timer` atualiza a lista em até ~2 min
+- `gen-content-news-items.timer` atualiza detalhes em até ~5 min
+- execução manual dos services continua útil para smoke controlado imediato
 
 ### 6. Rodar services ETL de News
 
@@ -321,8 +344,9 @@ Critério esperado:
 
 Observação:
 
-- `gen-all-v2.timer` está ativo e roda a cada 30 minutos
-- timers dedicados de News existem, mas estavam `disabled/inactive` no diagnóstico validado
+- `gen-all-v2.timer` segue ativo como automação agregada da v2
+- timers dedicados de News estão `enabled/active` em modo conservador
+- o impacto observado no momento do teste foi baixo, mas isso não deve ser lido como garantia de ausência de impacto no servidor CS2
 
 ### 7. Validar JSON público em disco
 
@@ -415,6 +439,23 @@ Critério esperado:
 - notícia deixa de aparecer em `/content/news` após unpublish ou delete
 - JSON público deixa de expor a notícia após regeneração do cache
 - Portal Estático deixa de exibir a notícia de smoke
+
+### Rollback dos timers dedicados de News
+
+O rollback operacional canônico dos timers dedicados vive em [systemd Automation](../01-infra-hostinger/systemd-automation.md).
+
+Resumo do rollback conservador:
+
+```sh
+sudo systemctl disable --now gen-content-news.timer gen-content-news-items.timer
+sudo systemctl reset-failed gen-content-news.timer gen-content-news-items.timer gen-content-news.service gen-content-news-items.service
+```
+
+Leitura esperada:
+
+- timers dedicados deixam de agendar automaticamente
+- services continuam disponíveis para execução manual controlada
+- News volta a depender da automação agregada e/ou execução manual controlada, com latência maior
 
 ---
 
