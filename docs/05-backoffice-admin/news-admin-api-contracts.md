@@ -25,6 +25,7 @@ Este documento existe para:
 ### Documentos diretamente relacionados
 - [Admin API Contracts](./admin-api-contracts.md)
 - [News Admin Integration and Evolution](./news-admin-integration-and-evolution.md)
+- [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
 - [Backoffice Admin Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Backoffice Admin References Inventory](./backoffice-admin-references-inventory.md)
@@ -70,6 +71,7 @@ O domínio `news` possui **três superfícies diferentes** e elas não devem ser
 Consumida pelo Backoffice Admin na Auth API:
 
 - `GET /admin/news`
+- `GET /admin/news/:id`
 - `POST /admin/news`
 - `PATCH /admin/news/:id`
 - `POST /admin/news/:id/publish`
@@ -106,6 +108,7 @@ No estado reconciliado atual, o domínio `news` já está funcional ponta a pont
 Capacidades comprovadas:
 
 - listagem administrativa protegida por sessão
+- detalhe administrativo por `id` com `content`
 - criação de draft
 - edição parcial
 - publicação
@@ -163,6 +166,22 @@ O backend permanece autoridade final para:
 - publicação e despublicação
 - remoção
 - auditoria transacional das mutações sensíveis
+
+### CORS administrativo
+
+No runtime PROD validado, a Auth API permite o método `DELETE` no preflight CORS administrativo.
+
+Header validado:
+
+```http
+Access-Control-Allow-Methods: GET,POST,PATCH,DELETE,OPTIONS
+```
+
+Leitura correta:
+
+- `DELETE /admin/news/:id` depende de `DELETE` permitido no CORS para operar no browser
+- o Backoffice deve continuar usando sessão cookie-based com `withCredentials: true`
+- o frontend não deve contornar CORS nem trocar a superfície administrativa por mirror público
 
 ---
 
@@ -227,6 +246,7 @@ Os seguintes invariantes permanecem canônicos para `news`:
 | Método | Endpoint | Auth | Papel funcional |
 |---|---|---:|---|
 | GET | `/admin/news` | sim | listar itens administrativos |
+| GET | `/admin/news/:id` | sim | carregar detalhe administrativo completo |
 | POST | `/admin/news` | sim | criar draft |
 | PATCH | `/admin/news/:id` | sim | editar parcialmente |
 | POST | `/admin/news/:id/publish` | sim | publicar item |
@@ -300,7 +320,8 @@ Com base nas respostas reconciliadas, cada item administrativo tende a expor:
 
 - a resposta observada não expôs paginação
 - a resposta observada usa `count` + `items`
-- a listagem administrativa é a principal superfície de leitura canônica confirmada para o Backoffice no checkpoint atual
+- a listagem administrativa é a leitura de coleção do Backoffice
+- a edição não deve depender da listagem como fonte primária de detalhe completo
 
 ---
 
@@ -320,10 +341,10 @@ Expor o detalhe administrativo de um item de `news` por `id`, com dados suficien
 
 Leitura correta:
 
-- esta superfície já possui implementação local no `hsc-auth-api`
-- o runtime local já foi validado com sucesso `200 OK` para item existente
-- o runtime local já foi validado com `404 Not Found` + `error: "not_found"` para item inexistente
-- esta revisão ainda não deve tratá-la como baseline reconciliada do runtime principal até PR, merge e publicação correspondentes
+- esta superfície já está publicada e reconciliada no runtime PROD da Auth API
+- a Auth API PROD real está na AWS Lightsail e foi atualizada para o commit `728299e`
+- `GET /admin/news/:id` é contrato administrativo real para hidratar `/news/:id/edit`
+- a resposta deve incluir `content`, além dos metadados administrativos do item
 
 ### Auth esperada
 
@@ -340,7 +361,7 @@ Status esperado:
 
 * `401 Unauthorized`
 
-### Resposta de sucesso validada localmente
+### Resposta de sucesso validada
 
 ```json
 {
@@ -360,11 +381,11 @@ Status esperado:
 }
 ```
 
-Status validado localmente:
+Status validado:
 
 - `200 OK`
 
-### Erro relevante mínimo validado localmente
+### Erro relevante mínimo validado
 
 ```json
 {
@@ -373,11 +394,11 @@ Status validado localmente:
 }
 ```
 
-Status validado localmente:
+Status validado:
 
 - `404 Not Found`
 
-### Campos mínimos propostos do item
+### Campos mínimos do item
 
 * `id`
 * `slug`
@@ -390,7 +411,7 @@ Status validado localmente:
 * `created_at`
 * `updated_at`
 
-### Invariantes propostos
+### Invariantes canônicos
 
 * o endpoint não altera estado do recurso
 * o endpoint deve refletir o estado administrativo atual do item
@@ -400,11 +421,10 @@ Status validado localmente:
 
 ### Leitura correta
 
-- a fonte de verdade inicial desta superfície continua sendo `05-backoffice-admin`
-- a implementação local correspondente já existe no `hsc-auth-api`
-- o runtime local já confirmou sucesso com `content` no detail DTO e erro `404 not_found`
-- esta superfície ainda depende de PR, merge e publicação para passar a integrar o baseline reconciliado do runtime principal
-- após merge e publicação, o Backoffice deve preferir esta leitura para hidratar `/news/:id/edit`
+- a fonte de verdade desta superfície continua sendo o contrato administrativo de `05-backoffice-admin`
+- o runtime PROD já confirmou essa superfície como publicada e reconciliada
+- o Backoffice deve usar `GET /admin/news/:id` como fonte primária para hidratar `/news/:id/edit`
+- a edição não deve depender de `editableDrafts`, cache da listagem ou estado roteado como fonte primária de `content`
 
 ---
 
@@ -461,7 +481,7 @@ Status observado:
 
 - `400 Bad Request`
 
-### Resposta de sucesso validada localmente
+### Resposta de sucesso observada
 
 ```json
 {
@@ -830,24 +850,27 @@ Após sucesso, o frontend pode:
 O fluxo de edição deve consumir:
 
 ```http
+GET /admin/news/:id
 PATCH /admin/news/:id
 ```
 
 Leitura correta do estado atual:
 
-* `GET /admin/news/:id` passa a ser tratado como evolução prioritária do domínio
-* porém, este endpoint ainda não está reconciliado como superfície publicada no runtime desta revisão
-* portanto, a tela de edição não deve presumir sua disponibilidade até validação futura explícita
+* `GET /admin/news/:id` é superfície publicada e reconciliada no runtime PROD
+* a tela `/news/:id/edit` deve carregar o detalhe completo por `id`, incluindo `content`
+* refresh direto na rota e deep link em nova aba devem funcionar sem depender de cache/listagem local
 
-Estratégias aceitáveis no checkpoint atual:
+Mutações de edição devem continuar usando:
 
-* hidratar a edição a partir da listagem já carregada, quando suficiente
-* reter estado do item recém-criado/atualizado no fluxo do frontend
-* adicionar leitura dedicada apenas quando essa superfície estiver publicada e reconciliada
+```http
+PATCH /admin/news/:id
+```
 
-Leitura alvo após evolução do contrato:
+Estratégias antigas removidas:
 
-* após publicação e reconciliação de `GET /admin/news/:id`, a tela `/news/:id/edit` deve preferir essa leitura para hidratação do detalhe administrativo
+* não usar `editableDrafts` como fonte primária de edição
+* não tratar cache da listagem como fonte primária de `content`
+* não manter `missing-draft` como comportamento esperado para refresh/deep link
 
 ### Ações de ciclo de vida
 
@@ -894,12 +917,11 @@ Status observado:
 
 - `400`
 
-### Lacuna explícita
+### Lacunas explícitas
 
 Ainda não há, nesta revisão, reconciliação suficiente para promover a catálogo canônico completo de:
 
 - erros de slug duplicado
-- erros de `id` inexistente
 - erros de publish inválido por estado
 - erros de unpublish inválido por estado
 - shape de erro de validação de `excerpt` e `image_url`
@@ -915,15 +937,7 @@ Regra importante:
 
 Os seguintes pontos continuam abertos ou parcialmente confirmados:
 
-### 1. Leitura admin por item
-
-Ainda não foi confirmada uma superfície canônica de:
-
-```http
-GET /admin/news/:id
-```
-
-### 2. Campos opcionais mutáveis
+### 1. Campos opcionais mutáveis
 
 Ainda não foi validado no runtime, neste checkpoint, o comportamento exato de:
 
@@ -931,7 +945,7 @@ Ainda não foi validado no runtime, neste checkpoint, o comportamento exato de:
 - `image_url`
 - alteração de `slug`
 
-### 3. Paginação, ordenação e filtros
+### 2. Paginação, ordenação e filtros
 
 Ainda não houve confirmação de:
 
@@ -940,7 +954,7 @@ Ainda não houve confirmação de:
 - ordenação explícita
 - busca textual server-side
 
-### 4. Catálogo completo de erros
+### 3. Catálogo completo de erros
 
 Apenas parte do contrato de erro foi comprovada.
 
@@ -951,9 +965,11 @@ Apenas parte do contrato de erro foi comprovada.
 Neste checkpoint, a leitura canônica segura é:
 
 - `news` já possui CRUD administrativo básico utilizável
+- `GET /admin/news/:id` é superfície admin real, publicada e reconciliada
 - o contrato mínimo de criação é `slug`, `title`, `content`
 - o ciclo `draft` → `published` → `draft` está funcional
 - `GET /content/news` e `GET /content/news/:slug` já refletem corretamente o estado publicado
+- o fluxo público validado atravessa Backoffice PROD → Auth API PROD `/content/news` → ETL Hostinger → `/var/www/api/cs2/v2/content/news` → Nginx → Portal Estático
 - o domínio já é suficiente para a primeira entrega do Backoffice Admin
 - expansões adicionais devem respeitar o contrato já reconciliado, não substituí-lo silenciosamente
 
@@ -978,4 +994,4 @@ Este documento está saudável quando:
 - Classificação: canônico
 - Contexto: `05-backoffice-admin`
 - Domínio: `news`
-- Última revisão: 2026-03-25
+- Última revisão: 2026-05-04

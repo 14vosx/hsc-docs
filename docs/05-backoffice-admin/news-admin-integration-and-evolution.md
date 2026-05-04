@@ -23,6 +23,7 @@ Este documento existe para:
 
 ### Documentos diretamente relacionados
 - [News Admin API Contracts](./news-admin-api-contracts.md)
+- [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Admin API Contracts](./admin-api-contracts.md)
 - [Backoffice Admin Frontend Structure](./backoffice-admin-frontend-structure.md)
 - [Auth, RBAC and Guards](./auth-rbac-and-guards.md)
@@ -67,6 +68,32 @@ O domínio `news` precisa ser lido como uma cadeia com papéis diferentes.
 3. a Auth API aplica regras, transições e persistência
 4. `publish` torna o item visível em `/content/news*`
 5. o Portal público consome o mirror same-origin de `content/news`
+
+### Cadeia pública validada
+
+O smoke PROD validou a cadeia pública de News nesta ordem:
+
+1. Backoffice Admin PROD
+2. Auth API PROD `/content/news`
+3. ETL Hostinger
+4. `/var/www/api/cs2/v2/content/news`
+5. Nginx
+6. Portal Estático
+
+Scripts ETL validados:
+
+- `/opt/cs2-portal/bin/gen-content-news-cache.sh`
+- `/opt/cs2-portal/bin/gen-content-news-items-cache.sh`
+
+Services validados:
+
+- `gen-content-news.service`
+- `gen-content-news-items.service`
+
+Automação validada:
+
+- `gen-all-v2.timer` está ativo e roda a cada 30 minutos
+- timers dedicados de News existem, mas estavam `disabled/inactive` no diagnóstico validado
 
 ### Erro conceitual a evitar
 
@@ -151,20 +178,23 @@ Tela:
 Contrato principal confirmado:
 
 ```http
+GET /admin/news/:id
 PATCH /admin/news/:id
 ```
 
 Leitura importante:
 
 - a mutação de edição está confirmada
-- `GET /admin/news/:id` passa a ser tratado como evolução prioritária do domínio
-- porém, a leitura dedicada por `id` ainda não está reconciliada como superfície canônica publicada no runtime atual
+- `GET /admin/news/:id` está publicado e reconciliado como superfície canônica no runtime PROD
+- o detalhe administrativo expõe `content` para hidratar a edição
+- a Auth API PROD real está na AWS Lightsail e foi atualizada para o commit `728299e`
 
 Uso correto no checkpoint atual:
 
-- não tornar a tela dependente de um `GET /admin/news/:id` ainda não reconciliado
-- preferir hidratação a partir de cache de listagem, estado roteado ou resultado da criação
-- só promover leitura dedicada quando o endpoint existir, for documentado e estiver validado no runtime
+- tornar `GET /admin/news/:id` a fonte primária da tela `/news/:id/edit`
+- manter refresh direto em `/news/:id/edit` funcional
+- manter deep link ou abertura em nova aba funcional
+- não depender de cache da listagem, `editableDrafts` ou estado roteado como fonte primária de `content`
 
 ### 4. Publish e unpublish
 
@@ -282,6 +312,7 @@ features/news/data-access/news-admin-api.service.ts
 Operações recomendadas:
 
 - `list()`
+- `detail(id)`
 - `create(payload)`
 - `update(id, payload)`
 - `publish(id)`
@@ -322,8 +353,8 @@ Regra importante:
 Escolher uma das abordagens abaixo:
 
 - navegar para `/news` e revalidar a lista
-- navegar para `/news/:id/edit` usando o `id` retornado
-- manter o item recém-criado em estado local e depois reconciliar com listagem
+- navegar para `/news/:id/edit` usando o `id` retornado e carregar detalhe por `GET /admin/news/:id`
+- manter o item recém-criado em estado local apenas como otimização visual, não como fonte primária de edição
 
 ### Após patch
 
@@ -370,8 +401,7 @@ A fonte de verdade do contrato novo deve ser explicitada.
 
 Exemplos:
 
-- `GET /admin/news/:id` → `05-backoffice-admin`
-- este contrato passa a ser tratado como evolução prioritária do domínio `news`
+- `GET /admin/news/:id` → `05-backoffice-admin`, já reconciliado como contrato admin real
 - `GET /content/news/:slug` → Auth API como fonte canônica de conteúdo
 - `/content/news/<slug>/` → Portal/Nginx como mirror same-origin
 
@@ -438,7 +468,6 @@ Antes de considerar um novo contrato saudável, validar:
 
 Este documento deve ser expandido quando houver:
 
-- publicação e validação de runtime de `GET /admin/news/:id`
 - suporte confirmado para `excerpt`
 - suporte confirmado para `image_url`
 - validação explícita de erro para slug duplicado
@@ -453,7 +482,7 @@ Este documento deve ser expandido quando houver:
 Os principais anti-padrões para este domínio são:
 
 - usar o mirror same-origin do Portal como contrato admin
-- assumir `GET /admin/news/:id` como disponível antes de publicação e validação de runtime
+- usar cache/listagem/`editableDrafts` como fonte primária de edição depois da publicação de `GET /admin/news/:id`
 - transformar publish/unpublish em patch genérico de status
 - inventar shape de erro não validado
 - misturar contrato público e contrato administrativo no mesmo tipo frontend
@@ -468,7 +497,8 @@ A leitura correta do checkpoint atual é:
 
 - o domínio `news` já pode sustentar a primeira feature administrativa real do Backoffice
 - o contrato mínimo já é pequeno, estável e suficiente
-- a principal disciplina agora não é “imaginar mais endpoints”, e sim evoluir o domínio sem perder a fronteira entre admin, conteúdo canônico e mirror público
+- a edição administrativa deve carregar detalhe por `GET /admin/news/:id`
+- a principal disciplina agora é evoluir o domínio sem perder a fronteira entre admin, conteúdo canônico e mirror público
 
 ---
 
@@ -490,4 +520,4 @@ Este documento está saudável quando:
 - Classificação: canônico
 - Contexto: `05-backoffice-admin`
 - Domínio: `news`
-- Última revisão: 2026-03-25
+- Última revisão: 2026-05-04
