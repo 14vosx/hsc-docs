@@ -98,9 +98,10 @@ O estado operacional reconciliado desta camada inclui:
 
 **Superfícies da API e Integração**
 - superfícies públicas de conteúdo ativas (`health`, `content/news`, `content/seasons`);
-- superfícies administrativas protegidas funcionais, incluindo `admin/schema`, mutações de `news` e `seasons`, e leitura/criação admin de `seasons`;
+- superfícies administrativas protegidas funcionais, incluindo `admin/schema`, mutações de `news` e `seasons`, e leitura/criação/edição admin de `seasons`;
 - leitura administrativa de Seasons disponível por `GET /admin/seasons` e `GET /admin/seasons/:slug`;
 - criação administrativa de Seasons em `draft` disponível por `POST /admin/seasons`;
+- edição administrativa de Seasons disponível por `PATCH /admin/seasons/:slug`;
 - **CRUD administrativo básico de usuários publicado e funcional**, expondo:
   - `GET /admin/users`
   - `POST /admin/users`
@@ -299,6 +300,7 @@ Superfícies administrativas relevantes no estado atual:
 - `GET /admin/seasons`
 - `GET /admin/seasons/:slug`
 - `POST /admin/seasons`
+- `PATCH /admin/seasons/:slug`
 - `GET /auth/session`
 - `POST /auth/magic-link/request`
 - `GET /auth/magic-link/consume`
@@ -314,6 +316,7 @@ Nota operacional de Seasons:
 - `GET /admin/seasons` lista Seasons para consumo administrativo do Backoffice
 - `GET /admin/seasons/:slug` retorna o detalhe administrativo por `slug`
 - `POST /admin/seasons` cria Season administrativa em estado `draft`, consumida pelo Backoffice em `/seasons/new`
+- `PATCH /admin/seasons/:slug` atualiza metadados editáveis de Season, consumido pelo Backoffice em `/seasons/:slug/edit`
 - a configuração `mysql2` com `timezone: "Z"` mantém o tráfego do backend em UTC e evita deslocamento indevido ao ler `DATETIME`
 - a apresentação para o operador fica a cargo da UI em horário local do navegador, com `America/Sao_Paulo` como referência humana usual do HSC quando for necessário explicitar timezone
 

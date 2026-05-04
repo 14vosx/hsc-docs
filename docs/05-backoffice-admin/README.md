@@ -90,11 +90,13 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
 - `GET /admin/news/:id` já é superfície admin real, publicada e reconciliada para edição
 - a edição de News usa detalhe administrativo com `content` como fonte primária
 - o lifecycle PROD de News já foi validado para edição, refresh/deep link, publish, unpublish e delete
-- `seasons` já possui listagem administrativa inicial funcional em `/seasons`
+- `seasons` já possui listagem administrativa funcional em `/seasons`
 - `seasons` já possui criação administrativa funcional em `/seasons/new`
+- `seasons` já possui edição administrativa funcional em `/seasons/:slug/edit`
 - a leitura admin canônica de Seasons já está disponível na Auth API por `GET /admin/seasons` e `GET /admin/seasons/:slug`
 - a criação admin de Seasons já está disponível por `POST /admin/seasons`, criando registros em `draft`
-- lifecycle de Seasons ainda não está implementado na UI do Backoffice
+- a edição admin de Seasons já está disponível por `PATCH /admin/seasons/:slug`, sem alterar `slug`
+- activate e close de Seasons ainda não estão implementados na UI do Backoffice
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais
 - o contexto já não deve ser tratado como “pré-implementação pura”
 
@@ -244,7 +246,7 @@ A ordem recomendada de leitura é:
 A próxima fase natural deste contexto é:
 
 - expandir implementação administrativa por domínio
-- evoluir lifecycle administrativo de `seasons` na UI sem tratar listagem e criação atual como CRUD completo
+- evoluir lifecycle administrativo de `seasons` na UI sem tratar listagem, criação e edição atual como lifecycle completo
 - consolidar leituras administrativas canônicas de `events`
 - amadurecer superfícies e lifecycle de `events`
 - manter auth, guards e callback publicados como espinha dorsal estável

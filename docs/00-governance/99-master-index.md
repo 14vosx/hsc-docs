@@ -74,7 +74,7 @@ Leitura correta do estado atual:
 - o repositório já pode ser tratado como **base canônica viva**
 - a maior parte das pendências críticas de realidade operacional dos contextos de infraestrutura já foi fechada
 - o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
-- Seasons já possui listagem administrativa inicial e criação em `draft` funcionais no Backoffice, com leitura e criação admin canônicas disponíveis na Auth API
+- Seasons já possui listagem administrativa, criação em `draft` e edição de metadados funcionais no Backoffice, com leitura, criação e edição admin canônicas disponíveis na Auth API
 - o contexto `02-game-panel` agora também possui trilha administrativa explícita, com autoridade centralizada no CounterStrikeSharp e runbooks próprios de manutenção
 - o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e evolução sustentável das superfícies administrativas**
 
@@ -300,10 +300,11 @@ Leitura sintética:
 - shell administrativo, auth frontend e contratos iniciais já existem
 - News já possui ciclo PROD validado atravessando Backoffice Admin, Auth API, ETL Hostinger e Portal Estático
 - `GET /admin/news/:id` já é contrato admin real para edição com `content`
-- Seasons já possui listagem administrativa inicial em `/seasons`
+- Seasons já possui listagem administrativa em `/seasons`
 - Seasons já possui criação administrativa em `draft` por `/seasons/new`
-- `GET /admin/seasons`, `GET /admin/seasons/:slug` e `POST /admin/seasons` já são contratos admin reais consumidos pelo Backoffice
-- edit, lifecycle, ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin
+- Seasons já possui edição administrativa de metadados por `/seasons/:slug/edit`
+- `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons` e `PATCH /admin/seasons/:slug` já são contratos admin reais consumidos pelo Backoffice
+- activate, close, ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---
