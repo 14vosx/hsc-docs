@@ -43,6 +43,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
   - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
   - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
   - [Seasons Admin Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
+  - [Backoffice UI Material Foundation](../05-backoffice-admin/backoffice-ui-material-foundation.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
@@ -215,6 +216,7 @@ Arquivos principais:
 - [News Admin Frontend Implementation Runtime](../05-backoffice-admin/news-admin-frontend-implementation-runtime.md)
 - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
 - [Seasons Admin Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
+- [Backoffice UI Material Foundation](../05-backoffice-admin/backoffice-ui-material-foundation.md)
 - [Auth, RBAC and Guards](../05-backoffice-admin/auth-rbac-and-guards.md)
 - [Backoffice Admin Architecture Runtime](../05-backoffice-admin/backoffice-admin-architecture-runtime.md)
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
@@ -305,6 +307,8 @@ Leitura sintética:
 - Seasons já possui edição administrativa de metadados por `/seasons/:slug/edit`
 - Seasons já possui ações administrativas de lifecycle em `/seasons` para ativar e fechar
 - `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já são contratos admin reais consumidos pelo Backoffice
+- Backoffice já possui fundação UI Material para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
+- dark mode, toggle de tema, design system completo e padronização visual total permanecem como lacunas futuras
 - ranking, partidas por season, Portal e ETL seguem como lacunas futuras de Seasons/Admin
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 

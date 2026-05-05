@@ -33,6 +33,7 @@ Este documento existe para:
 - [News Admin Frontend Implementation Runtime](./news-admin-frontend-implementation-runtime.md)
 - [News Functional Smoke Guide](./news-functional-smoke-guide.md)
 - [Seasons Admin Functional Smoke Guide](./seasons-admin-list-functional-smoke-guide.md)
+- [Backoffice UI Material Foundation](./backoffice-ui-material-foundation.md)
 - [Operational Runbooks](./backoffice-admin-operational-runbooks.md)
 - [References and Inventory](./backoffice-admin-references-inventory.md)
 
@@ -98,6 +99,8 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
 - a criação admin de Seasons já está disponível por `POST /admin/seasons`, criando registros em `draft`
 - a edição admin de Seasons já está disponível por `PATCH /admin/seasons/:slug`, sem alterar `slug`
 - activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
+- o Backoffice já possui fundação UI Material compartilhada para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
+- dark mode, toggle de tema, design system completo e padronização visual total do Backoffice ainda não devem ser tratados como implementados
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais
 - o contexto já não deve ser tratado como “pré-implementação pura”
 
@@ -215,6 +218,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 - `docs/05-backoffice-admin/news-functional-smoke-guide.md`
 - `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
+- `docs/05-backoffice-admin/backoffice-ui-material-foundation.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -237,8 +241,9 @@ A ordem recomendada de leitura é:
 9. `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 10. `docs/05-backoffice-admin/news-functional-smoke-guide.md`
 11. `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
-12. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
-13. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
+12. `docs/05-backoffice-admin/backoffice-ui-material-foundation.md`
+13. `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
+14. `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
 ---
 
