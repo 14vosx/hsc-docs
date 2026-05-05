@@ -91,6 +91,8 @@ O estado atual conhecido do contexto é:
 - a criação admin canônica de Seasons já está disponível no backend por `POST /admin/seasons`
 - a edição admin canônica de Seasons já está disponível no backend por `PATCH /admin/seasons/:slug`
 - activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
+- a fundação UI Material compartilhada já existe em `src/app/shared/ui` para feedback, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
+- dark mode, toggle de tema, design system completo e padronização visual total ainda permanecem como lacunas futuras
 - parte importante da auth base já está reconciliada com runtime real
 - parte da expansão de domínio ainda depende de evolução incremental de contrato e implementação
 
@@ -117,6 +119,7 @@ Os documentos canônicos diretos de `05-backoffice-admin` são:
 - `docs/05-backoffice-admin/news-admin-feature-implementation-spec.md`
 - `docs/05-backoffice-admin/news-admin-frontend-implementation-runtime.md`
 - `docs/05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md`
+- `docs/05-backoffice-admin/backoffice-ui-material-foundation.md`
 - `docs/05-backoffice-admin/backoffice-admin-operational-runbooks.md`
 - `docs/05-backoffice-admin/backoffice-admin-references-inventory.md`
 
@@ -132,6 +135,7 @@ Leitura recomendada:
 - `news-admin-feature-implementation-spec.md` traduz o domínio reconciliado em feature implementável no frontend
 - `news-admin-frontend-implementation-runtime.md` registra a implementação real materializada no frontend
 - `seasons-admin-list-functional-smoke-guide.md` registra a administração funcional de `seasons`, seus contratos de leitura/criação/edição/lifecycle e o smoke funcional
+- `backoffice-ui-material-foundation.md` registra a fundação transversal de UI Material para feedback, confirmação e input simples, incluindo lacunas explícitas de tema e padronização visual
 - `operational-runbooks.md` define validação e troubleshooting
 - este arquivo consolida o inventário de referência e dependência
 
@@ -318,6 +322,8 @@ Papel:
 - componentes transversais
 - tabela e formulário base
 - feedback visual
+- feedback transitório e persistente com base Material
+- confirmação e input simples padronizados
 - helpers utilitários
 - tipos neutros
 
