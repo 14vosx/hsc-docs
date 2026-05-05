@@ -186,6 +186,8 @@ Lacuna conhecida:
 Estado implementado:
 
 - SCSS de `news` e `seasons` trocou cores hardcoded por tokens Material/CSS variables no escopo migrado
+- SCSS de Core layout, Auth e Dashboard também trocou cores hardcoded por tokens Material/CSS variables no escopo auditado da fatia `#17`
+- a auditoria restrita de Core/Auth/Dashboard/Users não apontou cores hardcoded residuais após a fatia `#17`
 - essa troca reduz risco para uma evolução futura de tema
 
 Estado não implementado:
@@ -193,7 +195,7 @@ Estado não implementado:
 - dark mode ainda não está implementado
 - não há toggle de tema
 - não há design system completo
-- Core/Auth/Dashboard/Users ainda possuem dívida de cores hardcoded em SCSS
+- a migração total para Angular Material ainda não está concluída
 
 Regra importante:
 
@@ -206,15 +208,13 @@ Regra importante:
 
 As lacunas conhecidas desta etapa são:
 
-- Core layout ainda tem cores hardcoded
-- Auth ainda tem cores hardcoded
-- Dashboard ainda tem cores hardcoded
 - Users ainda não teve padronização visual completa de layout/form/list
 - dark mode completo ainda não existe
 - não há toggle de tema
 - não há design system completo
 - a migração total para Angular Material ainda não deve ser tratada como concluída
 - o redesign global do Backoffice ainda não deve ser tratado como concluído
+- validação visual futura ainda é necessária antes de ativar dark mode ou toggle de tema
 
 Essas lacunas devem permanecer documentadas como dívida futura até haver evidência explícita de implementação.
 
@@ -229,7 +229,7 @@ A fundação UI Material atual pode ser considerada pronta no escopo documentado
 - feedback persistente de `news` e `seasons` está centralizado com `PageFeedbackComponent`
 - confirmações sensíveis de `news`, `seasons` e `users` usam `ConfirmationService`
 - inputs administrativos simples já migrados usam `InputDialogService`
-- SCSS de `news` e `seasons` usa tokens Material/CSS variables no escopo migrado
+- SCSS de `news`, `seasons`, Core layout, Auth e Dashboard usa tokens Material/CSS variables nos escopos já auditados/migrados
 
 Leitura correta:
 
