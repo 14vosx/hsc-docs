@@ -186,6 +186,10 @@ Lacuna conhecida:
 Estado implementado:
 
 - o tema global usa `@use '@angular/material' as mat;` e `@include mat.theme(...)` em `src/styles.scss`
+- existe `ThemeService` em `src/app/core/theme`
+- a inicialização global do tema usa `provideAppInitializer`
+- o serviço aplica a classe `theme-light` em `document.documentElement`
+- `src/styles.scss` declara `html.theme-light { color-scheme: light; }`
 - SCSS de `news` e `seasons` trocou cores hardcoded por tokens Material/CSS variables no escopo migrado
 - SCSS de Core layout, Auth e Dashboard também trocou cores hardcoded por tokens Material/CSS variables no escopo auditado da fatia `#17`
 - a auditoria restrita de Core/Auth/Dashboard/Users não apontou cores hardcoded residuais após a fatia `#17`
@@ -195,9 +199,9 @@ Estado não implementado:
 
 - dark mode ainda não está implementado
 - não há toggle de tema
-- não há `ThemeService`
 - não há persistência de preferência de tema em `localStorage`
-- não há classe global `theme-light`, `theme-dark` ou equivalente
+- não há classe funcional `theme-dark`
+- não há `color-scheme: light dark`
 - não há design system completo
 - a migração total para Angular Material ainda não está concluída
 
@@ -223,10 +227,19 @@ Diretrizes:
 
 Infraestrutura futura provável:
 
-- classe global controlada no `html` ou `body`, por exemplo `theme-light`, `theme-dark` e eventualmente `theme-system`
-- serviço dedicado para centralizar decisão de tema, aplicação de classe global e integração futura com preferência do usuário
+Infraestrutura mínima já existente:
+
+- `ThemeService` centraliza a aplicação inicial do tema
+- `theme-light` é aplicado globalmente no `html`
+- a inicialização global usa `provideAppInitializer`
+- o app permanece com `color-scheme: light` como comportamento default
+
+Evolução futura ainda pendente:
+
+- suporte funcional a `theme-dark`
+- opção futura `theme-system`, se houver decisão explícita para isso
 - toggle explícito no shell/header somente depois de base visual majoritariamente tokenizada, validação visual das telas principais e definição de persistência
-- persistência em `localStorage` somente quando houver `ThemeService`/toggle ou decisão explícita de override de preferência
+- persistência em `localStorage` somente quando houver toggle ou decisão explícita de override de preferência
 
 Telas mínimas para validação visual futura:
 
@@ -254,7 +267,8 @@ As lacunas conhecidas desta etapa são:
 - Users ainda não teve padronização visual completa de layout/form/list
 - dark mode completo ainda não existe
 - não há toggle de tema
-- não há decisão implementada de infraestrutura de tema
+- não há persistência de preferência de tema
+- não há suporte funcional a `theme-dark`
 - não há design system completo
 - a migração total para Angular Material ainda não deve ser tratada como concluída
 - o redesign global do Backoffice ainda não deve ser tratado como concluído
