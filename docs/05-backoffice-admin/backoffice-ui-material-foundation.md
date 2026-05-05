@@ -185,6 +185,7 @@ Lacuna conhecida:
 
 Estado implementado:
 
+- o tema global usa `@use '@angular/material' as mat;` e `@include mat.theme(...)` em `src/styles.scss`
 - SCSS de `news` e `seasons` trocou cores hardcoded por tokens Material/CSS variables no escopo migrado
 - SCSS de Core layout, Auth e Dashboard também trocou cores hardcoded por tokens Material/CSS variables no escopo auditado da fatia `#17`
 - a auditoria restrita de Core/Auth/Dashboard/Users não apontou cores hardcoded residuais após a fatia `#17`
@@ -194,6 +195,9 @@ Estado não implementado:
 
 - dark mode ainda não está implementado
 - não há toggle de tema
+- não há `ThemeService`
+- não há persistência de preferência de tema em `localStorage`
+- não há classe global `theme-light`, `theme-dark` ou equivalente
 - não há design system completo
 - a migração total para Angular Material ainda não está concluída
 
@@ -204,6 +208,45 @@ Regra importante:
 
 ---
 
+## Estratégia futura de tema e dark mode
+
+A estratégia oficial de tema do Backoffice deve continuar baseada em `mat.theme()` e nas CSS variables geradas pelo Angular Material.
+
+Diretrizes:
+
+- `mat.theme()` é a fonte oficial dos tokens Material globais
+- componentes devem preferir `var(--mat-sys-*)` em vez de criar um sistema paralelo de tokens de tema
+- não criar design system próprio completo nesta etapa
+- o app permanece com `color-scheme: light` como comportamento default até validação visual
+- dark mode deve ser tratado como evolução controlada, não como simples troca imediata de `color-scheme`
+- não ativar `color-scheme: light dark` sem validação visual das telas principais
+
+Infraestrutura futura provável:
+
+- classe global controlada no `html` ou `body`, por exemplo `theme-light`, `theme-dark` e eventualmente `theme-system`
+- serviço dedicado para centralizar decisão de tema, aplicação de classe global e integração futura com preferência do usuário
+- toggle explícito no shell/header somente depois de base visual majoritariamente tokenizada, validação visual das telas principais e definição de persistência
+- persistência em `localStorage` somente quando houver `ThemeService`/toggle ou decisão explícita de override de preferência
+
+Telas mínimas para validação visual futura:
+
+- `/login`
+- `/dashboard`
+- `/news`
+- `/news/new`
+- `/seasons`
+- `/seasons/new`
+- `/users`
+
+Leitura correta:
+
+- dark mode não está implementado
+- toggle de tema não está implementado
+- persistência de preferência de tema não está implementada
+- a estratégia acima orienta evolução futura, não estado entregue
+
+---
+
 ## Lacunas explícitas
 
 As lacunas conhecidas desta etapa são:
@@ -211,6 +254,7 @@ As lacunas conhecidas desta etapa são:
 - Users ainda não teve padronização visual completa de layout/form/list
 - dark mode completo ainda não existe
 - não há toggle de tema
+- não há decisão implementada de infraestrutura de tema
 - não há design system completo
 - a migração total para Angular Material ainda não deve ser tratada como concluída
 - o redesign global do Backoffice ainda não deve ser tratado como concluído
