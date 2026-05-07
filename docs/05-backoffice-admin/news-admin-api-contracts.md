@@ -300,7 +300,7 @@ Resposta observada:
 
 ### Campos esperados por item
 
-Com base nas respostas reconciliadas, cada item administrativo tende a expor:
+Com base nas respostas reconciliadas, cada item administrativo expõe `excerpt` e `image_url`:
 
 ```json
 {
@@ -416,8 +416,9 @@ Status validado:
 * o endpoint não altera estado do recurso
 * o endpoint deve refletir o estado administrativo atual do item
 * `content` deve estar disponível no detalhe administrativo
-* este contrato não promove nova mutabilidade de `slug`, `excerpt` ou `image_url`
-* este contrato não altera o shape reconciliado de `PATCH /admin/news/:id`
+* `image_url` deve estar disponível no detalhe administrativo
+* este contrato não promove nova mutabilidade de `slug` ou `excerpt`
+* `PATCH /admin/news/:id` aceita `image_url`, incluindo `image_url: null` para limpar imagem
 
 ### Leitura correta
 
@@ -441,13 +442,17 @@ POST /admin/news
 
 Criar um novo item de `news` em estado inicial de draft.
 
-### Body mínimo confirmado
+### Body confirmado
 
 A validação observada no runtime confirmou que os campos mínimos obrigatórios são:
 
 - `slug`
 - `title`
 - `content`
+
+Campo opcional confirmado:
+
+- `image_url`
 
 Exemplo mínimo válido:
 
@@ -456,6 +461,17 @@ Exemplo mínimo válido:
   "slug": "news-crud-smoke-20260325",
   "title": "News CRUD Smoke 2026-03-25",
   "content": "Primeiro draft de teste do fluxo news."
+}
+```
+
+Exemplo com imagem:
+
+```json
+{
+  "slug": "news-crud-smoke-20260325",
+  "title": "News CRUD Smoke 2026-03-25",
+  "content": "Primeiro draft de teste do fluxo news.",
+  "image_url": "http://127.0.0.1:3000/uploads/news-smoke.png"
 }
 ```
 
@@ -500,6 +516,7 @@ Status observado:
 
 - a criação mínima confirmada ainda não exige `excerpt`
 - a criação mínima confirmada ainda não exige `image_url`
+- `POST /admin/news` aceita `image_url` quando informado
 - o backend já devolve `status: "draft"` imediatamente após a criação
 - o frontend deve tratar essa resposta como sucesso suficiente para redirecionar, revalidar lista ou abrir edição
 
@@ -523,13 +540,23 @@ Os seguintes campos foram confirmados no runtime:
 
 - `title`
 - `content`
+- `image_url`
 
 Exemplo observado:
 
 ```json
 {
   "title": "News CRUD Smoke 2026-03-25 Atualizada",
-  "content": "Draft atualizado no teste completo de CRUD do recurso news."
+  "content": "Draft atualizado no teste completo de CRUD do recurso news.",
+  "image_url": "http://127.0.0.1:3000/uploads/news-smoke.png"
+}
+```
+
+Limpeza de imagem:
+
+```json
+{
+  "image_url": null
 }
 ```
 
@@ -561,6 +588,8 @@ Status observado:
 - o recurso permaneceu em `draft` após edição
 - `published_at` permaneceu `null`
 - o retorno da mutação já contém shape administrativo suficiente para atualizar tabela, cache local ou estado do formulário
+- `image_url: null` limpa a imagem da notícia
+- URL vazia ou apenas whitespace deve ser normalizada pelo Backoffice para `null`
 
 ### Campos ainda não confirmados nesta revisão
 
@@ -568,7 +597,6 @@ Ainda não houve validação runtime explícita, neste checkpoint, para update d
 
 - `slug`
 - `excerpt`
-- `image_url`
 
 Leitura canônica atual:
 
@@ -839,6 +867,10 @@ Com body mínimo confirmado:
 - `title`
 - `content`
 
+Campo opcional confirmado:
+
+- `image_url`
+
 Após sucesso, o frontend pode:
 
 - revalidar `GET /admin/news`
@@ -857,13 +889,27 @@ PATCH /admin/news/:id
 Leitura correta do estado atual:
 
 * `GET /admin/news/:id` é superfície publicada e reconciliada no runtime PROD
-* a tela `/news/:id/edit` deve carregar o detalhe completo por `id`, incluindo `content`
+* a tela `/news/:id/edit` deve carregar o detalhe completo por `id`, incluindo `content` e `image_url`
 * refresh direto na rota e deep link em nova aba devem funcionar sem depender de cache/listagem local
 
 Mutações de edição devem continuar usando:
 
 ```http
 PATCH /admin/news/:id
+```
+
+Campos mutáveis confirmados:
+
+- `title`
+- `content`
+- `image_url`
+
+Para limpar imagem, enviar:
+
+```json
+{
+  "image_url": null
+}
 ```
 
 Estratégias antigas removidas:
@@ -942,8 +988,9 @@ Os seguintes pontos continuam abertos ou parcialmente confirmados:
 Ainda não foi validado no runtime, neste checkpoint, o comportamento exato de:
 
 - `excerpt`
-- `image_url`
 - alteração de `slug`
+
+`image_url` já foi reconciliado como campo mutável de News. A limpeza usa `image_url: null`.
 
 ### 2. Paginação, ordenação e filtros
 

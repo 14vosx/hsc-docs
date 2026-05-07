@@ -60,7 +60,7 @@ Este documento não cobre em profundidade:
 - detalhes internos de backend, SQL ou migrations
 - design system final, refinamento visual ou acessibilidade aprofundada
 - paginação administrativa, filtros avançados, busca textual ou rich text editor
-- futuras expansões de `excerpt`, `image_url` ou mutabilidade de `slug`
+- futuras expansões de `excerpt` ou mutabilidade de `slug`
 
 Esses tópicos vivem em documentos adjacentes ou permanecem fora do escopo do checkpoint atual.
 
@@ -137,6 +137,10 @@ As seguintes ações já estão materializadas no frontend:
 - listar itens administrativos
 - criar draft
 - editar `title` e `content`
+- editar `image_url`
+- enviar upload de imagem por `POST /admin/uploads`
+- visualizar preview da imagem
+- limpar imagem
 - publicar
 - despublicar
 - remover
@@ -148,10 +152,8 @@ A implementação não materializa, neste checkpoint:
 - filtros
 - ordenação explícita configurável
 - busca textual server-side
-- upload de imagem
 - mutação forte de `slug`
 - edição de `excerpt`
-- edição de `image_url`
 
 ---
 
@@ -239,6 +241,7 @@ PATCH  /admin/news/:id
 POST   /admin/news/:id/publish
 POST   /admin/news/:id/unpublish
 DELETE /admin/news/:id
+POST   /admin/uploads
 ```
 
 Invariantes adotados na implementação:
@@ -248,6 +251,7 @@ Invariantes adotados na implementação:
 * a UI não espalha endpoints diretamente em componentes de página
 * publish e unpublish permanecem mutações explícitas, não patch de `status`
 * a edição carrega `content` via detalhe administrativo por `id`
+* o upload de imagem usa `FormData` em `POST /admin/uploads` com `withCredentials: true`
 
 ---
 
@@ -272,12 +276,37 @@ Leitura importante:
 
 * `AdminNewsListItem` representa a leitura administrativa de lista
 * `AdminNewsDetailItem` representa a leitura administrativa completa com `content`
-* `NewsFormValue` representa o formulário mínimo do domínio no frontend
-* `UpdateNewsPayload` permanece limitado a `title` e `content`, em linha com o checkpoint canônico atual
+* `NewsFormValue` inclui `image_url`
+* `CreateNewsPayload` envia `image_url`
+* `UpdateNewsPayload` permite `image_url?: string | null`
 
 Regra importante:
 
-* a implementação não promove `slug`, `excerpt` ou `image_url` como payload mutável forte do MVP
+* a implementação promove `image_url` como campo mutável reconciliado de News
+* `image_url: null` limpa a imagem da notícia
+* a implementação não promove `slug` ou `excerpt` como payload mutável forte do MVP
+
+### Upload de imagem
+
+A integração materializada usa serviço dedicado:
+
+```text
+NewsImageUploadApiService
+```
+
+Comportamento confirmado no Backoffice:
+
+* o serviço envia `FormData` para `POST /admin/uploads` com `withCredentials: true`
+* o formulário exibe campo de URL da imagem
+* o operador pode enviar upload de `image/jpeg`, `image/png` ou `image/webp`
+* o formulário exibe preview quando há URL de imagem
+* a ação de limpar imagem persiste `image_url: null`
+* URL vazia ou apenas whitespace é normalizada para `null`
+* arquivo inválido mostra erro local antes de persistência funcional
+
+Validação:
+
+* smoke manual local validou criar draft com upload, preview, edição, limpeza de imagem e arquivo inválido
 
 ---
 
@@ -578,6 +607,7 @@ Neste checkpoint, está confirmado que:
 * a integração administrativa principal do domínio está operando no frontend
 * o MVP PROD já é operacional para o lifecycle completo do recurso
 * a solução implementada para edição usa a leitura dedicada por `id` reconciliada
+* a integração visual de `image_url` em News foi validada em smoke manual local
 
 ---
 
@@ -587,7 +617,6 @@ Este documento deliberadamente não promove como verdade canônica consolidada:
 
 * mutabilidade de `slug`
 * mutabilidade de `excerpt`
-* mutabilidade de `image_url`
 * paginação administrativa
 * filtros administrativos
 * busca textual administrativa
