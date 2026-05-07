@@ -230,7 +230,7 @@ Uso previsto:
 
 Ainda pendente:
 
-- materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e auditoria do Portal como consumidor visual quando aplicável.
+- materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e validação visual pública do Portal com dados reais quando aplicável.
 
 Este endpoint não altera `news`, `seasons` ou qualquer entidade funcional diretamente.
 
@@ -354,7 +354,8 @@ Regra importante:
 - `cover_image_url: null` limpa a capa da Season.
 - Seasons `closed` continuam read-only no Backoffice e não devem permitir upload ou limpeza pela UI.
 - O código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nos JSONs estáticos de Seasons da Static API v2.
-- Seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa.
+- O Portal Angular já está source-ready para consumir esse campo: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou.
+- Seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais.
 
 ## Auth — introspecção de sessão
 

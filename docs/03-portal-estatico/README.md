@@ -107,8 +107,10 @@ O estado operacional conhecido deste contexto é:
 - o repositório ETL agora possui CI mínima de shell via GitHub Actions
 - esse gate cobre `bin/*.sh` e `scripts/*.sh` com `bash -n` e `shellcheck -S warning`
 - a fonte ETL versionada já propaga `cover_image_url` de Seasons para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
+- o Portal Angular já está source-ready para consumir `cover_image_url`: `SeasonDto` tipa o campo, `seasonCoverImage(...)` o prioriza, e cards/heróis de Seasons e Ranking usam `--season-cover`
+- `npm run build` do Portal Angular passou; houve apenas warnings de CSS budget já existentes/não bloqueantes
 - essa propagação foi validada apenas localmente em diretórios temporários, sem tocar `/var/www` e sem rodar produção
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais
 
 A arquitetura do Portal Estático existe para entregar:
 

@@ -681,7 +681,8 @@ Limites:
 - não rodou produção
 - não substitui a materialização runtime/prod do ETL atualizado
 - não substitui a validação pública real em `/api/cs2/v2/...`
-- não prova que o Portal já exibe visualmente a capa
+- não prova que o Portal já exibe visualmente a capa em produção com dados reais
+- auditoria posterior do Portal Angular confirmou source-ready: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
 
 ---
 
