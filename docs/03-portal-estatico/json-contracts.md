@@ -46,7 +46,7 @@ Este documento cobre:
 
 - os princípios gerais dos contratos JSON da v2
 - os artefatos públicos principais da Static API v2
-- os contratos macro de `health.json`, `ranking.json`, `matches.json`, `match/{id}.json`, `maps.json`, `map/{map}.json`, `player/{steamid64}.json` e `steam-cache/{steamid64}.json`
+- os contratos macro de `health.json`, `ranking.json`, `matches.json`, `match/{id}.json`, `maps.json`, `map/{map}.json`, `player/{steamid64}.json`, `steam-cache/{steamid64}.json`, `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
 - os campos derivados e enriquecimentos conhecidos em alto nível
 - as regras de compatibilidade entre ETL, publicação e frontend
 - as validações mínimas esperadas dos contratos
@@ -75,6 +75,7 @@ O estado operacional conhecido dos contratos JSON da v2 é:
 - a publicação final é servida por Nginx
 - a compatibilidade dos contratos é crítica para o funcionamento do portal
 - a v2 é a versão canônica atual da API estática
+- os contratos estáticos de Seasons já incluem `cover_image_url` na fonte ETL versionada, com materialização runtime/prod e validação pública real ainda pendentes
 
 A integridade do portal depende não apenas da existência dos arquivos, mas também da estabilidade semântica desses contratos.
 
@@ -145,12 +146,15 @@ Os contratos da v2 se dividem, conceitualmente, em quatro grupos:
 - `ranking.json`
 - `matches.json`
 - `maps.json`
+- `seasons.json`
 
 ### 3. Recursos públicos de detalhe
 
 - `match/{id}.json`
 - `map/{map}.json`
 - `player/{steamid64}.json`
+- `season/{slug}.json`
+- `season/{slug}/ranking.json`
 
 ### 4. Recursos auxiliares de enriquecimento
 
@@ -253,6 +257,41 @@ Em nível macro, `matches.json` deve conter:
 - `match/{id}.json`
 - a ordenação pública esperada da coleção
 - a presença dos recursos de detalhe realmente publicados
+
+---
+
+## Contratos de Seasons
+
+### Papel
+
+Os contratos de Seasons expõem metadados públicos estáticos vindos de `${AUTH_BASE}/content/seasons`.
+
+### Recursos
+
+- `/api/cs2/v2/seasons.json`
+- `/api/cs2/v2/season/{slug}.json`
+- `/api/cs2/v2/season/{slug}/ranking.json`
+
+### Campo de capa
+
+- `seasons.json` inclui `cover_image_url` em cada Season
+- `season/{slug}.json` inclui `season.cover_image_url`
+- `season/{slug}/ranking.json` inclui `season.cover_image_url`
+- `null` significa sem capa
+
+Normalização no ETL:
+
+- campo ausente => `null`
+- `null` => `null`
+- string vazia/whitespace => `null`
+- valor preenchido => string trimada
+
+Evidência e limites:
+
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nesses três recursos
+- a validação registrada foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário
+- essa validação não tocou `/var/www` e não rodou produção
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
 
 ---
 

@@ -331,6 +331,29 @@ Papel:
 
 ---
 
+## `gen-seasons.sh`
+
+Papel:
+- gerar `seasons.json` a partir de `${AUTH_BASE}/content/seasons`
+- preservar `cover_image_url` em cada Season
+
+Normalização de `cover_image_url`:
+- campo ausente => `null`
+- `null` => `null`
+- string vazia/whitespace => `null`
+- valor preenchido => string trimada
+
+---
+
+## `gen-season-rankings.sh`
+
+Papel:
+- gerar `season/{slug}.json`
+- gerar `season/{slug}/ranking.json`
+- preservar `season.cover_image_url` nos dois artefatos
+
+---
+
 ## `gen-players-incremental.sh`
 
 Papel:
@@ -642,6 +665,23 @@ curl -I https://haxixesmokeclub.com/api/cs2/v2/health.json
 curl -I https://haxixesmokeclub.com/api/cs2/v2/ranking.json
 curl -I https://haxixesmokeclub.com/api/cs2/v2/matches.json
 ```
+
+### Validação local registrada para `cover_image_url` de Seasons
+
+A propagação de `cover_image_url` no código-fonte do ETL foi validada localmente em diretórios temporários, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário.
+
+Resultado registrado:
+
+```text
+OK cover_image_url propagated to seasons.json, season detail, and season ranking
+```
+
+Limites:
+- não tocou `/var/www`
+- não rodou produção
+- não substitui a materialização runtime/prod do ETL atualizado
+- não substitui a validação pública real em `/api/cs2/v2/...`
+- não prova que o Portal já exibe visualmente a capa
 
 ---
 

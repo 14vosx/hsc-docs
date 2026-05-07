@@ -230,7 +230,7 @@ Uso previsto:
 
 Ainda pendente:
 
-- propagação e consumo em Static API v2/Portal quando aplicável.
+- materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e auditoria do Portal como consumidor visual quando aplicável.
 
 Este endpoint não altera `news`, `seasons` ou qualquer entidade funcional diretamente.
 
@@ -353,7 +353,8 @@ Regra importante:
 
 - `cover_image_url: null` limpa a capa da Season.
 - Seasons `closed` continuam read-only no Backoffice e não devem permitir upload ou limpeza pela UI.
-- ETL/Static API v2 e Portal ainda precisam de reconciliação própria para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável.
+- O código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nos JSONs estáticos de Seasons da Static API v2.
+- Seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa.
 
 ## Auth — introspecção de sessão
 

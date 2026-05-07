@@ -51,7 +51,10 @@ Este guia não cobre:
 - associação automática de partidas à season
 - snapshot histórico ou hall of fame
 - consumo rico de Seasons no Portal público
-- geração ETL de ranking ou partidas por season
+- materialização runtime/prod do ETL atualizado para Seasons
+- validação pública real da Static API v2 para Seasons
+- auditoria do Portal como consumidor visual de capa de Season
+- geração ETL de ranking ou partidas por season além do contrato estático já documentado
 - monetização, billing ou regras comerciais
 
 ---
@@ -126,6 +129,8 @@ Observação sobre mutações:
 - `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` existem no contrato administrativo
 - `POST /admin/seasons` e `PATCH /admin/seasons/:slug` aceitam `cover_image_url`
 - `PATCH /admin/seasons/:slug` com `cover_image_url: null` limpa a capa
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nos JSONs estáticos de Seasons da Static API v2
+- a validação do ETL citada para essa propagação foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
 - este documento descreve a leitura admin, a listagem, a criação em `draft`, a edição inicial e o lifecycle básico no Backoffice
 - a UI atual expõe `POST /admin/seasons` pela rota `/seasons/new`
 - a UI atual expõe `PATCH /admin/seasons/:slug` pela rota `/seasons/:slug/edit`
@@ -654,12 +659,12 @@ Exemplo validado de edição:
 
 Lacunas futuras conhecidas:
 
-- não há ranking por season
+- não há administração visual de ranking por season no Backoffice neste guia
 - não há associação automática de partidas à season
 - não há snapshot histórico ou hall of fame
 - o Portal CS2 ainda não exibe visão rica de Season
-- o ETL ainda não gera ranking ou partidas por season
-- ETL/Static API v2 e Portal ainda estão pendentes para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável
+- o código-fonte do ETL já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a auditoria do Portal como consumidor visual da capa
 
 Regra importante:
 

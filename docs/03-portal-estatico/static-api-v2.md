@@ -202,6 +202,30 @@ Função:
 
 ---
 
+### `seasons.json`
+
+Função:
+- expor o catálogo público estático de Seasons vindo de `${AUTH_BASE}/content/seasons`
+- incluir `cover_image_url` para cada Season; `null` significa sem capa
+
+---
+
+### `season/{slug}.json`
+
+Função:
+- expor detalhe público estático de uma Season
+- incluir `season.cover_image_url`; `null` significa sem capa
+
+---
+
+### `season/{slug}/ranking.json`
+
+Função:
+- expor ranking público estático associado a uma Season
+- incluir `season.cover_image_url`; `null` significa sem capa
+
+---
+
 ### `map/{map}.json`
 
 Função:
@@ -243,6 +267,7 @@ Usado para:
 - `ranking.json`
 - `matches.json`
 - `maps.json`
+- `seasons.json`
 
 Usadas para:
 - carregar listas públicas
@@ -257,6 +282,8 @@ Usadas para:
 - `map/{map}.json`
 - `player/{steamid64}.json`
 - `steam-cache/{steamid64}.json`
+- `season/{slug}.json`
+- `season/{slug}/ranking.json`
 
 Usados para:
 - páginas de detalhe
@@ -328,6 +355,7 @@ A Static API v2 não é escrita manualmente.
 Ela é resultado do ETL Bash, que:
 
 - consulta a fonte SQLite
+- consulta `${AUTH_BASE}/content/seasons` para metadados públicos de Seasons
 - aplica queries e transformações
 - escreve artefatos intermediários
 - publica JSONs finais nos paths públicos da v2
@@ -339,6 +367,12 @@ Isso significa:
 - erro de permissionamento pode impedir a publicação da v2 mesmo com ETL logicamente correto
 
 A v2 é, portanto, inseparável da disciplina operacional do pipeline.
+
+Nota sobre Seasons:
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
+- a normalização documentada é: ausente => `null`, `null` => `null`, string vazia/whitespace => `null`, valor preenchido => string trimada
+- a validação registrada foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
 
 ---
 
