@@ -103,7 +103,8 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
 - o Backoffice News já integra visualmente upload de imagem por `POST /admin/uploads`, com campo de URL, upload, preview e limpeza de imagem validados em smoke manual local
 - a Auth API já possui contrato de `cover_image_url` para Seasons nas superfícies administrativas e públicas de Seasons
 - o Backoffice Seasons já integra visualmente upload de capa por `POST /admin/uploads`, com URL da capa, upload, preview e limpeza validados em smoke manual local
-- ETL/Static API v2 e Portal ainda estão pendentes para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para os JSONs estáticos de Seasons da Static API v2
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
 - o Backoffice já possui fundação UI Material compartilhada para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total do Backoffice ainda não devem ser tratados como implementados
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais

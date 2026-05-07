@@ -95,7 +95,8 @@ O estado atual conhecido do contexto é:
 - o formulário administrativo de News já integra upload visual de imagem, URL, preview e limpeza de `image_url`, com smoke manual local validado
 - o contrato de `cover_image_url` para Seasons já existe na Auth API
 - o formulário administrativo de Seasons já integra upload visual de capa, URL, preview e limpeza de `cover_image_url`, com smoke manual local validado
-- ETL/Static API v2 e Portal ainda estão pendentes para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para os JSONs estáticos de Seasons da Static API v2
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a auditoria do Portal como consumidor visual da capa
 - a fundação UI Material compartilhada já existe em `src/app/shared/ui` para feedback, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total ainda permanecem como lacunas futuras
 - parte importante da auth base já está reconciliada com runtime real
@@ -242,7 +243,7 @@ Papel desta referência:
 - registrar que `/seasons` já é página real do Backoffice
 - registrar que `/seasons/new` já cria Seasons em `draft`
 - preservar o smoke funcional local
-- distinguir a listagem implementada das lacunas de lifecycle, ranking, partidas, Portal e ETL
+- distinguir a administração implementada das lacunas de ranking, partidas, Portal e materialização runtime/prod do ETL atualizado
 
 ---
 
@@ -435,7 +436,8 @@ Status do domínio no contexto:
 - rota `/seasons/new` materializada como página funcional do Backoffice
 - rota `/seasons/:slug/edit` materializada como página funcional do Backoffice
 - ações `Ativar` e `Fechar` materializadas na listagem `/seasons`
-- ranking por season, partidas associadas, snapshot histórico, Portal, ETL e propagação de `cover_image_url` na Static API v2 seguem como lacunas futuras
+- o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json` da Static API v2
+- ranking por season, partidas associadas, snapshot histórico, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e auditoria do Portal como consumidor visual seguem como lacunas futuras
 
 ---
 

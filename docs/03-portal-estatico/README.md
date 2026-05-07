@@ -106,6 +106,9 @@ O estado operacional conhecido deste contexto é:
 - a materialização live dessa camada já foi validada via `systemd`
 - o repositório ETL agora possui CI mínima de shell via GitHub Actions
 - esse gate cobre `bin/*.sh` e `scripts/*.sh` com `bash -n` e `shellcheck -S warning`
+- a fonte ETL versionada já propaga `cover_image_url` de Seasons para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
+- essa propagação foi validada apenas localmente em diretórios temporários, sem tocar `/var/www` e sem rodar produção
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
 
 A arquitetura do Portal Estático existe para entregar:
 
