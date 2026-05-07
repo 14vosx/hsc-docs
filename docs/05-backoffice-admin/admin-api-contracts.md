@@ -226,7 +226,11 @@ Objetivo:
 Uso previsto:
 
 - `news.image_url`, já integrado visualmente no Backoffice News;
-- `seasons.cover_image_url`, ainda pendente de integração visual completa no Backoffice.
+- `seasons.cover_image_url`, já integrado visualmente no Backoffice Seasons.
+
+Ainda pendente:
+
+- propagação e consumo em Static API v2/Portal quando aplicável.
 
 Este endpoint não altera `news`, `seasons` ou qualquer entidade funcional diretamente.
 
@@ -297,7 +301,59 @@ Fronteira com Backoffice:
 Estado atual:
 
 - News já usa esta fronteira para `image_url` no formulário administrativo;
-- Seasons ainda não tem integração visual completa para `cover_image_url`.
+- Seasons já usa esta fronteira para `cover_image_url` no formulário administrativo.
+
+## Admin seasons — contrato de capa
+
+### Superfícies
+
+O contrato de Seasons já inclui `cover_image_url` nas seguintes superfícies administrativas:
+
+- `GET /admin/seasons`
+- `GET /admin/seasons/:slug`
+- `POST /admin/seasons`
+- `PATCH /admin/seasons/:slug`
+
+### Leitura
+
+`GET /admin/seasons` e `GET /admin/seasons/:slug` incluem `cover_image_url` na resposta.
+
+Exemplo de item administrativo:
+
+```json
+{
+  "id": 1,
+  "slug": "season-smoke-local",
+  "name": "Season Smoke Local",
+  "description": "Season temporaria para smoke local.",
+  "cover_image_url": null,
+  "start_at": "2026-05-04T00:00:00.000Z",
+  "end_at": "2026-05-31T23:59:59.000Z",
+  "status": "draft",
+  "created_at": "2026-05-04T12:00:00.000Z",
+  "updated_at": "2026-05-04T12:00:00.000Z"
+}
+```
+
+### Criação e edição
+
+`POST /admin/seasons` aceita `cover_image_url` como campo opcional.
+
+`PATCH /admin/seasons/:slug` aceita `cover_image_url` como campo editável.
+
+Para limpar capa, enviar:
+
+```json
+{
+  "cover_image_url": null
+}
+```
+
+Regra importante:
+
+- `cover_image_url: null` limpa a capa da Season.
+- Seasons `closed` continuam read-only no Backoffice e não devem permitir upload ou limpeza pela UI.
+- ETL/Static API v2 e Portal ainda precisam de reconciliação própria para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável.
 
 ## Auth — introspecção de sessão
 

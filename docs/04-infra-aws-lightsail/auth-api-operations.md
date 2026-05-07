@@ -102,6 +102,8 @@ O estado operacional reconciliado desta camada inclui:
 - leitura administrativa de Seasons disponível por `GET /admin/seasons` e `GET /admin/seasons/:slug`;
 - criação administrativa de Seasons em `draft` disponível por `POST /admin/seasons`;
 - edição administrativa de Seasons disponível por `PATCH /admin/seasons/:slug`;
+- contrato de `seasons.cover_image_url` disponível nas leituras, criação e edição administrativas de Seasons;
+- contrato público de Seasons inclui `cover_image_url` em `GET /content/seasons`, `GET /content/seasons/active` e `GET /content/seasons/:slug`;
 - lifecycle administrativo básico de Seasons disponível por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`;
 - upload administrativo protegido disponível por `POST /admin/uploads`, com storage local controlado, URL pública retornada e auditoria `upload.create`;
 - **CRUD administrativo básico de usuários publicado e funcional**, expondo:
@@ -289,6 +291,7 @@ Função:
 
 - expor catálogo e season ativa
 - sustentar integração com outras camadas do ecossistema
+- expor `cover_image_url` no contrato público dinâmico da Auth API
 
 ---
 
@@ -318,9 +321,11 @@ Regra importante:
 Nota operacional de Seasons:
 
 - `GET /admin/seasons` lista Seasons para consumo administrativo do Backoffice
-- `GET /admin/seasons/:slug` retorna o detalhe administrativo por `slug`
-- `POST /admin/seasons` cria Season administrativa em estado `draft`, consumida pelo Backoffice em `/seasons/new`
-- `PATCH /admin/seasons/:slug` atualiza metadados editáveis de Season, consumido pelo Backoffice em `/seasons/:slug/edit`
+- `GET /admin/seasons` inclui `cover_image_url`
+- `GET /admin/seasons/:slug` retorna o detalhe administrativo por `slug`, incluindo `cover_image_url`
+- `POST /admin/seasons` cria Season administrativa em estado `draft`, consumida pelo Backoffice em `/seasons/new`, e aceita `cover_image_url`
+- `PATCH /admin/seasons/:slug` atualiza metadados editáveis de Season, consumido pelo Backoffice em `/seasons/:slug/edit`, e aceita `cover_image_url`
+- `PATCH /admin/seasons/:slug` com `cover_image_url: null` limpa a capa
 - `POST /admin/seasons/:slug/activate` ativa uma Season e pode rebaixar outra Season `active` para `draft`
 - `POST /admin/seasons/:slug/close` fecha uma Season ativa; `closed` é estado terminal no backend atual
 - a configuração `mysql2` com `timezone: "Z"` mantém o tráfego do backend em UTC e evita deslocamento indevido ao ler `DATETIME`
