@@ -103,6 +103,7 @@ O estado operacional reconciliado desta camada inclui:
 - criação administrativa de Seasons em `draft` disponível por `POST /admin/seasons`;
 - edição administrativa de Seasons disponível por `PATCH /admin/seasons/:slug`;
 - lifecycle administrativo básico de Seasons disponível por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`;
+- upload administrativo protegido disponível por `POST /admin/uploads`, com storage local controlado, URL pública retornada e auditoria `upload.create`;
 - **CRUD administrativo básico de usuários publicado e funcional**, expondo:
   - `GET /admin/users`
   - `POST /admin/users`

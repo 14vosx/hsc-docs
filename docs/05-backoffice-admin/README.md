@@ -99,6 +99,7 @@ O estado atual conhecido do contexto `05-backoffice-admin` é:
 - a criação admin de Seasons já está disponível por `POST /admin/seasons`, criando registros em `draft`
 - a edição admin de Seasons já está disponível por `PATCH /admin/seasons/:slug`, sem alterar `slug`
 - activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
+- a Auth API já possui contrato protegido de upload administrativo por `POST /admin/uploads`, ainda pendente de integração visual completa no Backoffice
 - o Backoffice já possui fundação UI Material compartilhada para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total do Backoffice ainda não devem ser tratados como implementados
 - `seasons`, `news` e `events` continuam sendo os domínios iniciais
