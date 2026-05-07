@@ -91,6 +91,7 @@ O estado atual conhecido do contexto é:
 - a criação admin canônica de Seasons já está disponível no backend por `POST /admin/seasons`
 - a edição admin canônica de Seasons já está disponível no backend por `PATCH /admin/seasons/:slug`
 - activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
+- `POST /admin/uploads` já existe como contrato protegido da Auth API para upload de imagens administrativas, ainda pendente de integração completa no formulário de News/Seasons do Backoffice
 - a fundação UI Material compartilhada já existe em `src/app/shared/ui` para feedback, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total ainda permanecem como lacunas futuras
 - parte importante da auth base já está reconciliada com runtime real

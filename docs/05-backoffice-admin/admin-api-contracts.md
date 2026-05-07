@@ -59,6 +59,9 @@ No estado publicado atual, a Auth API expõe para o Backoffice Admin:
 ### Admin schema / suporte
 - `GET /admin/schema`
 
+### Admin uploads
+- `POST /admin/uploads`
+
 ### Admin users
 - `GET /admin/users`
 - `POST /admin/users`
@@ -113,7 +116,7 @@ Características esperadas da linha publicada:
 - `SameSite` compatível com o fluxo cross-subdomain
 - reutilização do cookie nas chamadas subsequentes para `/auth/session` e superfícies `/admin/*`
 
-O frontend **não** deve depender de leitura direta do cookie.  
+O frontend **não** deve depender de leitura direta do cookie.
 A fonte de verdade para “usuário autenticado ou não” é o resultado de `GET /auth/session`.
 
 ---
@@ -204,6 +207,92 @@ Em caso de falha:
 * o frontend não deve tentar inferir sucesso apenas pelo redirect; ele deve revalidar a sessão em `/auth/session`
 
 ---
+
+---
+
+## Admin uploads
+
+### `POST /admin/uploads`
+
+Contrato protegido da Auth API para upload administrativo de imagens.
+
+Objetivo:
+
+- receber uma imagem enviada pelo Backoffice Admin;
+- validar tipo, tamanho e assinatura real do arquivo;
+- salvar em storage local controlado pela Auth API;
+- retornar uma URL pública pronta para persistência em entidades de domínio.
+
+Uso previsto:
+
+- `news.image_url`;
+- `seasons.cover_image_url` em evolução posterior.
+
+Este endpoint não altera `news`, `seasons` ou qualquer entidade funcional diretamente.
+
+Request:
+
+- `Content-Type: multipart/form-data`;
+- campo `file`.
+
+Tipos aceitos no primeiro corte:
+
+- `image/jpeg`;
+- `image/png`;
+- `image/webp`.
+
+SVG não é aceito neste corte.
+
+Variáveis operacionais da Auth API:
+
+- `UPLOAD_DIR`;
+- `UPLOAD_PUBLIC_PATH`;
+- `UPLOAD_PUBLIC_BASE_URL`;
+- `UPLOAD_MAX_BYTES`.
+
+Resposta de sucesso:
+
+```json
+{
+  "ok": true,
+  "url": "http://127.0.0.1:3000/uploads/20260507T171550813Z-21395de1a0ec0224.png",
+  "path": "/uploads/20260507T171550813Z-21395de1a0ec0224.png",
+  "filename": "20260507T171550813Z-21395de1a0ec0224.png",
+  "size": 70,
+  "mimetype": "image/png"
+}
+```
+
+Erros esperados:
+
+- `401 Unauthorized`: sem autenticação administrativa;
+- `400 missing_file`: nenhum arquivo enviado no campo `file`;
+- `400 invalid_file_type`: MIME declarado não permitido;
+- `400 invalid_file_signature`: assinatura real do arquivo inválida;
+- `400 file_type_mismatch`: MIME declarado e assinatura real divergem;
+- `413 file_too_large`: arquivo maior que `UPLOAD_MAX_BYTES`;
+- `500 audit_failed`: arquivo removido porque a auditoria administrativa falhou.
+
+Invariantes de segurança:
+
+- rota protegida por `requireAdmin`;
+- exigência de `db_ready` antes da mutação;
+- auditoria administrativa com `action = upload.create`;
+- limite de tamanho via parser multipart;
+- campo único esperado: `file`;
+- MIME declarado restrito;
+- validação por assinatura real do arquivo;
+- nome final gerado pelo backend;
+- nome original do usuário não é usado como path final;
+- bloqueio de SVG;
+- publicação estática com `X-Content-Type-Options: nosniff`.
+
+Fronteira com Backoffice:
+
+1. operador escolhe imagem no Backoffice;
+2. Backoffice envia arquivo para `POST /admin/uploads`;
+3. Auth API retorna `url`;
+4. Backoffice persiste essa URL no campo funcional adequado.
 
 ## Auth — introspecção de sessão
 
