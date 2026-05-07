@@ -225,8 +225,8 @@ Objetivo:
 
 Uso previsto:
 
-- `news.image_url`;
-- `seasons.cover_image_url` em evolução posterior.
+- `news.image_url`, já integrado visualmente no Backoffice News;
+- `seasons.cover_image_url`, ainda pendente de integração visual completa no Backoffice.
 
 Este endpoint não altera `news`, `seasons` ou qualquer entidade funcional diretamente.
 
@@ -293,6 +293,11 @@ Fronteira com Backoffice:
 2. Backoffice envia arquivo para `POST /admin/uploads`;
 3. Auth API retorna `url`;
 4. Backoffice persiste essa URL no campo funcional adequado.
+
+Estado atual:
+
+- News já usa esta fronteira para `image_url` no formulário administrativo;
+- Seasons ainda não tem integração visual completa para `cover_image_url`.
 
 ## Auth — introspecção de sessão
 
@@ -784,4 +789,3 @@ Este documento está correto quando:
 
 * 2026-03-24
 * reconciliado após rollout completo de admin users management e hotfixes `v0.4.8`, `v0.4.9` e `v0.4.10`
-

@@ -328,6 +328,7 @@ type CreateNewsPayload = {
   slug: string;
   title: string;
   content: string;
+  image_url?: string | null;
 };
 ```
 
@@ -337,12 +338,15 @@ Payload seguro já confirmado para update:
 type UpdateNewsPayload = {
   title?: string;
   content?: string;
+  image_url?: string | null;
 };
 ```
 
 Regra importante:
 
-- não promover `excerpt`, `image_url` ou `slug` mutáveis como contrato forte do frontend sem reconciliação explícita adicional
+- `image_url` já está reconciliado como campo mutável no frontend de News
+- `image_url: null` limpa a imagem da notícia
+- não promover `excerpt` ou `slug` mutáveis como contrato forte do frontend sem reconciliação explícita adicional
 
 ---
 
@@ -469,7 +473,6 @@ Antes de considerar um novo contrato saudável, validar:
 Este documento deve ser expandido quando houver:
 
 - suporte confirmado para `excerpt`
-- suporte confirmado para `image_url`
 - validação explícita de erro para slug duplicado
 - paginação, filtros ou ordenação server-side em `/admin/news`
 - novas transições de estado no lifecycle de `news`

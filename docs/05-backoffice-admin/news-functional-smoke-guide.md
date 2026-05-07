@@ -90,6 +90,19 @@ Estado PROD validado:
 - delete funciona
 - CORS administrativo permite `DELETE`
 
+Smoke manual local validado no Backoffice:
+
+- criação de News draft com upload de imagem
+- preview exibido após selecionar/enviar imagem
+- edição recarrega URL e preview da imagem
+- limpar imagem e salvar persiste a remoção
+- reload após salvar confirma imagem limpa
+- arquivo inválido mostra erro local
+
+Leitura importante:
+
+- a validação acima é smoke manual local do Backoffice, não validação de produção
+
 Header CORS validado:
 
 ```http
@@ -239,6 +252,27 @@ Critério esperado:
 - retorno de `id`
 - status inicial `draft`
 
+### 1.1. Criar draft com upload de imagem
+
+No Backoffice Admin local:
+
+1. abrir `/news/new`
+2. preencher `slug`, `title` e `content`
+3. selecionar arquivo válido `image/jpeg`, `image/png` ou `image/webp`
+4. confirmar que o upload preenche a URL da imagem
+5. confirmar que o preview aparece no formulário
+6. salvar
+
+Critério esperado:
+
+- draft criado com sucesso
+- payload de criação envia `image_url`
+- preview permanece coerente com a URL usada
+
+Validação:
+
+- smoke manual local validado
+
 ### 2. Editar
 
 No Backoffice Admin PROD:
@@ -269,6 +303,44 @@ Critério esperado:
 - resposta `ok: true`
 - item retornado com título atualizado
 - item segue em `draft`, salvo se já tiver sido publicado antes
+
+### 2.1. Editar imagem
+
+No Backoffice Admin local:
+
+1. abrir `/news/:id/edit` para uma notícia criada com imagem
+2. confirmar que a URL da imagem foi recarregada
+3. confirmar que o preview aparece após o carregamento do formulário
+4. limpar a imagem
+5. salvar
+6. recarregar `/news/:id/edit`
+
+Critério esperado:
+
+- o formulário recarrega URL e preview antes da limpeza
+- salvar a limpeza envia `image_url: null`
+- após reload, a URL permanece limpa e o preview não aparece
+
+Validação:
+
+- smoke manual local validado
+
+### 2.2. Arquivo inválido
+
+No Backoffice Admin local:
+
+1. abrir `/news/new` ou `/news/:id/edit`
+2. selecionar arquivo fora dos tipos aceitos
+3. observar feedback local
+
+Critério esperado:
+
+- arquivo inválido mostra erro local
+- o formulário não trata o arquivo inválido como imagem persistível
+
+Validação:
+
+- smoke manual local validado
 
 ### 3. Validar refresh e deep link
 
