@@ -291,7 +291,8 @@ Evidência e limites:
 - o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nesses três recursos
 - a validação registrada foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário
 - essa validação não tocou `/var/www` e não rodou produção
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a auditoria do Portal como consumidor visual da capa
+- o Portal Angular já está source-ready para consumir esse campo: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais
 
 ---
 

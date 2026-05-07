@@ -53,7 +53,7 @@ Este guia não cobre:
 - consumo rico de Seasons no Portal público
 - materialização runtime/prod do ETL atualizado para Seasons
 - validação pública real da Static API v2 para Seasons
-- auditoria do Portal como consumidor visual de capa de Season
+- validação visual pública do Portal com dados reais de capa de Season
 - geração ETL de ranking ou partidas por season além do contrato estático já documentado
 - monetização, billing ou regras comerciais
 
@@ -664,7 +664,8 @@ Lacunas futuras conhecidas:
 - não há snapshot histórico ou hall of fame
 - o Portal CS2 ainda não exibe visão rica de Season
 - o código-fonte do ETL já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a auditoria do Portal como consumidor visual da capa
+- o Portal Angular já está source-ready para consumir `cover_image_url`: `SeasonDto` tipa o campo, `seasonCoverImage(...)` o prioriza, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a validação visual pública do Portal com dados reais
 
 Regra importante:
 

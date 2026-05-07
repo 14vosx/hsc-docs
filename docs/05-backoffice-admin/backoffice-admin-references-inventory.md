@@ -96,7 +96,8 @@ O estado atual conhecido do contexto é:
 - o contrato de `cover_image_url` para Seasons já existe na Auth API
 - o formulário administrativo de Seasons já integra upload visual de capa, URL, preview e limpeza de `cover_image_url`, com smoke manual local validado
 - o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para os JSONs estáticos de Seasons da Static API v2
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a auditoria do Portal como consumidor visual da capa
+- o Portal Angular já está source-ready para consumir `cover_image_url`: `SeasonDto` tipa o campo, `seasonCoverImage(...)` o prioriza, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
+- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real da Static API v2 e a validação visual pública do Portal com dados reais
 - a fundação UI Material compartilhada já existe em `src/app/shared/ui` para feedback, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total ainda permanecem como lacunas futuras
 - parte importante da auth base já está reconciliada com runtime real
@@ -437,7 +438,8 @@ Status do domínio no contexto:
 - rota `/seasons/:slug/edit` materializada como página funcional do Backoffice
 - ações `Ativar` e `Fechar` materializadas na listagem `/seasons`
 - o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json` da Static API v2
-- ranking por season, partidas associadas, snapshot histórico, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e auditoria do Portal como consumidor visual seguem como lacunas futuras
+- o Portal Angular já está source-ready para consumir `cover_image_url`: `SeasonDto` tipa o campo, `seasonCoverImage(...)` o prioriza, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
+- ranking por season, partidas associadas, snapshot histórico, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e validação visual pública do Portal com dados reais seguem como lacunas futuras
 
 ---
 

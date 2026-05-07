@@ -307,10 +307,11 @@ Leitura sintética:
 - Seasons já possui edição administrativa de metadados por `/seasons/:slug/edit`
 - Seasons já possui ações administrativas de lifecycle em `/seasons` para ativar e fechar
 - `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já são contratos admin reais consumidos pelo Backoffice
-- `cover_image_url` de Seasons já é suportado pela Auth API, pelo Backoffice e pela fonte ETL da Static API v2
+- `cover_image_url` de Seasons já é suportado pela Auth API, pelo Backoffice, pela fonte ETL da Static API v2 e pelo código-fonte do Portal Angular
+- no Portal Angular, `SeasonDto` já tipa `cover_image_url`, `seasonCoverImage(...)` já prioriza esse campo, cards/heróis de Seasons e Ranking já usam `--season-cover`, e `npm run build` passou
 - Backoffice já possui fundação UI Material para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total permanecem como lacunas futuras
-- ranking, partidas por season, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e auditoria do Portal como consumidor visual seguem como lacunas futuras de Seasons/Admin
+- ranking, partidas por season, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e validação visual pública do Portal com dados reais seguem como lacunas futuras de Seasons/Admin
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---
