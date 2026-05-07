@@ -91,8 +91,10 @@ O estado funcional documentado é:
   - Início
   - Fim
   - Atualizado em
+- a listagem administrativa recebe `cover_image_url`
 - a tela posiciona Seasons como ciclos competitivos oficiais do servidor HSC
 - `/seasons/new` cria uma Season em `draft` por `POST /admin/seasons`
+- `/seasons/new` permite informar URL da capa ou fazer upload de capa por `POST /admin/uploads`
 - ao criar com sucesso, a UI navega de volta para `/seasons`
 - a Season criada aparece na listagem com status `Draft`
 - a listagem `/seasons` possui ações condicionais de lifecycle
@@ -104,7 +106,9 @@ O estado funcional documentado é:
 - `/seasons/:slug/edit` salva alterações por `PATCH /admin/seasons/:slug`
 - o formulário é reutilizado em modo de edição
 - o `slug` é somente leitura no modo de edição
-- a edição permite alterar `name`, `description`, `start_at` e `end_at`
+- a edição permite alterar `name`, `description`, `start_at`, `end_at` e `cover_image_url`
+- o formulário de Seasons exibe URL da capa, upload, preview e ação `Limpar capa`
+- Seasons `closed` continuam read-only, com upload e limpeza de capa bloqueados
 - a edição não altera o `slug`
 - a UI trata Season inexistente como not-found
 - `POST /admin/seasons/:slug/activate` é exposto pela ação `Ativar`
@@ -120,6 +124,8 @@ O estado funcional documentado é:
 Observação sobre mutações:
 
 - `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` existem no contrato administrativo
+- `POST /admin/seasons` e `PATCH /admin/seasons/:slug` aceitam `cover_image_url`
+- `PATCH /admin/seasons/:slug` com `cover_image_url: null` limpa a capa
 - este documento descreve a leitura admin, a listagem, a criação em `draft`, a edição inicial e o lifecycle básico no Backoffice
 - a UI atual expõe `POST /admin/seasons` pela rota `/seasons/new`
 - a UI atual expõe `PATCH /admin/seasons/:slug` pela rota `/seasons/:slug/edit`
@@ -147,6 +153,7 @@ Resposta esperada:
       "slug": "season-smoke-local",
       "name": "Season Smoke Local",
       "description": "Season temporaria para smoke local.",
+      "cover_image_url": null,
       "start_at": "2026-05-04T00:00:00.000Z",
       "end_at": "2026-05-31T23:59:59.000Z",
       "status": "draft",
@@ -173,6 +180,7 @@ Resposta esperada:
     "slug": "season-smoke-local",
     "name": "Season Smoke Local",
     "description": "Season temporaria para smoke local.",
+    "cover_image_url": null,
     "start_at": "2026-05-04T00:00:00.000Z",
     "end_at": "2026-05-31T23:59:59.000Z",
     "status": "draft",
@@ -195,6 +203,7 @@ Payload esperado:
   "slug": "season-junho-2026",
   "name": "Season Junho 2026",
   "description": "Ciclo competitivo oficial de junho de 2026.",
+  "cover_image_url": "http://127.0.0.1:3000/uploads/season-junho-2026.png",
   "start_at": "2026-06-01T03:00:00.000Z",
   "end_at": "2026-07-01T02:59:00.000Z"
 }
@@ -216,6 +225,7 @@ Campos do payload:
 - `slug`: obrigatório
 - `name`: obrigatório
 - `description`: texto opcional ou `null`
+- `cover_image_url`: URL opcional ou `null`
 - `start_at`: data/hora UTC em ISO com `Z`
 - `end_at`: data/hora UTC em ISO com `Z`
 
@@ -235,8 +245,17 @@ Payload esperado:
 {
   "name": "Season Junho 2026",
   "description": "Ciclo competitivo oficial de junho de 2026 ajustado.",
+  "cover_image_url": "http://127.0.0.1:3000/uploads/season-junho-2026-ajustada.png",
   "start_at": "2026-06-01T03:00:00.000Z",
   "end_at": "2026-07-02T02:59:00.000Z"
+}
+```
+
+Para limpar capa:
+
+```json
+{
+  "cover_image_url": null
 }
 ```
 
@@ -254,6 +273,7 @@ Campos aceitos no payload:
 
 - `name`: opcional
 - `description`: texto opcional ou `null`
+- `cover_image_url`: URL opcional ou `null`
 - `start_at`: opcional, data/hora UTC em ISO com `Z`
 - `end_at`: opcional, data/hora UTC em ISO com `Z`
 
@@ -261,7 +281,9 @@ Regras importantes:
 
 - o endpoint é endereçado pelo `slug`
 - o payload de edição não altera o `slug`
+- `cover_image_url: null` limpa a capa
 - Season `closed` é estado terminal no backend atual e não pode ser editada
+- Season `closed` não permite upload ou limpeza de capa pela UI
 - o backend continua sendo a fonte final de validação e invariantes de domínio
 - quando o backend retorna erro `season_closed`, a UI apresenta `Season fechada não pode ser alterada.`
 
@@ -396,6 +418,10 @@ Comportamentos esperados:
 
 - a tela apresenta formulário baseado em Angular Material
 - o formulário envia `POST /admin/seasons`
+- o formulário permite URL da capa, upload, preview e limpeza de capa
+- o upload de capa usa `POST /admin/uploads` com `FormData` e `withCredentials`
+- uploads aceitos: `image/jpeg`, `image/png` e `image/webp`
+- URL vazia ou apenas whitespace normaliza para `null`
 - a entrada de data usa `MatDatepicker`
 - a entrada de hora usa campo textual `HH:mm`
 - a tela não usa `input type="datetime-local"`
@@ -441,8 +467,12 @@ Comportamentos esperados:
 - a edição permite atualizar:
   - `name`
   - `description`
+  - `cover_image_url`
   - `start_at`
   - `end_at`
+- a tela recarrega URL e preview da capa quando `cover_image_url` existe
+- a ação `Limpar capa` salva `cover_image_url: null`
+- Seasons `closed` permanecem read-only, com upload e limpeza de capa bloqueados
 - a edição não altera o `slug`
 - a tela trata Season inexistente como not-found
 - a tela apresenta erro `season_closed` como `Season fechada não pode ser alterada.`
@@ -456,6 +486,7 @@ Fronteiras explícitas:
 
 - a edição não altera lifecycle
 - a edição não associa partidas, ranking, Portal ou ETL à Season
+- a edição de capa no Backoffice/Auth API não confirma publicação em Static API v2 ou consumo no Portal
 - activate e close ficam na listagem `/seasons`, não no formulário de edição
 
 Regra importante:
@@ -480,6 +511,42 @@ Leitura correta:
 ---
 
 ## Smoke funcional
+
+### Capa de Season — smoke manual local
+
+Validação já executada localmente no Backoffice:
+
+1. criar Season em `/seasons/new` com upload de capa válido
+2. confirmar que a URL da capa é preenchida automaticamente após upload
+3. confirmar que o preview aparece no formulário
+4. salvar a Season
+5. abrir `/seasons/:slug/edit`
+6. confirmar que a edição recarrega URL e preview da capa
+7. acionar `Limpar capa`
+8. salvar
+9. recarregar `/seasons/:slug/edit`
+10. confirmar que a capa permanece limpa e o preview não aparece
+11. selecionar arquivo inválido
+12. confirmar erro local
+
+Critério esperado:
+
+- `SeasonFormValue` inclui `cover_image_url`
+- `CreateSeasonPayload` envia `cover_image_url`
+- `UpdateSeasonPayload` permite `cover_image_url?: string | null`
+- `SeasonsImageUploadApiService` usa `FormData` em `POST /admin/uploads` com `withCredentials`
+- upload aceita `image/jpeg`, `image/png` e `image/webp`
+- URL vazia ou apenas whitespace normaliza para `null`
+- Seasons `closed` continuam read-only, com upload e limpeza bloqueados
+- arquivo inválido mostra erro local
+
+Leitura importante:
+
+- este smoke manual local valida a fatia Backoffice/Auth API
+- ele não inventa validação de produção
+- um `404` observado em `/api/cs2/v2/season/<local-season>.json` pertence à Static API v2/Portal e não bloqueia a fatia Backoffice/Auth API
+
+---
 
 O smoke funcional preserva a cobertura de listagem, criação e edição já documentada e registra a validação de lifecycle para ativação e fechamento.
 
@@ -592,6 +659,7 @@ Lacunas futuras conhecidas:
 - não há snapshot histórico ou hall of fame
 - o Portal CS2 ainda não exibe visão rica de Season
 - o ETL ainda não gera ranking ou partidas por season
+- ETL/Static API v2 e Portal ainda estão pendentes para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável
 
 Regra importante:
 

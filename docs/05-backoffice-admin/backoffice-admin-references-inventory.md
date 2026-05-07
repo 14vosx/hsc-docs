@@ -93,7 +93,9 @@ O estado atual conhecido do contexto é:
 - activate e close de Seasons já estão disponíveis na UI por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
 - `POST /admin/uploads` já existe como contrato protegido da Auth API para upload de imagens administrativas
 - o formulário administrativo de News já integra upload visual de imagem, URL, preview e limpeza de `image_url`, com smoke manual local validado
-- `seasons.cover_image_url` ainda está pendente de integração visual completa no Backoffice
+- o contrato de `cover_image_url` para Seasons já existe na Auth API
+- o formulário administrativo de Seasons já integra upload visual de capa, URL, preview e limpeza de `cover_image_url`, com smoke manual local validado
+- ETL/Static API v2 e Portal ainda estão pendentes para publicar ou consumir `cover_image_url` nos JSONs estáticos quando aplicável
 - a fundação UI Material compartilhada já existe em `src/app/shared/ui` para feedback, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total ainda permanecem como lacunas futuras
 - parte importante da auth base já está reconciliada com runtime real
@@ -428,11 +430,12 @@ Status do domínio no contexto:
 - criação admin canônica disponível no backend por `POST /admin/seasons`
 - edição admin canônica disponível no backend por `PATCH /admin/seasons/:slug`
 - lifecycle admin canônico disponível no backend por `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close`
+- `cover_image_url` disponível no backend e no formulário administrativo de Seasons
 - rota `/seasons` materializada como página funcional do Backoffice
 - rota `/seasons/new` materializada como página funcional do Backoffice
 - rota `/seasons/:slug/edit` materializada como página funcional do Backoffice
 - ações `Ativar` e `Fechar` materializadas na listagem `/seasons`
-- ranking por season, partidas associadas, snapshot histórico, Portal e ETL seguem como lacunas futuras
+- ranking por season, partidas associadas, snapshot histórico, Portal, ETL e propagação de `cover_image_url` na Static API v2 seguem como lacunas futuras
 
 ---
 
