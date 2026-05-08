@@ -2,25 +2,29 @@
 
 ## Status
 
-`ETL mergeado e validado localmente; produção/runtime pendente`.
+`Publicado e validado em produção/runtime`.
 
-Este registro documenta a Prioridade 3 — Season matches/maps, entregue no `hsc-cs2-etl` após merge do PR #10.
+Este registro documenta a Prioridade 3 — Season matches/maps.
+
+Histórico do status:
+
+- a primeira etapa foi entregue no `hsc-cs2-etl` após merge do PR #10, com ETL mergeado e validação local/smoke temporária
+- naquele checkpoint, produção/runtime ainda estava pendente
+- em 2026-05-08, a etapa runtime/prod foi materializada e validada publicamente
 
 ## Repositórios e PRs
 
 - `hsc-cs2-etl` PR #10: `feat(seasons): add season matches and maps`
-- commit mergeado: `0345b57`
+- commit mergeado PR #10: `0345b57`
+- `hsc-cs2-etl` PR #11: `fix(etl): materialize season matches maps script`
+- commit mergeado PR #11: `81701e6`
 - `hsc-docs`: documentação canônica dos contratos públicos da Static API v2
 
-Não houve alteração registrada nesta entrega em:
+Não houve alteração registrada nesta frente em:
 
 - `hsc-auth-api`
-- `hsc-cs2-portal`
 - `hsc-backoffice-admin`
-- produção/runtime
-- `systemd`
-- `/usr/local/bin`
-- `/var/www`
+- Portal Angular
 
 ## Contexto de produto
 
@@ -178,28 +182,87 @@ Resultado do smoke:
 - `computed.distinctMaps = 3`
 - mapa inválido com `winner` vazio e `0` rounds foi excluído
 
-## Fora do escopo desta entrega
+## Publicação e validação runtime/prod
 
-Esta entrega não publicou nem validou produção para esses endpoints.
+Em 2026-05-08, os contratos de partidas/maps por Season foram materializados no runtime Hostinger e validados publicamente.
+
+Contexto runtime/prod:
+
+- Host ETL: `srv1353392`
+- runtime source: `/opt/cs2-portal`
+- runtime source final atualizado para `81701e6` (`fix(etl): materialize season matches maps script`)
+- scripts runtime: `/usr/local/bin`
+- Static API: `/var/www/api/cs2/v2`
+- service: `gen-all-v2.service`
+- timer: `gen-all-v2.timer`
+- snapshot antes da publicação: `/root/hsc-snapshots/etl-pre-season-matches-maps-20260508T143611Z`
+
+Sequência executada:
+
+- `/opt/cs2-portal` foi atualizado inicialmente de `31ce4fc` para `0345b57`
+- `scripts/materialize-etl-runtime.sh` foi executado
+- foi identificado um gap operacional: `gen-all-v2.sh` foi materializado, mas `gen-season-matches-maps.sh` ainda não foi copiado para `/usr/local/bin`
+- a correção imediata no runtime foi feita manualmente com `install`, copiando `/opt/cs2-portal/bin/gen-season-matches-maps.sh` para `/usr/local/bin/gen-season-matches-maps.sh`
+- o hash do script foi confirmado como `4b0eabcba08ee08b46c26278d4b1a99128b16d4c3a0fa6bffeea617ee5d01ceb`
+- depois disso, a correção definitiva foi aberta e mergeada no `hsc-cs2-etl` PR #11
+- `/opt/cs2-portal` foi atualizado para `81701e6`
+- `scripts/materialize-etl-runtime.sh` foi reexecutado e passou a materializar automaticamente `/usr/local/bin/gen-season-matches-maps.sh`
+
+Hash final validado para os dois caminhos:
+
+- `/opt/cs2-portal/bin/gen-season-matches-maps.sh`
+- `/usr/local/bin/gen-season-matches-maps.sh`
+- hash: `4b0eabcba08ee08b46c26278d4b1a99128b16d4c3a0fa6bffeea617ee5d01ceb`
+
+Execução final do service:
+
+- `gen-all-v2.service` executou com `status=0/SUCCESS`
+- o journal confirmou os steps:
+  - `STEP gen-seasons`
+  - `STEP gen-season-matches-maps`
+  - `STEP gen-season-rankings`
+
+Endpoints públicos validados:
+
+- `https://haxixesmokeclub.com/api/cs2/v2/season/s01-2026/matches.json`
+- `https://haxixesmokeclub.com/api/cs2/v2/season/s01-2026/maps.json`
+- `https://haxixesmokeclub.com/api/cs2/v2/season/s01-2026/ranking.json`
+
+Resultado do smoke público final:
+
+- `matches.summary.matches = 15`
+- `matches.summary.maps = 15`
+- `matches.summary.rounds = 336`
+- `matches.summary.players = 32`
+- `matches.summary.lastMapEndedAt = 2026-04-16 01:23:43`
+- `matches.computed.firstMapStartedAt = 2026-02-09 22:54:25`
+- `matches_count = 15`
+- `maps.summary.matches = 15`
+- `maps.summary.maps = 15`
+- `maps.summary.rounds = 336`
+- `maps.summary.players = 32`
+- `maps.summary.lastMapEndedAt = 2026-04-16 01:23:43`
+- `maps.computed.distinctMaps = 7`
+- `maps_count = 7`
+- regressão de ranking: `players = 32`
+- regressão de ranking: `missing_steam_avatar_url_field = 0`
+- regressão de ranking: `non_null_steam_avatar_url = 32`
+
+## Fora do escopo desta frente
+
+O checkpoint inicial do PR #10 não publicou nem validou produção para esses endpoints. Essa pendência foi fechada posteriormente pela publicação runtime/prod documentada acima.
 
 Também ficou fora do escopo:
 
 - alteração em `hsc-auth-api`
-- alteração em `hsc-cs2-portal`
 - alteração em `hsc-backoffice-admin`
-- alteração em produção/runtime
-- alteração em `systemd`
-- alteração em `/usr/local/bin`
-- alteração em `/var/www`
+- alteração no Portal Angular
 - criação de endpoints de detalhe por Season
 - afirmação de consumo pelo Portal Angular
 - mudança dos contratos globais de partidas e mapas
 
 ## Pendências
 
-- materializar o ETL atualizado no runtime quando essa etapa for explicitamente executada
-- validar a geração em produção/runtime
-- validar a publicação pública dos endpoints sob `/api/cs2/v2/season/{slug}/...`
 - documentar eventual consumo pelo Portal Angular somente depois de implementação e validação próprias
 
 ## Documentos canônicos relacionados

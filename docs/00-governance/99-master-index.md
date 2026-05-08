@@ -278,8 +278,9 @@ Leitura sintética:
 - cadeia MatchZy SQLite → ETL → Static API v2 → portal segue como trilha principal do lado público
 - o runtime ETL da v2 já foi reconciliado com o repositório `hsc-cs2-etl`
 - a materialização em `/usr/local/bin` já passou a ser tratada como camada runtime, e não como superfície manual de autoria
-- partidas/maps por Season passaram de lacuna futura para contrato ETL mergeado no `hsc-cs2-etl` PR #10, com validação local/smoke temporária
-- a materialização em produção/runtime e a validação pública desses endpoints ainda seguem pendentes
+- partidas/maps por Season passaram de lacuna futura para contrato ETL mergeado no `hsc-cs2-etl` PR #10, com validação local/smoke temporária preservada como histórico
+- `season/{slug}/matches.json` e `season/{slug}/maps.json` foram materializados em runtime/prod após o `hsc-cs2-etl` PR #11 e validados publicamente na Static API v2
+- o consumo desses endpoints pelo Portal Angular segue como pendência separada, sem afirmação de implementação nesta etapa
 
 ---
 
@@ -314,7 +315,8 @@ Leitura sintética:
 - `cover_image_url` de Seasons já é suportado pela Auth API, pelo Backoffice, pela fonte ETL da Static API v2 e pelo código-fonte do Portal Angular
 - no Portal Angular, `SeasonDto` já tipa `cover_image_url`, `seasonCoverImage(...)` já prioriza esse campo, cards/heróis de Seasons e Ranking já usam `--season-cover`, e `npm run build` passou
 - `steam_avatar_url` no Season Ranking foi publicado e validado em runtime/prod, com Auth API, ETL, JSON público da Static API v2 e smoke visual do Portal CS2 Next
-- `season/{slug}/matches.json` e `season/{slug}/maps.json` foram mergeados no `hsc-cs2-etl` como contratos aditivos da Static API v2 para recortes competitivos de Season, com validação local/smoke temporária e produção/runtime ainda pendentes
+- `season/{slug}/matches.json` e `season/{slug}/maps.json` foram mergeados no `hsc-cs2-etl` como contratos aditivos da Static API v2 para recortes competitivos de Season, materializados em runtime/prod e validados publicamente
+- o Portal Angular ainda não tem consumo documentado desses endpoints de partidas/maps por Season
 - Backoffice já possui fundação UI Material para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total permanecem como lacunas futuras
 - próximos ciclos de Seasons/Admin seguem como lacunas futuras fora das entregas atuais de Season Ranking e recortes de partidas/maps por Season
