@@ -26,6 +26,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 - [Home da documentação](../README.md)
 - [Governance](./README.md)
 - [Documentation System](./documentation-system.md)
+- [HSC Repositories Map](./hsc-repositories-map.md)
 
 ### Contextos canônicos
 - [01 — Infra Hostinger](../01-infra-hostinger/README.md)
@@ -96,6 +97,7 @@ Arquivos principais:
 - [Governance — README](./README.md)
 - [Documentation System](./documentation-system.md)
 - [HSC Docs Maintenance Playbook](./hsc-docs-maintenance-playbook.md)
+- [HSC Repositories Map](./hsc-repositories-map.md)
 - [Master Index](./99-master-index.md)
 
 ---
