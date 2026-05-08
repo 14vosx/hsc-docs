@@ -166,7 +166,18 @@ Consumidores previstos ou já source-ready:
 - futura área logada
 - futuras superfícies do portal
 
-Esta seção registra a decisão arquitetural e o estado do código-fonte. Ela não substitui runbook de deploy, não afirma materialização em produção e não prescreve alteração operacional sem validação específica.
+Estado runtime/prod validado em 2026-05-08:
+- código em `/opt/hsc/hsc-auth-api` atualizado para `7b61cd7 feat(steam): add Steam profiles cache (#51)`
+- migration `0006_steam_profiles.sql` aplicada
+- serviço `hsc-auth-api.service` reiniciado
+- health público `https://auth-api.haxixesmokeclub.com/health` retornou `200` com `db.ready=true`
+- env real configurada para `STEAM_API_KEY`, `INTERNAL_API_KEY`, `STEAM_PROFILE_CACHE_TTL_SECONDS` e `STEAM_API_TIMEOUT_SECONDS`, sem documentar valores
+- `POST /internal/steam/profiles/resolve` sem key retornou `401 invalid_internal_key`
+- `POST /internal/steam/profiles/resolve` autenticado retornou `200 OK`, `profiles_count=2` e `missing_count=0`
+- tabela `steam_profiles` validada com `count=2` e `lastFetchedAt=2026-05-08T02:11:02Z`
+- um db quick check avulso falhou porque o script Node não carregou `.env`; o serviço e o endpoint estavam OK, e o quick check foi corrigido com `dotenv.config`
+
+Esta seção registra a decisão arquitetural, o estado do código-fonte e a validação runtime/prod da entrega. Ela não substitui runbook de deploy e não prescreve rotação de segredo.
 
 ---
 

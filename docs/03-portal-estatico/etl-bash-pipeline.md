@@ -361,7 +361,11 @@ Enriquecimento de Steam Profiles:
 - falha, timeout, ausência de `INTERNAL_API_KEY`, resposta inválida ou perfil ausente não bloqueiam o ranking
 - o fallback publicado para `players[].steam_avatar_url` é `null`
 - smokes funcionais locais validaram consumo de Auth API fake com `INTERNAL_API_KEY` e fallback sem `INTERNAL_API_KEY`, usando SQLite fixture temporário e `API_DIR` temporário
-- isso descreve o código-fonte do ETL; não afirma que a produção já foi materializada ou validada com esse campo
+- runtime/prod foi materializado em `/usr/local/bin/gen-season-rankings.sh` via `/opt/cs2-portal/scripts/materialize-etl-runtime.sh`
+- o hash source/runtime de `gen-season-rankings.sh` foi confirmado igual: `78db539257451215394aae1d7c3dea338873cb70df254243168804d9f158b8f5`
+- o enriquecimento em runtime usa arquivo protegido `/etc/hsc/cs2-etl.env` carregado pelo drop-in systemd `/etc/systemd/system/gen-all-v2.service.d/steam-profiles-env.conf`
+- o drop-in declara `EnvironmentFile=/etc/hsc/cs2-etl.env`; valores de `INTERNAL_API_KEY` não devem ser impressos ou registrados em documentação
+- `gen-all-v2.service` foi validado com status `0/SUCCESS`, `STEP gen-season-rankings` executado e pós-validação com 32 players, `missing_steam_avatar_url_field=0` e `non_null_steam_avatar_url=32`
 
 ---
 

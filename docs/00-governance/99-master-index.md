@@ -310,9 +310,10 @@ Leitura sintética:
 - `GET /admin/seasons`, `GET /admin/seasons/:slug`, `POST /admin/seasons`, `PATCH /admin/seasons/:slug`, `POST /admin/seasons/:slug/activate` e `POST /admin/seasons/:slug/close` já são contratos admin reais consumidos pelo Backoffice
 - `cover_image_url` de Seasons já é suportado pela Auth API, pelo Backoffice, pela fonte ETL da Static API v2 e pelo código-fonte do Portal Angular
 - no Portal Angular, `SeasonDto` já tipa `cover_image_url`, `seasonCoverImage(...)` já prioriza esse campo, cards/heróis de Seasons e Ranking já usam `--season-cover`, e `npm run build` passou
+- `steam_avatar_url` no Season Ranking foi publicado e validado em runtime/prod, com Auth API, ETL, JSON público da Static API v2 e smoke visual do Portal CS2 Next
 - Backoffice já possui fundação UI Material para feedback transitório, feedback persistente, confirmação e input simples em fluxos principais de `news`, `seasons` e `users`
 - dark mode, toggle de tema, design system completo e padronização visual total permanecem como lacunas futuras
-- ranking, partidas por season, materialização runtime/prod do ETL atualizado, validação pública real da Static API v2 e validação visual pública do Portal com dados reais seguem como lacunas futuras de Seasons/Admin
+- partidas/maps por season e próximos ciclos de Seasons/Admin seguem como lacunas futuras fora da entrega de avatar Steam no Season Ranking
 - a tendência agora é expansão por features e superfícies de produto sem perder reconciliação runtime
 
 ---
