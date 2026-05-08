@@ -423,6 +423,7 @@ Nota sobre Seasons:
 - a regra de pertencimento considera mapas com `matchzy_stats_maps.end_time` entre `season.start_at` e `season.end_at`, `winner` preenchido e `team1_score + team2_score >= 12`
 - os contratos globais `matches.json`, `maps.json`, `match/{id}.json` e `map/{map}.json` não mudaram nesta entrega
 - não foram criados endpoints `season/{slug}/match/{id}.json` nem `season/{slug}/map/{map}.json`; detalhes continuam nos endpoints globais
+- após o merge do `hsc-cs2-portal` PR #28, commit `01564d1`, o Portal Angular CS2 Next passou a consumir esses contratos em rotas player-facing de Season Matches e Season Maps
 - a validação registrada até aqui foi local/smoke temporário no `hsc-cs2-etl`, sem tocar produção, runtime, `systemd`, `/usr/local/bin` ou `/var/www`
 - a materialização e validação pública em produção desses dois endpoints seguem pendentes
 

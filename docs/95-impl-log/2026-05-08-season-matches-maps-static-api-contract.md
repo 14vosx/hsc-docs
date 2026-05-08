@@ -263,7 +263,30 @@ Também ficou fora do escopo:
 
 ## Pendências
 
-- documentar eventual consumo pelo Portal Angular somente depois de implementação e validação próprias
+- não registrar validação visual de staging/prod para Season Matches/Maps até que essa etapa seja autorizada e executada
+
+## Atualização posterior - Portal Angular CS2 Next
+
+Em 2026-05-08, o `hsc-cs2-portal` PR #28 foi mergeado em `main` com o commit `01564d1` (`feat(cs2-next): add season matches and maps pages`).
+
+Esse PR adicionou rotas player-facing no Portal Angular CS2 Next para consumir os contratos documentados da Static API v2:
+
+- `/seasons/current/matches`
+- `/seasons/:slug/matches`
+- `/seasons/current/maps`
+- `/seasons/:slug/maps`
+
+As listagens consomem os recortes prontos:
+
+- `/api/cs2/v2/season/{slug}/matches.json`
+- `/api/cs2/v2/season/{slug}/maps.json`
+
+Os detalhes continuam globais:
+
+- `/matches/:matchId`
+- `/maps/:map`
+
+Não foram criados endpoints de detalhe por Season.
 
 ## Documentos canônicos relacionados
 

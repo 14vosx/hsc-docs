@@ -207,6 +207,42 @@ Regra editorial:
 
 ---
 
+## Rotas player-facing de Seasons no CS2 Next
+
+No recorte Angular CS2 Next do Portal, as rotas player-facing conhecidas de Seasons são:
+
+- `/seasons/current`
+- `/seasons/:slug`
+- `/seasons/current/ranking`
+- `/seasons/:slug/ranking`
+- `/seasons/current/matches`
+- `/seasons/:slug/matches`
+- `/seasons/current/maps`
+- `/seasons/:slug/maps`
+
+Distinções importantes:
+
+- Ranking Geral não é Ranking da Season
+- Matches globais não são Matches da Season
+- Maps globais não são Maps da Season
+- as páginas de Season Matches/Maps consomem os recortes prontos da Static API v2
+- o frontend não recalcula pertencimento à Season
+- o frontend não faz N+1 requests para detalhes ao montar listagens
+
+As páginas de Season Matches/Maps consomem:
+
+- `/api/cs2/v2/season/{slug}/matches.json`
+- `/api/cs2/v2/season/{slug}/maps.json`
+
+Os links de detalhe continuam globais:
+
+- `/matches/:matchId`
+- `/maps/:map`
+
+Não há endpoints de detalhe por Season para esses recortes.
+
+---
+
 ## Relação entre rotas e recursos públicos
 
 A relação estrutural conhecida entre frontend e v2 é:
@@ -537,4 +573,4 @@ Este documento pode ser considerado maduro quando:
 - Status: ativo
 - Classificação: canônico
 - Contexto: portal estático / estrutura do frontend
-- Última revisão: 2026-03-18
+- Última revisão: 2026-05-08
