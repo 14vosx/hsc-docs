@@ -18,6 +18,7 @@ Ele registra arquitetura, infraestrutura, runbooks, decisões, contratos públic
 - `docs/03-portal-estatico`
 - `docs/04-infra-aws-lightsail`
 - `docs/05-backoffice-admin`
+- `docs/06-player-bunker`
 - `docs/95-impl-log`
 - `docs/97-audit`
 - `docs/98-legacy`

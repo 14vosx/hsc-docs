@@ -21,6 +21,7 @@ docs/02-game-panel
 docs/03-portal-estatico
 docs/04-infra-aws-lightsail
 docs/05-backoffice-admin
+docs/06-player-bunker
 docs/95-impl-log
 docs/97-audit
 docs/98-legacy
@@ -200,6 +201,30 @@ document feature status
 ```
 
 Do not change RBAC/auth policy or product behavior as a documentation assumption.
+
+### `docs/06-player-bunker`
+
+Purpose:
+
+```text
+player-facing logged-in area
+Bunker
+Player Auth architecture
+separation between Admin Auth and Player Auth
+Steam as initial identity provider
+```
+
+Allowed:
+
+```text
+document Player Auth decisions
+document Bunker architecture
+document player-facing auth boundaries
+document Steam identity assumptions
+link to related Auth API, Portal, and Static API docs
+```
+
+Do not change authentication, identity, entitlement, billing, product, or API contract decisions as a documentation assumption.
 
 ### `docs/95-impl-log`
 

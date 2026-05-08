@@ -45,6 +45,8 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
   - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
   - [Seasons Admin Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
   - [Backoffice UI Material Foundation](../05-backoffice-admin/backoffice-ui-material-foundation.md)
+- [06 — Player Bunker](../06-player-bunker/player-auth-architecture.md)
+  - [Player Auth Architecture — Bunker](../06-player-bunker/player-auth-architecture.md)
 
 ### Trilhas principais
 - [Fluxo jogo → dados → portal](../03-portal-estatico/static-api-v2.md)
@@ -80,6 +82,7 @@ Leitura correta do estado atual:
 - o Backoffice Admin deixou de ser apenas contexto preparatório e já possui auth base publicada, callback real e shell administrativo validado
 - Seasons já possui listagem administrativa, criação em `draft`, edição de metadados e lifecycle básico de ativar/fechar funcionais no Backoffice, com contratos admin canônicos disponíveis na Auth API
 - o contexto `02-game-panel` agora também possui trilha administrativa explícita, com autoridade centralizada no CounterStrikeSharp e runbooks próprios de manutenção
+- o contexto draft `06-player-bunker` registra a decisão arquitetural para autenticação player-facing, separando Admin Auth de Player Auth, com Steam como provider inicial
 - o que resta agora é principalmente **expansão incremental de domínio, reconciliação fina entre canônicos e evolução sustentável das superfícies administrativas**
 
 ---
@@ -226,6 +229,19 @@ Arquivos principais:
 - [Backoffice Admin Frontend Structure](../05-backoffice-admin/backoffice-admin-frontend-structure.md)
 - [Backoffice Admin Operational Runbooks](../05-backoffice-admin/backoffice-admin-operational-runbooks.md)
 - [Backoffice Admin References Inventory](../05-backoffice-admin/backoffice-admin-references-inventory.md)
+
+---
+
+## 06-player-bunker
+
+Função:
+- Bunker player-facing
+- decisão arquitetural da Player Auth
+- separação entre Admin Auth e Player Auth
+- Steam como provider inicial
+
+Arquivos principais:
+- [Player Auth Architecture — Bunker](../06-player-bunker/player-auth-architecture.md)
 
 ---
 

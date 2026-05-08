@@ -10,6 +10,7 @@
 - [Portal Estático](./03-portal-estatico/README.md)
 - [Infra AWS Lightsail](./04-infra-aws-lightsail/README.md)
 - [Backoffice Admin](./05-backoffice-admin/README.md)
+- [Player Bunker](./06-player-bunker/player-auth-architecture.md)
 - [Impl Log](./95-impl-log/README.md)
 - [Audit](./97-audit/README.md)
 - [Legacy](./98-legacy/README.md)
@@ -39,6 +40,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [03 — Portal Estático](./03-portal-estatico/README.md)
 - [04 — Infra AWS Lightsail](./04-infra-aws-lightsail/README.md)
 - [05 — Backoffice Admin](./05-backoffice-admin/README.md)
+- [06 — Player Bunker](./06-player-bunker/player-auth-architecture.md)
 
 ---
 
@@ -87,6 +89,9 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [Auth, RBAC and Guards](./05-backoffice-admin/auth-rbac-and-guards.md)
 - [Admin API Contracts](./05-backoffice-admin/admin-api-contracts.md)
 - [Operational Runbooks — Backoffice](./05-backoffice-admin/backoffice-admin-operational-runbooks.md)
+
+### Player Bunker
+- [Player Auth Architecture — Bunker](./06-player-bunker/player-auth-architecture.md)
 
 ---
 
