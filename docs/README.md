@@ -4,6 +4,7 @@
 
 - [Governance](./00-governance/README.md)
 - [Master Index](./00-governance/99-master-index.md)
+- [HSC Repositories Map](./00-governance/hsc-repositories-map.md)
 - [Infra Hostinger](./01-infra-hostinger/README.md)
 - [Game Panel](./02-game-panel/README.md)
 - [Portal Estático](./03-portal-estatico/README.md)
@@ -27,6 +28,7 @@ A navegação recomendada do repositório começa aqui e segue por contexto can�
 - [Governance](./00-governance/README.md)
 - [Documentation System](./00-governance/documentation-system.md)
 - [Master Index](./00-governance/99-master-index.md)
+- [HSC Repositories Map](./00-governance/hsc-repositories-map.md)
 
 ---
 
