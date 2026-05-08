@@ -288,6 +288,49 @@ Os detalhes continuam globais:
 
 Não foram criados endpoints de detalhe por Season.
 
+## Atualização posterior - deploy staging e hardening Nginx
+
+Em 2026-05-08, após o merge do `hsc-cs2-portal` PR #28 (`01564d1`) e do `hsc-docs` PR #38 (`da2743f`), o Portal Angular CS2 Next foi publicado em staging público na VPS `srv1353392`.
+
+Publicação realizada:
+
+- build local publicado a partir de `frontend/angular/dist/hsc-cs2-portal-angular/browser/*`
+- webroot de staging: `/var/www/portal/cs2-next`
+- Nginx ativo: `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf`
+- backup do build anterior: `/root/hsc-snapshots/cs2-next-before-cs2-next-20260508T161102Z-01564d1.tar.gz`
+- backup do Nginx antes do hardening: `/etc/nginx/conf.d/srv1353392.hstgr.cloud.conf.bak.harden-cs2next-20260508T162837Z`
+
+Smoke público validado com `200`:
+
+- `/portal/cs2-next/`
+- `/portal/cs2-next/seasons/current`
+- `/portal/cs2-next/seasons/current/ranking`
+- `/portal/cs2-next/seasons/current/matches`
+- `/portal/cs2-next/seasons/current/maps`
+- `/portal/cs2-next/matches`
+- `/portal/cs2-next/maps`
+- `/portal/cs2-next/api-smoke`
+- `/portal/cs2/`
+- `/api/cs2/v2/season/s01-2026/matches.json`
+- `/api/cs2/v2/season/s01-2026/maps.json`
+
+Hardening Nginx validado:
+
+- `/portal/cs2` → `301 /portal/cs2/`
+- `/portal/cs2-next` → `301 /portal/cs2-next/`
+- `/portal/cs2-next/package.json` → `404`
+- `/portal/cs2-next/angular.json` → `404`
+- `/portal/cs2-next/src/` → `404`
+- `/portal/cs2-next/node_modules/` → `404`
+- `/portal/cs2-next/.git/` → `404`
+
+Leitura final:
+
+- `/portal/cs2-next/` ficou concluído em staging público para as páginas player-facing de Season Matches/Maps
+- `/portal/cs2/` segue legado e preservado
+- esta frente não representa cutover de produção do portal legado
+- rollback permanece disponível pelos snapshots registrados acima
+
 ## Documentos canônicos relacionados
 
 - [JSON Contracts](../03-portal-estatico/json-contracts.md)
