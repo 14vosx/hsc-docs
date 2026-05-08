@@ -46,6 +46,7 @@ Este documento existe para registrar, de forma estável e auditável:
 Este documento cobre:
 
 - publishing do portal sob `/portal/cs2/`
+- publishing staging do Angular CS2 Next sob `/portal/cs2-next/`
 - publishing da Static API v2 sob `/api/cs2/v2/`
 - publishing dos assets públicos do portal
 - mirror same-origin de `/content/news/`
@@ -73,6 +74,8 @@ O estado operacional conhecido e reconciliado desta camada é:
 
 - o portal público é servido sob:
   - `/portal/cs2/`
+- o staging público do Angular CS2 Next é servido sob:
+  - `/portal/cs2-next/`
 - os assets estáveis do portal são servidos sob:
   - `/portal/cs2/assets/`
 - a Static API v2 é servida publicamente sob:
@@ -185,6 +188,55 @@ Leitura canônica:
 - `/portal/cs2/` é a porta principal do frontend estático
 - a navegação do portal depende do fallback SPA configurado no Nginx
 - o portal não deve ser tratado como aplicação publicada na raiz `/`
+
+---
+
+## Publicação staging do Angular CS2 Next
+
+O HSC Portal CS2 Angular staging é servido sob:
+
+```text
+/portal/cs2-next/
+```
+
+A árvore de filesystem reconciliada para essa publicação é:
+
+```text
+/var/www/portal/cs2-next/
+```
+
+No runtime real, o Nginx usa:
+
+- `alias /var/www/portal/cs2-next/;`
+- fallback SPA com `try_files $uri $uri/ /portal/cs2-next/index.html;`
+
+Leitura canônica:
+
+- `/portal/cs2-next/` é staging público do Angular CS2 Next
+- `/portal/cs2/` continua legado e preservado
+- essa publicação não representa cutover de produção do portal legado
+- o deploy do `cs2-next` não deve tocar a árvore `/var/www/portal/cs2/`
+
+Normalização sem barra:
+
+- `/portal/cs2-next` → `/portal/cs2-next/`
+- `/portal/cs2` → `/portal/cs2/`
+
+Hardening aplicado em `/portal/cs2-next/`:
+
+- `package.json`
+- `angular.json`
+- `tsconfig*.json`
+- `.npmrc`
+- `.env`
+- `src/`
+- `node_modules/`
+- `.github/`
+- dotfiles
+
+Esses paths devem responder `404` na borda pública.
+
+Antes do hardening, alguns paths inexistentes sob `/portal/cs2-next/` podiam cair no `index.html` por causa do fallback SPA. Isso não significava exposição real desses arquivos, mas a borda foi endurecida para responder `404` explicitamente nesses casos sensíveis.
 
 ---
 
@@ -682,4 +734,4 @@ Este documento pode ser considerado maduro quando:
 - Status: ativo
 - Classificação: canônico
 - Contexto: portal estático / Nginx publishing and cache
-- Última revisão: 2026-03-18
+- Última revisão: 2026-05-08

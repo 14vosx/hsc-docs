@@ -398,6 +398,75 @@ O portal é considerado saudável quando:
 
 ---
 
+## Runbook de publicar build Angular no staging `/portal/cs2-next/`
+
+Este runbook deve ser usado para publicar o build estático do `hsc-cs2-portal` no staging público do Angular CS2 Next.
+
+### Objetivo
+
+Publicar somente os artefatos gerados do Angular em `/var/www/portal/cs2-next/`, preservando o portal legado em `/var/www/portal/cs2/`.
+
+### Sequência lógica
+
+1. confirmar que o checkout local do `hsc-cs2-portal` está em `main` e no commit esperado para a publicação
+2. gerar o build com base href do staging:
+
+```bash
+npx ng build hsc-cs2-portal-angular --base-href=/portal/cs2-next/
+```
+
+3. publicar somente o conteúdo de:
+
+```text
+frontend/angular/dist/hsc-cs2-portal-angular/browser/*
+```
+
+4. criar snapshot antes de sobrescrever:
+
+```text
+/var/www/portal/cs2-next/
+```
+
+5. preparar staging temporário em `/tmp`
+6. rodar `rsync --dry-run` antes do `rsync` real
+7. executar o `rsync` real somente após conferir o plano do dry-run
+8. rodar smoke público mínimo
+
+### Smoke público mínimo
+
+Validar, no mínimo:
+
+- `/portal/cs2-next/`
+- `/portal/cs2-next/seasons/current`
+- `/portal/cs2-next/seasons/current/ranking`
+- `/portal/cs2-next/seasons/current/matches`
+- `/portal/cs2-next/seasons/current/maps`
+- `/portal/cs2-next/matches`
+- `/portal/cs2-next/maps`
+- `/portal/cs2-next/api-smoke`
+- `/portal/cs2/`
+
+Também validar os contratos de Season consumidos pelas novas páginas:
+
+- `/api/cs2/v2/season/s01-2026/matches.json`
+- `/api/cs2/v2/season/s01-2026/maps.json`
+
+### Rollback
+
+Rollback deve restaurar o snapshot anterior de `/var/www/portal/cs2-next/`.
+
+O snapshot deve ser criado antes de qualquer sobrescrita do webroot e deve ser guardado fora da árvore publicada.
+
+### Regras de segurança operacional
+
+- nunca usar `/var/www/portal/cs2-next/` como Git working tree
+- nunca tocar `/var/www/portal/cs2/` durante deploy do `cs2-next`
+- nunca publicar a raiz do repositório Angular no webroot
+- nunca sugerir `git pull` dentro do webroot
+- publicar apenas os artefatos gerados em `dist/hsc-cs2-portal-angular/browser/*`
+
+---
+
 ## Runbook de validação da Static API v2 pública
 
 Este runbook deve ser usado quando a suspeita principal recair sobre a camada JSON pública.
@@ -687,4 +756,4 @@ O runbook dedicado existe para evitar que o fluxo de materialização fique dilu
 - Status: ativo
 - Classificação: canônico
 - Contexto: portal-estatico / runbooks operacionais
-- Última revisão: 2026-04-01
+- Última revisão: 2026-05-08
