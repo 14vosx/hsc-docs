@@ -388,7 +388,10 @@ Nota sobre Seasons:
 - foram executados smokes funcionais locais com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
 - Smoke 1 validou `INTERNAL_API_KEY` configurada, consumo de `POST /internal/steam/profiles/resolve`, avatar preenchido para `76561198000000001` e fallback `null` para `76561198000000002`
 - Smoke 2 validou ausência de `INTERNAL_API_KEY` sem quebrar a geração do ranking, com `steam_avatar_url: null` e sem chamada ao endpoint interno
-- seguem pendentes a configuração/runtime com `INTERNAL_API_KEY`, a materialização runtime/prod, a validação pública real em `/api/cs2/v2/season/{slug}/ranking.json` e a validação visual pública do Portal com dados reais
+- a frente foi publicada e validada em runtime/prod para o Season Ranking
+- a validação HTTP pública de `/api/cs2/v2/season/s01-2026/ranking.json` confirmou 32 players, `missing_field=0` e `non_null=32`
+- a execução via `gen-all-v2.service` preservou avatars reais no HTTP público após `STEP gen-season-rankings`
+- o Portal CS2 Next foi validado visualmente em `/portal/cs2-next/seasons/current` e `/portal/cs2-next/seasons/current/ranking`, com pódio/top players, tabela preview e tabela completa exibindo avatares reais
 
 ---
 
