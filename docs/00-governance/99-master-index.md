@@ -53,6 +53,7 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
 ### Histórico e auditoria
 - [Impl Log](../95-impl-log/README.md)
   - [2026-04-02 — ETL Minimal Shell CI Workflow](../95-impl-log/2026-04-02-etl-minimal-shell-ci-workflow.md)
+  - [2026-05-07 — Steam Profiles e avatar no Season Ranking](../95-impl-log/2026-05-07-steam-profiles-and-season-ranking-avatar.md)
 - [Audit](../97-audit/README.md)
 - [Legacy](../98-legacy/README.md)
 

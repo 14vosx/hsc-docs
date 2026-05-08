@@ -223,6 +223,9 @@ Função:
 Função:
 - expor ranking público estático associado a uma Season
 - incluir `season.cover_image_url`; `null` significa sem capa
+- incluir `players[].steam_avatar_url` como `string|null`
+- entregar a URL de avatar já materializada pela Static API; o frontend não busca Steam diretamente
+- usar `null` quando o avatar Steam não estiver disponível ou quando o enriquecimento interno falhar
 
 ---
 
@@ -356,6 +359,7 @@ Ela é resultado do ETL Bash, que:
 
 - consulta a fonte SQLite
 - consulta `${AUTH_BASE}/content/seasons` para metadados públicos de Seasons
+- consulta a Auth API interna para resolver Steam Profiles quando o enriquecimento de avatar de Season Ranking está configurado
 - aplica queries e transformações
 - escreve artefatos intermediários
 - publica JSONs finais nos paths públicos da v2
@@ -369,11 +373,22 @@ Isso significa:
 A v2 é, portanto, inseparável da disciplina operacional do pipeline.
 
 Nota sobre Seasons:
+
+`cover_image_url`:
 - o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` para `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
 - a normalização documentada é: ausente => `null`, `null` => `null`, string vazia/whitespace => `null`, valor preenchido => string trimada
-- a validação registrada foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
-- o Portal Angular já está source-ready para consumir esse campo: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais
+- a validação registrada para propagação de `cover_image_url` foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
+- o Portal Angular já está source-ready para consumir `cover_image_url`: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
+
+`steam_avatar_url`:
+- o código-fonte do ETL em `hsc-cs2-etl` está source-ready/mergeado para materializar `players[].steam_avatar_url` em `season/{slug}/ranking.json` a partir do domínio Steam Profiles da Auth API
+- a Auth API é a fonte de enriquecimento de Steam Profiles; o ETL é o materializador do campo na Static API v2
+- o fallback documentado para `players[].steam_avatar_url` é `null`
+- o Portal Estático apenas exibe a URL pronta publicada pela v2; ele não chama Steam diretamente
+- foram executados smokes funcionais locais com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário, sem tocar `/var/www` e sem rodar produção
+- Smoke 1 validou `INTERNAL_API_KEY` configurada, consumo de `POST /internal/steam/profiles/resolve`, avatar preenchido para `76561198000000001` e fallback `null` para `76561198000000002`
+- Smoke 2 validou ausência de `INTERNAL_API_KEY` sem quebrar a geração do ranking, com `steam_avatar_url: null` e sem chamada ao endpoint interno
+- seguem pendentes a configuração/runtime com `INTERNAL_API_KEY`, a materialização runtime/prod, a validação pública real em `/api/cs2/v2/season/{slug}/ranking.json` e a validação visual pública do Portal com dados reais
 
 ---
 

@@ -140,6 +140,36 @@ As principais evidências deste documento, nesta fase, são:
 
 ---
 
+## Steam Profiles
+
+O código-fonte do `hsc-auth-api` introduziu o domínio Steam Profiles como dono canônico do cache de perfis Steam usado por integrações internas.
+
+Escopo documentado:
+- tabela `steam_profiles`
+- migration `0006_steam_profiles.sql`
+- endpoint interno `POST /internal/steam/profiles/resolve`
+- cache com TTL, resolução em lote de até 100 SteamIDs, timeout e fallback para cache
+
+Variáveis relacionadas:
+- `STEAM_API_KEY`
+- `INTERNAL_API_KEY`
+- `STEAM_PROFILE_CACHE_TTL_SECONDS`
+- `STEAM_API_TIMEOUT_SECONDS`
+
+Segurança:
+- o endpoint é interno e protegido por `X-Internal-Key`/`INTERNAL_API_KEY`
+- valores reais de chaves não devem ser registrados nesta documentação
+- `STEAM_API_KEY` pertence à Auth API; consumidores internos não devem reutilizar essa chave para chamar Steam diretamente
+
+Consumidores previstos ou já source-ready:
+- `hsc-cs2-etl`, como consumidor interno e materializador de `players[].steam_avatar_url` em `season/{slug}/ranking.json`
+- futura área logada
+- futuras superfícies do portal
+
+Esta seção registra a decisão arquitetural e o estado do código-fonte. Ela não substitui runbook de deploy, não afirma materialização em produção e não prescreve alteração operacional sem validação específica.
+
+---
+
 ## Relações com outros documentos
 
 Este arquivo é complementar a:

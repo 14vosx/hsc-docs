@@ -294,6 +294,26 @@ Evidência e limites:
 - o Portal Angular já está source-ready para consumir esse campo: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
 - seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais
 
+### Avatar Steam no ranking de Season
+
+`season/{slug}/ranking.json` inclui, em cada item de `players[]`, o campo:
+
+- `steam_avatar_url`
+
+Contrato:
+- tipo: `string|null`
+- fonte canônica: domínio Steam Profiles do `hsc-auth-api`
+- origem técnica: endpoint interno `POST /internal/steam/profiles/resolve`, consumido pelo `hsc-cs2-etl`
+- fallback: `null` quando o perfil, a URL, a chave interna, o endpoint ou a resposta não estiverem disponíveis
+- compatibilidade: campos existentes do ranking de Season não devem ser removidos por causa desse enriquecimento
+
+Responsabilidade por camada:
+- Auth API é dona canônica do cache de Steam Profiles
+- ETL consome a Auth API interna e materializa `players[].steam_avatar_url` no JSON público
+- Portal apenas exibe o campo publicado; ele não consulta Steam diretamente
+
+Esta decisão vale para o ranking de Season. Ela não transforma o `steam-cache/{steamid64}.json` legado/auxiliar em fonte canônica para esse novo campo.
+
 ---
 
 ## Contrato de `match/{id}.json`
@@ -432,7 +452,7 @@ O dossiê de jogador deve ser coerente com:
 
 ### Papel
 
-`steam-cache/{steamid64}.json` é o recurso auxiliar de enriquecimento associado ao jogador.
+`steam-cache/{steamid64}.json` é o recurso auxiliar/legado de enriquecimento associado ao jogador, especialmente no fluxo de dossiê público de jogador.
 
 ### Finalidade
 
@@ -453,6 +473,8 @@ Em nível macro, esse recurso pode conter campos como:
 Regra importante:
 - o cache auxiliar não deve substituir a identidade estrutural do jogador na v2
 - ele é complementar ao `player/{steamid64}.json`
+- `steam-cache/{steamid64}.json`, `avatarMedium` e `steamProfileUrl` pertencem ao fluxo legado/auxiliar de player dossier
+- a decisão nova para `season/{slug}/ranking.json` é `players[].steam_avatar_url` materializado pelo ETL a partir do domínio Steam Profiles da Auth API
 
 ---
 
@@ -465,11 +487,12 @@ Exemplos conhecidos em alto nível incluem:
 - `avatarMedium`
 - `steamProfileUrl`
 
-Esses campos existem para melhorar a experiência pública sem alterar a natureza estática da v2.
+Esses campos existem para melhorar a experiência pública sem alterar a natureza estática da v2. No contexto de `steam-cache/{steamid64}.json`, eles devem ser lidos como parte do fluxo legado/auxiliar de player dossier, não como a fonte atual do avatar do ranking de Season.
 
 Regra editorial:
 - enriquecimento deve continuar sendo tratado como complementar
 - o portal não deve depender de fonte externa em tempo de renderização para compor o básico do contrato público
+- a nova implementação de avatar em Season Ranking não deve ser documentada como dependente de Steam Community XML; ela usa Steam Profiles via Auth API
 
 ---
 
