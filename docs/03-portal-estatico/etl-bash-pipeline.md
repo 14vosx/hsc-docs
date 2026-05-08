@@ -351,6 +351,17 @@ Papel:
 - gerar `season/{slug}.json`
 - gerar `season/{slug}/ranking.json`
 - preservar `season.cover_image_url` nos dois artefatos
+- consumir o endpoint interno da Auth API para resolver Steam Profiles quando `INTERNAL_API_KEY` está configurada
+- publicar `players[].steam_avatar_url` em `season/{slug}/ranking.json`
+
+Enriquecimento de Steam Profiles:
+- a fonte versionada do ETL em `hsc-cs2-etl` consome `POST /internal/steam/profiles/resolve`
+- o ETL não usa `STEAM_API_KEY`
+- o ETL não chama Steam Web API diretamente
+- falha, timeout, ausência de `INTERNAL_API_KEY`, resposta inválida ou perfil ausente não bloqueiam o ranking
+- o fallback publicado para `players[].steam_avatar_url` é `null`
+- smokes funcionais locais validaram consumo de Auth API fake com `INTERNAL_API_KEY` e fallback sem `INTERNAL_API_KEY`, usando SQLite fixture temporário e `API_DIR` temporário
+- isso descreve o código-fonte do ETL; não afirma que a produção já foi materializada ou validada com esse campo
 
 ---
 
