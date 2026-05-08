@@ -46,7 +46,7 @@ Este documento cobre:
 
 - os princípios gerais dos contratos JSON da v2
 - os artefatos públicos principais da Static API v2
-- os contratos macro de `health.json`, `ranking.json`, `matches.json`, `match/{id}.json`, `maps.json`, `map/{map}.json`, `player/{steamid64}.json`, `steam-cache/{steamid64}.json`, `seasons.json`, `season/{slug}.json` e `season/{slug}/ranking.json`
+- os contratos macro de `health.json`, `ranking.json`, `matches.json`, `match/{id}.json`, `maps.json`, `map/{map}.json`, `player/{steamid64}.json`, `steam-cache/{steamid64}.json`, `seasons.json`, `season/{slug}.json`, `season/{slug}/ranking.json`, `season/{slug}/matches.json` e `season/{slug}/maps.json`
 - os campos derivados e enriquecimentos conhecidos em alto nível
 - as regras de compatibilidade entre ETL, publicação e frontend
 - as validações mínimas esperadas dos contratos
@@ -155,6 +155,8 @@ Os contratos da v2 se dividem, conceitualmente, em quatro grupos:
 - `player/{steamid64}.json`
 - `season/{slug}.json`
 - `season/{slug}/ranking.json`
+- `season/{slug}/matches.json`
+- `season/{slug}/maps.json`
 
 ### 4. Recursos auxiliares de enriquecimento
 
@@ -271,6 +273,8 @@ Os contratos de Seasons expõem metadados públicos estáticos vindos de `${AUTH
 - `/api/cs2/v2/seasons.json`
 - `/api/cs2/v2/season/{slug}.json`
 - `/api/cs2/v2/season/{slug}/ranking.json`
+- `/api/cs2/v2/season/{slug}/matches.json`
+- `/api/cs2/v2/season/{slug}/maps.json`
 
 ### Campo de capa
 
@@ -313,6 +317,54 @@ Responsabilidade por camada:
 - Portal apenas exibe o campo publicado; ele não consulta Steam diretamente
 
 Esta decisão vale para o ranking de Season. Ela não transforma o `steam-cache/{steamid64}.json` legado/auxiliar em fonte canônica para esse novo campo.
+
+### Partidas e mapas por Season
+
+`season/{slug}/matches.json` e `season/{slug}/maps.json` são contratos públicos incrementais da Static API v2 para recortes competitivos de uma Season.
+
+Esses recursos reforçam que Season não é apenas CRUD administrativo. Season representa uma feature competitiva com tema/narrativa, ranking separado, partidas e mapas classificados dentro da temporada e ciclo competitivo próprio.
+
+Papel:
+- `season/{slug}/matches.json` expõe a lista de partidas que possuem mapas válidos dentro da Season
+- `season/{slug}/maps.json` expõe o agregado por mapa dentro da Season
+- ambos são recortes competitivos da Season, não substitutos dos contratos globais
+
+Relação com contratos globais:
+- `matches.json`, `maps.json`, `match/{id}.json` e `map/{map}.json` não mudaram nesta entrega
+- os detalhes continuam nos endpoints globais `/api/cs2/v2/match/{id}.json` e `/api/cs2/v2/map/{map}.json`
+- não foram criados endpoints `season/{slug}/match/{id}.json` nem `season/{slug}/map/{map}.json`
+- Ranking Geral e Ranking da Season continuam sendo conceitos diferentes
+
+Regra de pertencimento à Season:
+
+Um mapa pertence à Season quando:
+- `matchzy_stats_maps.end_time` está entre `season.start_at` e `season.end_at`
+- `winner` está preenchido
+- `team1_score + team2_score >= 12`
+
+Contrato macro de `season/{slug}/matches.json`:
+- top-level: `generatedAt`, `season`, `rules`, `summary`, `computed`, `matches`
+- `summary`: `matches`, `maps`, `rounds`, `players`, `lastMapEndedAt`
+- `computed`: `firstMapStartedAt`
+- `matches[]` preserva o shape base de `matches.json` quando possível
+- cada item de `matches[]` pode conter `matchid`, `start_time`, `end_time`, `winner`, `series_type`, `team1_name`, `team1_score`, `team2_name`, `team2_score`, `server_ip` e `maps[]`
+- `matches[].maps[]` é restringido aos mapas válidos da Season
+- campos aditivos por partida: `seasonMapCount`, `seasonRounds`, `seasonFirstMapStartedAt`, `seasonLastMapEndedAt`
+- `matches[].maps[]` inclui `rounds` como campo aditivo
+
+Contrato macro de `season/{slug}/maps.json`:
+- top-level: `generatedAt`, `season`, `rules`, `summary`, `computed`, `maps`
+- `summary`: `matches`, `maps`, `rounds`, `players`, `lastMapEndedAt`
+- `computed`: `distinctMaps`
+- `maps[]` é agregado por `mapname` dentro da Season
+- cada item de `maps[]` contém `map`, `matches`, `rounds`, `avgRoundsPerMatch` e `lastPlayed`
+
+Compatibilidade e limites:
+- os dois contratos são aditivos na v2
+- a entrega foi mergeada no `hsc-cs2-etl` pelo PR #10, commit `0345b57`
+- a validação registrada até aqui foi local/smoke temporário no `hsc-cs2-etl`
+- produção/runtime ainda não foi materializada nem validada para esses endpoints
+- não há afirmação documental de consumo pelo Portal Angular nesta etapa
 
 ---
 

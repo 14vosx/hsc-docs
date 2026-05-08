@@ -229,6 +229,27 @@ Função:
 
 ---
 
+### `season/{slug}/matches.json`
+
+Função:
+- expor partidas com mapas válidos dentro de uma Season
+- preservar, quando possível, o shape base de `matches.json`
+- restringir `matches[].maps[]` aos mapas classificados dentro da janela e das regras da Season
+- adicionar métricas de recorte da Season por partida, como contagem de mapas, rounds e limites temporais dos mapas válidos
+- funcionar como contrato aditivo; não substitui `matches.json` nem `match/{id}.json`
+
+---
+
+### `season/{slug}/maps.json`
+
+Função:
+- expor agregado por mapa dentro de uma Season
+- publicar métricas por `mapname`, incluindo partidas, rounds, média de rounds por partida e último uso
+- representar recorte competitivo da Season, não a visão global de mapas
+- funcionar como contrato aditivo; não substitui `maps.json` nem `map/{map}.json`
+
+---
+
 ### `map/{map}.json`
 
 Função:
@@ -287,6 +308,8 @@ Usadas para:
 - `steam-cache/{steamid64}.json`
 - `season/{slug}.json`
 - `season/{slug}/ranking.json`
+- `season/{slug}/matches.json`
+- `season/{slug}/maps.json`
 
 Usados para:
 - páginas de detalhe
@@ -392,6 +415,16 @@ Nota sobre Seasons:
 - a validação HTTP pública de `/api/cs2/v2/season/s01-2026/ranking.json` confirmou 32 players, `missing_field=0` e `non_null=32`
 - a execução via `gen-all-v2.service` preservou avatars reais no HTTP público após `STEP gen-season-rankings`
 - o Portal CS2 Next foi validado visualmente em `/portal/cs2-next/seasons/current` e `/portal/cs2-next/seasons/current/ranking`, com pódio/top players, tabela preview e tabela completa exibindo avatares reais
+
+`season/{slug}/matches.json` e `season/{slug}/maps.json`:
+- o código-fonte do ETL em `hsc-cs2-etl` foi mergeado no PR #10, commit `0345b57`, para materializar os recortes competitivos de partidas e mapas por Season
+- `season/{slug}/matches.json` publica partidas com mapas válidos dentro da Season, preservando o shape base de `matches.json` quando possível e adicionando campos específicos do recorte
+- `season/{slug}/maps.json` publica agregado por `mapname` dentro da Season
+- a regra de pertencimento considera mapas com `matchzy_stats_maps.end_time` entre `season.start_at` e `season.end_at`, `winner` preenchido e `team1_score + team2_score >= 12`
+- os contratos globais `matches.json`, `maps.json`, `match/{id}.json` e `map/{map}.json` não mudaram nesta entrega
+- não foram criados endpoints `season/{slug}/match/{id}.json` nem `season/{slug}/map/{map}.json`; detalhes continuam nos endpoints globais
+- a validação registrada até aqui foi local/smoke temporário no `hsc-cs2-etl`, sem tocar produção, runtime, `systemd`, `/usr/local/bin` ou `/var/www`
+- a materialização e validação pública em produção desses dois endpoints seguem pendentes
 
 ---
 

@@ -28,6 +28,7 @@ Ela serve para:
 - [2026-04-01 — ETL Runtime Reconciliation, Parameterization and Materialization](./2026-04-01-etl-runtime-reconciliation-parameterization-and-materialization.md)
 - [2026-04-02 — ETL Minimal Shell CI Workflow](./2026-04-02-etl-minimal-shell-ci-workflow.md)
 - [2026-05-07 — Steam Profiles e avatar no Season Ranking](./2026-05-07-steam-profiles-and-season-ranking-avatar.md)
+- [2026-05-08 — Season matches/maps na Static API v2](./2026-05-08-season-matches-maps-static-api-contract.md)
 
 ### Contextos relacionados
 - [Governance](../00-governance/README.md)
