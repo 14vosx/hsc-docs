@@ -75,7 +75,8 @@ O estado operacional conhecido dos contratos JSON da v2 é:
 - a publicação final é servida por Nginx
 - a compatibilidade dos contratos é crítica para o funcionamento do portal
 - a v2 é a versão canônica atual da API estática
-- os contratos estáticos de Seasons já incluem `cover_image_url` na fonte ETL versionada, com materialização runtime/prod e validação pública real ainda pendentes
+- os contratos estáticos de Seasons já incluem `cover_image_url`, com materialização runtime/prod e validação pública real concluídas
+- `season/{slug}/matches.json` e `season/{slug}/maps.json` já foram materializados e validados publicamente em runtime/prod
 
 A integridade do portal depende não apenas da existência dos arquivos, mas também da estabilidade semântica desses contratos.
 
@@ -293,10 +294,9 @@ Normalização no ETL:
 Evidência e limites:
 
 - o código-fonte do ETL em `hsc-cs2-etl` já propaga `cover_image_url` nesses três recursos
-- a validação registrada foi local/temporária, com fake Auth API local, SQLite fixture temporário e `API_DIR` temporário
-- essa validação não tocou `/var/www` e não rodou produção
+- a materialização runtime/prod do campo já foi concluída
+- a validação pública real em `/api/cs2/v2/...` já foi concluída para os recursos de Season que expõem `cover_image_url`
 - o Portal Angular já está source-ready para consumir esse campo: `SeasonDto` tipa `cover_image_url`, `seasonCoverImage(...)` prioriza `cover_image_url`, cards/heróis de Seasons e Ranking usam `--season-cover`, e `npm run build` passou
-- seguem pendentes a materialização runtime/prod do ETL atualizado, a validação pública real em `/api/cs2/v2/...` e a validação visual pública do Portal com dados reais
 
 ### Avatar Steam no ranking de Season
 
@@ -362,8 +362,10 @@ Contrato macro de `season/{slug}/maps.json`:
 Compatibilidade e limites:
 - os dois contratos são aditivos na v2
 - a entrega foi mergeada no `hsc-cs2-etl` pelo PR #10, commit `0345b57`
-- a validação registrada até aqui foi local/smoke temporário no `hsc-cs2-etl`
-- produção/runtime ainda não foi materializada nem validada para esses endpoints
+- a primeira validação registrada foi local/smoke temporário no `hsc-cs2-etl`
+- a publicação runtime/prod foi concluída após o `hsc-cs2-etl` PR #11, commit `81701e6`, que incluiu `gen-season-matches-maps.sh` na materialização runtime
+- os endpoints públicos de `s01-2026` foram materializados e validados em `https://haxixesmokeclub.com/api/cs2/v2/season/s01-2026/matches.json` e `https://haxixesmokeclub.com/api/cs2/v2/season/s01-2026/maps.json`
+- o smoke público validou `summary.matches = 15`, `summary.maps = 15`, `summary.rounds = 336`, `summary.players = 32`, `computed.firstMapStartedAt = 2026-02-09 22:54:25` e `computed.distinctMaps = 7`
 - não há afirmação documental de consumo pelo Portal Angular nesta etapa
 
 ---
