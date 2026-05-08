@@ -45,7 +45,8 @@ Este índice coordena a leitura. Ele não substitui os documentos especializados
   - [News Functional Smoke Guide](../05-backoffice-admin/news-functional-smoke-guide.md)
   - [Seasons Admin Functional Smoke Guide](../05-backoffice-admin/seasons-admin-list-functional-smoke-guide.md)
   - [Backoffice UI Material Foundation](../05-backoffice-admin/backoffice-ui-material-foundation.md)
-- [06 — Player Bunker](../06-player-bunker/player-auth-architecture.md)
+- [06 — Player Bunker](../06-player-bunker/user-bunker-product-architecture-plan.md)
+  - [User Bunker — Product and Architecture Plan](../06-player-bunker/user-bunker-product-architecture-plan.md)
   - [Player Auth Architecture — Bunker](../06-player-bunker/player-auth-architecture.md)
 
 ### Trilhas principais
@@ -236,11 +237,13 @@ Arquivos principais:
 
 Função:
 - Bunker player-facing
+- planejamento de produto e arquitetura da área logada do usuário
 - decisão arquitetural da Player Auth
 - separação entre Admin Auth e Player Auth
 - Steam como provider inicial
 
 Arquivos principais:
+- [User Bunker — Product and Architecture Plan](../06-player-bunker/user-bunker-product-architecture-plan.md)
 - [Player Auth Architecture — Bunker](../06-player-bunker/player-auth-architecture.md)
 
 ---
