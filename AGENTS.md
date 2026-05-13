@@ -33,7 +33,144 @@ Codex should act as a documentation maintenance assistant.
 
 Codex may edit Markdown files when the task is explicit and the target context is clear.
 
-Codex must not make architecture, product, runtime, deployment, infrastructure, API, ETL, Game Panel, or security decisions independently.
+Codex must not make architecture, product, runtime, deployment, infrastructure, API, ETL, Game Panel, billing, authentication, security, or production-data decisions independently.
+
+Documentation may record approved decisions and validated facts. Documentation must not invent decisions.
+
+## Current HSC state to preserve
+
+Current important project state:
+
+```text
+/portal/cs2
+  current official/legacy portal path
+  do not change unless the human explicitly starts a cutoff/rollback task
+
+/portal/cs2-next
+  active public canary for Angular CS2 Next
+  contains the Player Bunker route
+
+/player/*
+  reverse-proxied by Hostinger Nginx to the Auth API on AWS
+  used for Player Auth and Player Bunker authenticated data
+
+Auth API AWS
+  owns Admin Auth, Player Auth, session, Steam login, and Bunker gateway behavior
+
+hsc-cs2-etl
+  owns competitive stats materialization and Season/player artifacts
+
+hsc-cs2-portal
+  owns Angular presentation and canary UI
+
+hsc-docs
+  owns canonical documentation, decisions, runbooks, checkpoints, and planning
+```
+
+There has been no cutoff from `/portal/cs2-next` to `/portal/cs2`.
+
+Do not write docs that imply the cutoff already happened.
+
+## Player Bunker documentation boundary
+
+The Player Bunker lives under:
+
+```text
+docs/06-player-bunker
+```
+
+This context covers:
+
+```text
+player-facing logged-in area
+Bunker product/architecture plans
+Player Auth architecture
+Steam-first player identity
+Admin Auth vs Player Auth separation
+Bunker deploy/rollback plans
+local/canary validation checkpoints
+MVP2 Bunker enrichment plans
+artifact and Auth API integration boundaries
+```
+
+Player Bunker documentation must preserve these boundaries:
+
+```text
+ETL owns competitive stats materialization
+Auth API owns authenticated access and response shaping
+Portal owns presentation
+Docs records decisions and runbooks
+Backoffice is admin/internal and not the Bunker
+Brand Hub is brand/static and not the Bunker
+```
+
+Do not document Bunker as if it were part of Backoffice.
+
+Do not document Bunker as if it were a Brand Hub route.
+
+Do not document Bunker as if the Portal directly reads ETL artifacts.
+
+## MVP2 Bunker documentation rules
+
+The current approved next product direction is:
+
+```text
+MVP2 — Bunker Melhorado
+```
+
+Documentation may describe the approved MVP2 scope:
+
+```text
+enrich /player/bunker/summary
+use existing data already available in the HSC ecosystem
+keep Auth API as authenticated gateway
+separate Season data from lifetime/competitive profile data
+preserve /portal/cs2-next as canary
+do not cutoff /portal/cs2
+do not start billing
+do not create a Bunker subdomain
+do not migrate to Angular Material
+do not create a new backend service
+do not recalculate ranking or score outside the canonical owner
+```
+
+Do not expand MVP2 scope without explicit human approval.
+
+Do not present future ideas as approved scope.
+
+Future topics such as billing, entitlements, premium gates, public profile sharing, ranking eligibility, and subdomains must stay clearly marked as future/out-of-scope unless approved.
+
+## Documentation is not deployment authorization
+
+A runbook, checklist, or plan in this repository does not authorize live changes by itself.
+
+Documentation may include operational steps, but Codex must not execute or recommend immediate production mutation unless the human explicitly starts an execution task.
+
+Docs may cover:
+
+```text
+dry-run commands
+read-only diagnostics
+validation steps
+rollback plans
+go/no-go checklists
+post-deploy evidence templates
+```
+
+Docs must not silently turn into:
+
+```text
+deploy
+release
+rollback
+cutoff
+systemd change
+Nginx change
+DNS/TLS change
+production migration
+production data mutation
+webroot publication
+```
 
 ## Source of truth rules
 
@@ -46,6 +183,55 @@ Do not duplicate information across contexts unless explicitly requested.
 Prefer linking to the canonical document over copying entire sections.
 
 When information conflicts, do not silently choose one version. Identify the conflict and ask the human for a decision.
+
+When recording status, distinguish clearly between:
+
+```text
+planned
+implemented locally
+validated locally
+published to canary
+published to production
+deprecated
+future/out-of-scope
+```
+
+Do not rewrite history as current canonical state without reconciliation.
+
+## Evidence and safety rules
+
+Allowed evidence in docs:
+
+```text
+HTTP status
+sanitized command output
+commit hashes
+PR numbers
+repo names
+route names
+artifact slug
+artifact counts
+non-secret filesystem paths
+screenshots without secrets/cookies/tokens
+safe JSON summaries
+```
+
+Forbidden evidence unless explicitly sanitized and approved:
+
+```text
+cookies
+session tokens
+token hashes
+Steam API keys
+DB credentials
+.env values
+private keys
+authorization headers
+raw callback query strings with sensitive values
+personal data beyond what is already intentionally public in the project context
+```
+
+If in doubt, redact.
 
 ## Context boundaries
 
@@ -60,6 +246,7 @@ maintenance playbook
 documentation system
 Codex usage policy
 cross-context rules
+repository map
 ```
 
 Allowed:
@@ -87,6 +274,7 @@ systemd
 webroots
 Static API hosting
 public portal hosting
+/player/* reverse proxy documentation
 ```
 
 Allowed:
@@ -96,9 +284,12 @@ document runbooks
 document diagnostics
 organize operational notes
 update read-only validation procedures
+record approved proxy/deploy findings
 ```
 
 Do not prescribe live infrastructure changes unless the task explicitly asks for a runbook.
+
+Do not imply a runbook has been executed unless evidence is provided.
 
 ### `docs/02-game-panel`
 
@@ -133,11 +324,12 @@ Purpose:
 
 ```text
 Static API v2
-portal público
+portal publico
 ETL outputs
 MatchZy data flow
 Angular cs2-next context when relevant
 public JSON contracts
+public canary and publication boundaries
 ```
 
 Allowed:
@@ -147,9 +339,12 @@ document portal behavior
 document Static API contracts
 document ETL-to-portal boundaries
 document staging/deploy findings
+document cs2-next canary state
 ```
 
 Do not change API contract meaning without explicit approval.
+
+Do not document `/portal/cs2-next` as official replacement for `/portal/cs2` until cutoff is explicitly approved and executed.
 
 ### `docs/04-infra-aws-lightsail`
 
@@ -164,6 +359,7 @@ Nginx reverse proxy
 systemd
 release/rollback
 migrations
+Player Auth runtime configuration when infrastructure-related
 ```
 
 Allowed:
@@ -173,9 +369,12 @@ document backend runbooks
 document release procedures
 document local/prod separation
 document migration policy
+document sanitized runtime config names
 ```
 
 Do not convert runbook steps into automatic execution guidance without explicit approval.
+
+Do not print secrets or production environment values.
 
 ### `docs/05-backoffice-admin`
 
@@ -202,6 +401,8 @@ document feature status
 
 Do not change RBAC/auth policy or product behavior as a documentation assumption.
 
+Do not mix Backoffice Admin with Player Bunker scope.
+
 ### `docs/06-player-bunker`
 
 Purpose:
@@ -212,6 +413,10 @@ Bunker
 Player Auth architecture
 separation between Admin Auth and Player Auth
 Steam as initial identity provider
+Bunker artifact and Auth API gateway boundaries
+MVP2 enrichment planning
+canary validation checkpoints
+deploy/rollback planning
 ```
 
 Allowed:
@@ -221,10 +426,14 @@ document Player Auth decisions
 document Bunker architecture
 document player-facing auth boundaries
 document Steam identity assumptions
-link to related Auth API, Portal, and Static API docs
+document canary validation
+document MVP2 scope and constraints
+link to related Auth API, Portal, ETL, and Static API docs
 ```
 
 Do not change authentication, identity, entitlement, billing, product, or API contract decisions as a documentation assumption.
+
+Do not document billing/subscription/premium gates as approved MVP2 work.
 
 ### `docs/95-impl-log`
 
@@ -261,179 +470,56 @@ reconciliation backlog
 Allowed:
 
 ```text
-organize findings
-turn findings into checklists
-mark items with evidence
-link to source docs
+record unresolved questions
+record inconsistencies
+record reconciliation tasks
+record known risks
 ```
 
-Do not close audit items without explicit evidence.
+Do not use audit docs as canonical architecture decisions until reconciled.
 
 ### `docs/98-legacy`
 
 Purpose:
 
 ```text
-legacy documentation
-historical blueprints
-old master docs
-preserved prior context
+legacy references
+historical docs
+deprecated notes
+old plans
 ```
 
 Allowed:
 
 ```text
-extract relevant history
-compare old docs with current docs
-propose reconciliation
+preserve historical context
+link legacy context when useful
 ```
 
-Do not treat legacy documents as canonical automatically.
+Do not promote legacy behavior to current state without confirmation.
 
-## Canonical vs local repository docs
+## Repository references
 
-This repository contains project-wide documentation.
-
-Implementation repositories may contain local operational docs and `AGENTS.md` files, for example:
+When documentation touches another repo, use the canonical repo names:
 
 ```text
-hsc-cs2-portal/AGENTS.md
-hsc-auth-api/AGENTS.md
-hsc-backoffice-admin/AGENTS.md
-hsc-cs2-etl/AGENTS.md
+hsc-docs
+hsc-auth-api
+hsc-cs2-etl
+hsc-cs2-portal
+hsc-backoffice-admin
+hsc-brand-hub
 ```
 
-Do not assume those repositories are available from this workspace.
+Do not invent new repository responsibilities.
 
-If a documentation change requires current code context from another repository, ask the human to provide the relevant file, diff, command output, or repository checkout.
-
-## Relation to Codex usage policy
-
-The canonical policy for Codex usage is:
-
-```text
-docs/00-governance/codex-usage-policy.md
-```
-
-Follow it when updating documentation related to agents, Codex, MCP, repo-local instructions, or development workflow.
-
-Do not contradict this policy in repo-local docs.
-
-## Allowed work
-
-Codex may:
-
-```text
-create Markdown docs
-edit Markdown docs
-fix broken links
-update indexes
-add cross-references
-summarize implementation logs
-convert notes into structured docs
-standardize headings
-improve wording without changing meaning
-add checklists
-document validated command outputs
-```
-
-## Forbidden work without explicit approval
-
-Do not:
-
-```text
-rename context directories
-delete documents
-move documents across contexts
-rewrite the documentation architecture
-promote legacy docs to canonical status
-change architecture decisions
-change product decisions
-invent runtime state
-invent command outputs
-invent validation results
-create deployment instructions without rollback/safety notes
-copy secrets or sensitive operational values into docs
-```
-
-## Documentation quality rules
-
-Prefer:
-
-```text
-clear context ownership
-short sections
-explicit assumptions
-links to related docs
-dates when documenting historical events
-separation of current state vs historical notes
-```
-
-Avoid:
-
-```text
-duplicated long sections
-ambiguous "current" claims without evidence
-mixing legacy notes into canonical docs
-large rewrites without reason
-uncited operational claims
-```
-
-## Link and navigation rules
-
-When adding a new document:
-
-```text
-place it in the correct context
-link it from the context README when relevant
-link it from the master index if it is important enough
-add cross-links to related contexts when useful
-```
-
-Important governance docs:
-
-```text
-docs/00-governance/README.md
-docs/00-governance/99-master-index.md
-docs/00-governance/documentation-system.md
-docs/00-governance/hsc-docs-maintenance-playbook.md
-docs/00-governance/codex-usage-policy.md
-```
-
-## Validation
-
-Before finalizing documentation changes, run:
-
-```bash
-git status --short
-git diff --check
-git diff --stat
-```
-
-If links are changed, inspect them manually.
-
-Do not claim validation that was not run.
-
-Always report:
-
-```text
-files changed
-summary of changes
-validation commands run
-warnings/errors
-```
+If a plan proposes a new repo/service, mark it as future/proposed and ask for approval.
 
 ## Git workflow
 
 Work on a feature branch.
 
-Prefer branch names such as:
-
-```text
-docs/<short-topic>
-```
-
-Before committing:
+Before committing, verify:
 
 ```bash
 git status --short
@@ -441,35 +527,53 @@ git diff --check
 git diff --stat
 ```
 
-Use focused commits.
-
 Do not alter unrelated files.
 
-## Writing style
+Prefer focused commits.
 
-Use Portuguese for project documentation unless the surrounding document is already in English.
+Do not commit generated artifacts unless explicitly requested.
 
-Preserve the language and tone of the target document.
+## Validation
 
-Keep technical terms precise.
+For documentation changes, validate:
 
-Do not over-polish logs or historical notes in a way that changes their meaning.
+```text
+target file path is correct
+heading structure is coherent
+links/routes/repo names are consistent
+status labels are explicit
+no secrets are included
+git diff --check passes
+```
+
+If a documentation update references implementation status, require evidence from:
+
+```text
+sanitized user-provided output
+repo history
+approved prior docs
+explicit human statement
+```
+
+Do not claim validation that was not actually performed.
 
 ## Stop and ask when
 
-Stop and ask the human when the task involves:
+Stop and ask the human when documentation would decide or imply:
 
 ```text
-architecture decisions
-context taxonomy changes
-canonical source conflicts
-legacy-to-current reconciliation
-deploy or rollback guidance
-security-sensitive details
-secrets
-API contract changes
-ETL contract changes
-Game Panel operations
-infrastructure operations
-large-scale rewrite
+cutoff from /portal/cs2-next to /portal/cs2
+production deploy
+rollback
+Nginx/systemd/DNS/TLS change
+database migration
+API contract change
+auth/session/cookie policy change
+Admin Auth and Player Auth integration
+billing/subscription/entitlement policy
+new service/repository
+ranking/scoring semantics
+Season membership semantics
+public/private data policy
+LGPD/security policy
 ```
